@@ -2,137 +2,116 @@ import { renderHook, act } from '@testing-library/react'
 import { useModal } from '../hooks/useModal.js'
 
 describe('useModal', () => {
-  it('should initialize with all modals closed', () => {
+  it('initializes all modals as closed', () => {
     const { result } = renderHook(() => useModal())
-    const { modals } = result.current
 
-    expect(modals.link.open).toBe(false)
-    expect(modals.image.open).toBe(false)
-    expect(modals.table.open).toBe(false)
-    expect(modals.embed.open).toBe(false)
-    expect(modals.findReplace.open).toBe(false)
-    expect(modals.source.open).toBe(false)
-    expect(modals.attachment.open).toBe(false)
-    expect(modals.importDocument.open).toBe(false)
-    expect(modals.export.open).toBe(false)
+    expect(result.current.isOpen('link')).toBe(false)
+    expect(result.current.isOpen('image')).toBe(false)
+    expect(result.current.isOpen('table')).toBe(false)
+    expect(result.current.isOpen('embed')).toBe(false)
+    expect(result.current.isOpen('findReplace')).toBe(false)
+    expect(result.current.isOpen('source')).toBe(false)
+    expect(result.current.isOpen('export')).toBe(false)
   })
 
-  it('should open a modal', () => {
+  it('opens a modal', () => {
     const { result } = renderHook(() => useModal())
 
     act(() => {
       result.current.openModal('link')
     })
 
-    expect(result.current.modals.link.open).toBe(true)
-    expect(result.current.modals.link.data).toBeNull()
+    expect(result.current.isOpen('link')).toBe(true)
+    // Others remain closed
+    expect(result.current.isOpen('image')).toBe(false)
   })
 
-  it('should open a modal with data', () => {
-    const { result } = renderHook(() => useModal())
-    const data = { href: 'https://example.com', text: 'Example' }
-
-    act(() => {
-      result.current.openModal('link', data)
-    })
-
-    expect(result.current.modals.link.open).toBe(true)
-    expect(result.current.modals.link.data).toEqual(data)
-  })
-
-  it('should close a modal', () => {
+  it('closes a modal', () => {
     const { result } = renderHook(() => useModal())
 
     act(() => {
-      result.current.openModal('image')
+      result.current.openModal('link')
     })
-    expect(result.current.modals.image.open).toBe(true)
-
-    act(() => {
-      result.current.closeModal('image')
-    })
-    expect(result.current.modals.image.open).toBe(false)
-    expect(result.current.modals.image.data).toBeNull()
-  })
-
-  it('should clear data when closing modal', () => {
-    const { result } = renderHook(() => useModal())
-
-    act(() => {
-      result.current.openModal('link', { href: 'test' })
-    })
-    expect(result.current.modals.link.data).toEqual({ href: 'test' })
+    expect(result.current.isOpen('link')).toBe(true)
 
     act(() => {
       result.current.closeModal('link')
     })
-    expect(result.current.modals.link.data).toBeNull()
+    expect(result.current.isOpen('link')).toBe(false)
   })
 
-  it('should not affect other modals when opening one', () => {
+  it('passes data when opening a modal', () => {
+    const { result } = renderHook(() => useModal())
+    const linkData = { url: 'https://example.com', text: 'Example' }
+
+    act(() => {
+      result.current.openModal('link', linkData)
+    })
+
+    expect(result.current.getData('link')).toEqual(linkData)
+  })
+
+  it('clears data when closing a modal', () => {
+    const { result } = renderHook(() => useModal())
+
+    act(() => {
+      result.current.openModal('link', { url: 'https://example.com' })
+    })
+    expect(result.current.getData('link')).toBeTruthy()
+
+    act(() => {
+      result.current.closeModal('link')
+    })
+    expect(result.current.getData('link')).toBeNull()
+  })
+
+  it('handles multiple modals independently', () => {
+    const { result } = renderHook(() => useModal())
+
+    act(() => {
+      result.current.openModal('link', { url: 'test' })
+      result.current.openModal('image', { src: 'image.png' })
+    })
+
+    expect(result.current.isOpen('link')).toBe(true)
+    expect(result.current.isOpen('image')).toBe(true)
+    expect(result.current.getData('link')).toEqual({ url: 'test' })
+    expect(result.current.getData('image')).toEqual({ src: 'image.png' })
+
+    act(() => {
+      result.current.closeModal('link')
+    })
+
+    expect(result.current.isOpen('link')).toBe(false)
+    expect(result.current.isOpen('image')).toBe(true)
+  })
+
+  it('returns false for isOpen on unknown modal names', () => {
+    const { result } = renderHook(() => useModal())
+
+    expect(result.current.isOpen('nonexistent')).toBe(false)
+  })
+
+  it('returns null for getData on unknown modal names', () => {
+    const { result } = renderHook(() => useModal())
+
+    expect(result.current.getData('nonexistent')).toBeNull()
+  })
+
+  it('returns null for getData when modal has no data', () => {
     const { result } = renderHook(() => useModal())
 
     act(() => {
       result.current.openModal('link')
     })
 
-    expect(result.current.modals.link.open).toBe(true)
-    expect(result.current.modals.image.open).toBe(false)
-    expect(result.current.modals.table.open).toBe(false)
+    expect(result.current.getData('link')).toBeNull()
   })
 
-  describe('isOpen', () => {
-    it('should return false for closed modals', () => {
-      const { result } = renderHook(() => useModal())
-      expect(result.current.isOpen('link')).toBe(false)
-    })
-
-    it('should return true for open modals', () => {
-      const { result } = renderHook(() => useModal())
-
-      act(() => {
-        result.current.openModal('link')
-      })
-      expect(result.current.isOpen('link')).toBe(true)
-    })
-
-    it('should return false for unknown modal names', () => {
-      const { result } = renderHook(() => useModal())
-      expect(result.current.isOpen('nonexistent')).toBe(false)
-    })
-  })
-
-  describe('getData', () => {
-    it('should return null when no data', () => {
-      const { result } = renderHook(() => useModal())
-      expect(result.current.getData('link')).toBeNull()
-    })
-
-    it('should return data when set', () => {
-      const { result } = renderHook(() => useModal())
-      const data = { href: 'https://example.com' }
-
-      act(() => {
-        result.current.openModal('link', data)
-      })
-      expect(result.current.getData('link')).toEqual(data)
-    })
-
-    it('should return null for unknown modal names', () => {
-      const { result } = renderHook(() => useModal())
-      expect(result.current.getData('nonexistent')).toBeNull()
-    })
-  })
-
-  it('should support opening multiple modals', () => {
+  it('exposes the modals state object', () => {
     const { result } = renderHook(() => useModal())
 
-    act(() => {
-      result.current.openModal('link')
-      result.current.openModal('image')
-    })
-
-    expect(result.current.modals.link.open).toBe(true)
-    expect(result.current.modals.image.open).toBe(true)
+    expect(result.current.modals).toBeDefined()
+    expect(result.current.modals.link).toEqual({ open: false, data: null })
   })
 })

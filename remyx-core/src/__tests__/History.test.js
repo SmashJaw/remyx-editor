@@ -97,12 +97,12 @@ describe('History', () => {
     })
 
     it('should restore previous state', () => {
-      // snapshot saves current state ('initial') to undo stack
       history.snapshot()
-      // change content without snapshotting — undo should restore to the saved state
       mockEngine.element.innerHTML = '<p>changed</p>'
+      history.snapshot()
+      mockEngine.element.innerHTML = '<p>latest</p>'
       history.undo()
-      expect(mockEngine.element.innerHTML).toBe('<p>initial</p>')
+      expect(mockEngine.element.innerHTML).toBe('<p>changed</p>')
     })
 
     it('should emit history:undo and content:change events', () => {

@@ -88,12 +88,10 @@ packages/
 - [BUGS.md](./docs/BUGS.md) — known bugs and resolution status
 - [CHANGELOG.md](./docs/CHANGELOG.md) — version history and release notes
 - [CLEANUP.md](./docs/CLEANUP.md) — cleanup tasks and technical debt
-- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) — contributing guide and development workflow
 - [OPTIMIZATION.md](./docs/OPTIMIZATION.md) — bundle size and runtime performance roadmap
 - [PLANNED_PACKAGES.md](./docs/PLANNED_PACKAGES.md) — multi-package restructure plan and progress
 - [ROADMAP.md](./docs/ROADMAP.md) — planned features and competitive analysis
 - [SECURITY.md](./docs/SECURITY.md) — security audit findings and remediation status
-- [NX.md](./docs/NX.md) — Nx workspace guide, task running, and npm publishing
 
 ## License
 

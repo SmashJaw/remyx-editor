@@ -46,7 +46,7 @@ The `npm install` at the repo root resolves all workspace dependencies, includin
 
 ## Project Structure
 
-Remyx Editor is a monorepo managed with **npm workspaces** and **[Nx](https://nx.dev)** for task orchestration, caching, and releases. All publishable packages live under `packages/`:
+Remyx Editor is a monorepo managed with **npm workspaces**. All publishable packages live under `packages/`:
 
 ```
 remyx/
@@ -97,84 +97,70 @@ All commands are run from the **repository root** unless stated otherwise.
 | Command | Description |
 |---|---|
 | `npm run dev` | Start the Vite dev server (root app with hot reload) |
-| `npm run build:all` | Build all packages (Nx handles dependency order + caching) |
+| `npm run build` | Build the root app |
 | `npm run build:core` | Build `@remyx/core` only |
-| `npm run build:react` | Build `@remyx/react` (builds core first automatically) |
-| `npm run lint` | Lint all packages via Nx |
-| `npm run test` | Run Jest unit tests across all packages |
-| `npm run test:watch` | Run Jest in watch mode |
-| `npm run e2e` | Run Playwright end-to-end tests |
-| `npm run e2e:report` | Open the Playwright HTML report |
-| `npm run graph` | Open the interactive Nx dependency graph |
-| `npm run affected:build` | Build only packages changed since last commit |
-| `npm run affected:test` | Test only packages changed since last commit |
+| `npm run build:react` | Build `@remyx/react` only |
+| `npm run build:all` | Build core then react (in dependency order) |
+| `npm run lint` | Run ESLint across the entire repo |
 | `npm run preview` | Preview the production build locally |
-
-Nx caches task results locally — repeated builds with unchanged inputs replay instantly.
 
 ### Watch mode for packages
 
 When working on a package in isolation, use the package-level `dev` script which runs Vite in watch mode:
 
 ```bash
-npx nx dev remyx-core     # vite build --watch
-npx nx dev remyx-react    # vite build --watch
+cd packages/remyx-core
+npm run dev    # vite build --watch
 ```
 
 ### Build order
 
-Nx automatically builds `@remyx/core` before `@remyx/react` via the `dependsOn: ["^build"]` configuration. You never need to manage build order manually.
+Always build `@remyx/core` before `@remyx/react`, since React depends on Core. The `build:all` script handles this automatically.
 
 ### Testing
 
-The project uses **Jest** for unit tests and **Playwright** for end-to-end tests.
-
-#### Unit tests (Jest)
-
-Jest is configured as a multi-project setup in `jest.config.js` at the repo root, with separate projects for `remyx-core` and `remyx-react`. Tests use `jest-environment-jsdom` for DOM simulation.
+Jest is the unit test runner and Playwright handles end-to-end tests. Coverage reports are generated as HTML.
 
 ```bash
 # Run all unit tests
 npm test
 
-# Run tests for a specific package
-npx jest --selectProjects remyx-core
-npx jest --selectProjects remyx-react
-
-# Watch mode
+# Run unit tests in watch mode
 npm run test:watch
-```
 
-Test files live alongside source code in `__tests__/` directories:
+# Run unit tests with coverage report (output: coverage/unit/)
+npm run test:coverage
 
-```
-packages/remyx-core/src/__tests__/     15 suites, 311 tests
-packages/remyx-react/src/__tests__/     3 suites,  33 tests
-```
-
-#### End-to-end tests (Playwright)
-
-Playwright tests cover full user interactions with the editor running in a real browser.
-
-```bash
-# Run e2e tests
+# Run Playwright e2e tests (requires dev server)
 npm run e2e
 
-# Open the HTML test report
+# View Playwright HTML report
 npm run e2e:report
 ```
 
-E2E test files live in `e2e/` at the repo root.
+#### Test structure
+
+| Directory | Runner | Description |
+|---|---|---|
+| `packages/remyx-core/src/__tests__/` | Jest | Core engine, commands, plugins, utilities |
+| `packages/remyx-react/src/__tests__/` | Jest | React hooks, components, config provider |
+| `e2e/` | Playwright | Browser-based integration tests |
+
+#### Writing tests
+
+- One test file per module: `ModuleName.test.js` (or `.test.jsx` for React)
+- Use `describe` / `it` nesting with `"should ..."` naming
+- Use `jest.fn()` and `jest.spyOn()` for mocks
+- Use `@testing-library/react` for component and hook tests
+- Clean up DOM in `afterEach` when appending to `document.body`
 
 ### Linting
 
-ESLint 9 is configured at the repo root with flat config. Husky + lint-staged run `eslint --fix` automatically on pre-commit:
+ESLint 9 is configured at the repo root with flat config. Run it before committing:
 
 ```bash
 npm run lint
 ```
-
-See [NX.md](./NX.md) for the full Nx workspace guide, including npm publishing instructions.
 
 ---
 

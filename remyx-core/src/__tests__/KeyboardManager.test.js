@@ -1,8 +1,9 @@
+
 import { KeyboardManager } from '../core/KeyboardManager.js'
 
-// Mock platform detection
+// Mock the platform module so we can control isMac()
 jest.mock('../utils/platform.js', () => ({
-  isMac: jest.fn(() => true),
+  isMac: jest.fn(() => false),
 }))
 
 import { isMac } from '../utils/platform.js'
@@ -14,167 +15,291 @@ describe('KeyboardManager', () => {
 
   beforeEach(() => {
     element = document.createElement('div')
-    element.setAttribute('contenteditable', 'true')
-    document.body.appendChild(element)
-
     mockEngine = {
       element,
-      commands: {
-        execute: jest.fn(),
-      },
+      commands: { execute: jest.fn() },
+      eventBus: { emit: jest.fn() },
     }
     km = new KeyboardManager(mockEngine)
+    isMac.mockReturnValue(false)
   })
 
   afterEach(() => {
     km.destroy()
-    document.body.removeChild(element)
   })
 
-  describe('register / unregister', () => {
-    it('should register a shortcut', () => {
-      km.register('mod+b', 'bold')
-      expect(km._shortcuts.size).toBe(1)
+  describe('constructor', () => {
+    it('should store the engine reference', () => {
+      expect(km.engine).toBe(mockEngine)
     })
 
-    it('should normalize shortcut keys', () => {
-      km.register('Mod+Shift+B', 'boldShift')
-      // Normalized to lowercase sorted: b+mod+shift
+    it('should initialize an empty shortcuts map', () => {
+      expect(km._shortcuts.size).toBe(0)
+    })
+  })
+
+  describe('init', () => {
+    it('should add a keydown event listener to the element', () => {
+      const spy = jest.spyOn(element, 'addEventListener')
+      km.init()
+      expect(spy).toHaveBeenCalledWith('keydown', km._handleKeyDown)
+    })
+  })
+
+  describe('destroy', () => {
+    it('should remove the keydown event listener from the element', () => {
+      km.init()
+      const spy = jest.spyOn(element, 'removeEventListener')
+      km.destroy()
+      expect(spy).toHaveBeenCalledWith('keydown', km._handleKeyDown)
+    })
+
+    it('should not throw if called without init', () => {
+      expect(() => km.destroy()).not.toThrow()
+    })
+  })
+
+  describe('register', () => {
+    it('should register a shortcut mapping to a command name', () => {
+      km.register('mod+b', 'bold')
+      expect(km._shortcuts.has('b+mod')).toBe(true)
+      expect(km._shortcuts.get('b+mod')).toBe('bold')
+    })
+
+    it('should normalize the shortcut before storing', () => {
+      km.register('Mod+Shift+B', 'bold')
+      // normalized: b+mod+shift (lowercase, sorted)
       expect(km._shortcuts.has('b+mod+shift')).toBe(true)
     })
 
-    it('should unregister a shortcut', () => {
+    it('should overwrite an existing shortcut with the same normalized key', () => {
+      km.register('mod+b', 'bold')
+      km.register('mod+b', 'strong')
+      expect(km._shortcuts.get('b+mod')).toBe('strong')
+    })
+
+    it('should allow multiple different shortcuts', () => {
+      km.register('mod+b', 'bold')
+      km.register('mod+i', 'italic')
+      expect(km._shortcuts.size).toBe(2)
+    })
+  })
+
+  describe('unregister', () => {
+    it('should remove a registered shortcut', () => {
       km.register('mod+b', 'bold')
       km.unregister('mod+b')
+      expect(km._shortcuts.has('b+mod')).toBe(false)
+    })
+
+    it('should not throw when unregistering a non-existent shortcut', () => {
+      expect(() => km.unregister('mod+x')).not.toThrow()
+    })
+
+    it('should normalize the shortcut for removal', () => {
+      km.register('mod+b', 'bold')
+      km.unregister('B+Mod')
       expect(km._shortcuts.size).toBe(0)
     })
   })
 
   describe('getShortcutForCommand', () => {
-    it('should find shortcut for a command', () => {
+    it('should return the shortcut string for a registered command', () => {
       km.register('mod+b', 'bold')
       expect(km.getShortcutForCommand('bold')).toBe('b+mod')
     })
 
-    it('should return null for unknown command', () => {
+    it('should return null if the command is not registered', () => {
       expect(km.getShortcutForCommand('nonexistent')).toBeNull()
+    })
+
+    it('should return the first matching shortcut if multiple commands exist', () => {
+      km.register('mod+b', 'bold')
+      km.register('mod+i', 'italic')
+      expect(km.getShortcutForCommand('italic')).toBe('i+mod')
     })
   })
 
   describe('getShortcutLabel', () => {
-    it('should return Mac labels when on Mac', () => {
-      isMac.mockReturnValue(true)
-      const label = km.getShortcutLabel('mod+b')
-      expect(label).toBe('⌘B')
-    })
-
-    it('should return Windows labels when not on Mac', () => {
-      isMac.mockReturnValue(false)
-      const label = km.getShortcutLabel('mod+b')
-      expect(label).toBe('Ctrl+B')
-    })
-
-    it('should handle shift modifier on Mac', () => {
-      isMac.mockReturnValue(true)
-      const label = km.getShortcutLabel('mod+shift+x')
-      expect(label).toBe('⌘⇧X')
-    })
-
-    it('should handle alt modifier', () => {
-      isMac.mockReturnValue(true)
-      const label = km.getShortcutLabel('alt+p')
-      expect(label).toBe('⌥P')
-    })
-
     it('should return empty string for falsy input', () => {
-      expect(km.getShortcutLabel('')).toBe('')
       expect(km.getShortcutLabel(null)).toBe('')
+      expect(km.getShortcutLabel('')).toBe('')
+      expect(km.getShortcutLabel(undefined)).toBe('')
+    })
+
+    it('should convert mod to Ctrl on non-Mac', () => {
+      isMac.mockReturnValue(false)
+      expect(km.getShortcutLabel('mod+b')).toBe('Ctrl+B')
+    })
+
+    it('should convert mod to command symbol on Mac', () => {
+      isMac.mockReturnValue(true)
+      expect(km.getShortcutLabel('mod+b')).toBe('⌘B')
+    })
+
+    it('should convert shift on non-Mac', () => {
+      isMac.mockReturnValue(false)
+      expect(km.getShortcutLabel('mod+shift+b')).toBe('Ctrl+Shift+B')
+    })
+
+    it('should convert shift on Mac', () => {
+      isMac.mockReturnValue(true)
+      expect(km.getShortcutLabel('mod+shift+b')).toBe('⌘⇧B')
+    })
+
+    it('should convert alt on non-Mac', () => {
+      isMac.mockReturnValue(false)
+      expect(km.getShortcutLabel('alt+b')).toBe('Alt+B')
+    })
+
+    it('should convert alt on Mac', () => {
+      isMac.mockReturnValue(true)
+      expect(km.getShortcutLabel('alt+b')).toBe('⌥B')
+    })
+  })
+
+  describe('_normalizeShortcut', () => {
+    it('should lowercase and sort parts', () => {
+      expect(km._normalizeShortcut('Mod+Shift+B')).toBe('b+mod+shift')
+    })
+
+    it('should handle single keys', () => {
+      expect(km._normalizeShortcut('Enter')).toBe('enter')
+    })
+
+    it('should produce consistent output regardless of input order', () => {
+      expect(km._normalizeShortcut('shift+mod+b')).toBe(km._normalizeShortcut('b+mod+shift'))
     })
   })
 
   describe('_handleKeyDown', () => {
     beforeEach(() => {
-      isMac.mockReturnValue(true)
       km.init()
-      km.register('mod+b', 'bold')
     })
 
-    it('should execute command on matching shortcut', () => {
+    it('should execute a matching command when shortcut is pressed', () => {
+      km.register('mod+b', 'bold')
       const event = new KeyboardEvent('keydown', {
         key: 'b',
-        metaKey: true,
+        ctrlKey: true,
         bubbles: true,
-        cancelable: true,
       })
       element.dispatchEvent(event)
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('bold')
     })
 
-    it('should not execute for non-matching shortcut', () => {
-      const event = new KeyboardEvent('keydown', {
-        key: 'i',
-        metaKey: true,
-        bubbles: true,
-        cancelable: true,
-      })
-      element.dispatchEvent(event)
-      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
-    })
-
-    it('should prevent default on matching shortcut', () => {
-      const event = new KeyboardEvent('keydown', {
-        key: 'b',
-        metaKey: true,
-        bubbles: true,
-        cancelable: true,
-      })
-      const preventSpy = jest.spyOn(event, 'preventDefault')
-      element.dispatchEvent(event)
-      expect(preventSpy).toHaveBeenCalled()
-    })
-
-    it('should use ctrlKey on non-Mac platforms', () => {
-      isMac.mockReturnValue(false)
-      // Re-init with non-Mac detection
-      km.destroy()
-      km = new KeyboardManager(mockEngine)
-      km.init()
+    it('should preventDefault and stopPropagation for matching shortcuts', () => {
       km.register('mod+b', 'bold')
-
       const event = new KeyboardEvent('keydown', {
         key: 'b',
         ctrlKey: true,
         bubbles: true,
         cancelable: true,
       })
+      const preventSpy = jest.spyOn(event, 'preventDefault')
+      const stopSpy = jest.spyOn(event, 'stopPropagation')
+      element.dispatchEvent(event)
+      expect(preventSpy).toHaveBeenCalled()
+      expect(stopSpy).toHaveBeenCalled()
+    })
+
+    it('should not execute anything for non-matching shortcuts', () => {
+      km.register('mod+b', 'bold')
+      const event = new KeyboardEvent('keydown', {
+        key: 'i',
+        ctrlKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
+    })
+
+    it('should handle shift modifier in shortcuts', () => {
+      km.register('mod+shift+z', 'redo')
+      const event = new KeyboardEvent('keydown', {
+        key: 'z',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).toHaveBeenCalledWith('redo')
+    })
+
+    it('should handle alt modifier in shortcuts', () => {
+      km.register('alt+1', 'heading1')
+      const event = new KeyboardEvent('keydown', {
+        key: '1',
+        altKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).toHaveBeenCalledWith('heading1')
+    })
+
+    it('should use metaKey on Mac', () => {
+      isMac.mockReturnValue(true)
+      km.register('mod+b', 'bold')
+      const event = new KeyboardEvent('keydown', {
+        key: 'b',
+        metaKey: true,
+        bubbles: true,
+      })
       element.dispatchEvent(event)
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('bold')
     })
 
-    it('should handle shift+mod combinations', () => {
-      km.register('mod+shift+x', 'strikethrough')
+    it('should ignore standalone modifier key presses', () => {
+      km.register('mod+b', 'bold')
       const event = new KeyboardEvent('keydown', {
-        key: 'x',
-        metaKey: true,
-        shiftKey: true,
+        key: 'Control',
+        ctrlKey: true,
         bubbles: true,
-        cancelable: true,
       })
       element.dispatchEvent(event)
-      expect(mockEngine.commands.execute).toHaveBeenCalledWith('strikethrough')
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
     })
-  })
 
-  describe('init / destroy', () => {
-    it('should add and remove keydown listener', () => {
-      const addSpy = jest.spyOn(element, 'addEventListener')
-      const removeSpy = jest.spyOn(element, 'removeEventListener')
+    it('should ignore Meta key press alone', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Meta',
+        metaKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
+    })
 
-      km.init()
-      expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
+    it('should ignore Shift key press alone', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Shift',
+        shiftKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
+    })
 
+    it('should ignore Alt key press alone', () => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Alt',
+        altKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
+    })
+
+    it('should not fire after destroy is called', () => {
+      km.register('mod+b', 'bold')
       km.destroy()
-      expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function))
+      const event = new KeyboardEvent('keydown', {
+        key: 'b',
+        ctrlKey: true,
+        bubbles: true,
+      })
+      element.dispatchEvent(event)
+      expect(mockEngine.commands.execute).not.toHaveBeenCalled()
     })
   })
 })
