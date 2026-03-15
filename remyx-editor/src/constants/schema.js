@@ -12,7 +12,7 @@ export const ALLOWED_TAGS = {
   pre: ['class'], code: ['class'],
   hr: [],
   br: [],
-  div: ['class', 'style', 'data-embed-url', 'contenteditable'],
+  div: ['class', 'style', 'data-embed-url'],
   span: ['style', 'class'],
   input: ['type', 'checked', 'disabled', 'class'],
   label: ['class'],

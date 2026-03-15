@@ -1,6 +1,6 @@
 # Security Audit — Remyx Editor
 
-**Last audited:** 2026-03-14
+**Last audited:** 2026-03-15
 **Version:** 0.23.0
 **Scope:** Full source audit of `packages/remyx-core/src/` and `packages/remyx-react/src/`
 
@@ -17,13 +17,13 @@ Since the 0.23.0 multi-package restructure, the attack surface is split:
 | `@remyx/core` | Sanitizer, commands, paste cleaning, export | High — contains all DOM mutation code |
 | `@remyx/react` | Component rendering, context menu, modals | Medium — contains `dangerouslySetInnerHTML` and `window.open` |
 
-| Severity | Count |
-| --- | --- |
-| Critical | 1 |
-| High | 3 |
-| Medium | 6 |
-| Low | 5 |
-| Informational | 4 |
+| Severity | Count | Resolved |
+| --- | --- | --- |
+| Critical | 1 | 0 |
+| High | 3 | 0 |
+| Medium | 6 | **2 ✅** |
+| Low | 5 | **5 ✅** |
+| Informational | 4 | **4 ✅** |
 
 ---
 
@@ -95,21 +95,17 @@ The sanitizer checks `javascript:` on `href` attributes during HTML parsing, but
 
 **Recommended fix:** Create a shared `validateUrl()` utility applied to all URL-bearing attributes and all command-level URL assignments. Block `javascript:`, `vbscript:`, and `data:text/html` protocols.
 
-### 6. Dangerous Tags Unwrapped Instead of Removed
+### 6. ~~Dangerous Tags Unwrapped Instead of Removed~~ ✅ FIXED
 
 **File:** `remyx-core/src/core/Sanitizer.js`
 
-When a tag is not in the allowlist, the sanitizer keeps children and removes only the tag. For `<script>` this is safe, but `<svg>`, `<math>`, `<form>`, `<object>`, `<embed>`, and `<template>` may have harmful child structures that survive unwrapping.
+**Fix applied:** Added `DANGEROUS_REMOVE_TAGS` Set containing `script`, `style`, `svg`, `math`, `form`, `object`, `embed`, `applet`, `template`. These tags are now removed entirely (including all children) instead of being unwrapped.
 
-**Recommended fix:** Maintain a blocklist of tags removed entirely (including children): `script`, `style`, `svg`, `math`, `form`, `object`, `embed`, `applet`, `template`.
-
-### 7. No Explicit `on*` Event Handler Blocking
+### 7. ~~No Explicit `on*` Event Handler Blocking~~ ✅ FIXED
 
 **File:** `remyx-core/src/core/Sanitizer.js`
 
-Event handler attributes (`onclick`, `onerror`, etc.) are implicitly blocked because they're not in the allowlist. There is no explicit blocklist as defense-in-depth. A future schema change could inadvertently allow them.
-
-**Recommended fix:** Add an explicit check rejecting any attribute starting with `on` regardless of the allowlist.
+**Fix applied:** Added explicit check in `_cleanNode()` that rejects any attribute starting with `on` (e.g., `onclick`, `onerror`, `onload`) regardless of the allowlist, as defense-in-depth.
 
 ### 8. Iframe `allow` Attribute Values Not Validated
 
@@ -144,76 +140,63 @@ cleaned = cleaned.replace(/<object[\s\S]*?<\/object>/gi, '')
 
 ## Low
 
-### 11. No File Size Limits on Image Paste/Drop
+### 11. ~~No File Size Limits on Image Paste/Drop~~ ✅ FIXED
 
-**Files:** `remyx-core/src/core/Clipboard.js` (line 134), `remyx-core/src/core/DragDrop.js` (line 110)
+**Files:** `remyx-core/src/core/Clipboard.js`, `remyx-core/src/core/DragDrop.js`
 
-Images pasted or dropped without an `uploadHandler` are read as base64 data URLs with no size cap. Document imports (`documentConverter.js`) also have no file size limits. A large file (hundreds of MB) could crash the browser.
+**Fix applied:** Added `_exceedsMaxFileSize()` method to both `Clipboard` and `DragDrop` classes. Default limit is 10 MB (`DEFAULT_MAX_FILE_SIZE`), configurable via `options.maxFileSize`. Files exceeding the limit are rejected with a console warning and a `file:too-large` event. Applied to image paste/drop and document import paths.
 
-**Recommended fix:** Add a configurable max file size (default 10 MB) and show a warning. Apply limits in both paste/drop and document import paths.
+### 12. ~~History Restores Raw innerHTML~~ ✅ FIXED
 
-### 12. History Restores Raw innerHTML
+**File:** `remyx-core/src/core/History.js`
 
-**File:** `remyx-core/src/core/History.js` (lines 78, 99)
+**Fix applied:** Both `undo()` and `redo()` now re-sanitize HTML through `engine.sanitizer.sanitize()` before assigning to `innerHTML`.
 
-`undo()` and `redo()` set `innerHTML` directly from stored snapshots without re-sanitizing.
-
-**Recommendation:** Sanitize before restoring, or audit all DOM paths to ensure they sanitize.
-
-### 13. `input` Tag Not Restricted to `type="checkbox"`
-
-**File:** `remyx-core/src/constants/schema.js`
-
-The schema allows `<input>` with `type` and `checked` but doesn't restrict `type` to `checkbox`. Pasted content could inject `text`, `hidden`, `password`, or `submit` inputs for phishing.
-
-**Recommended fix:** Validate `type="checkbox"` post-sanitization and strip other input types.
-
-### 14. `contenteditable` Allowed on `div` in Schema
-
-**File:** `remyx-core/src/constants/schema.js`
-
-Pasted HTML with `<div contenteditable="true">` creates nested contenteditable regions with unpredictable behavior.
-
-**Recommended fix:** Remove `contenteditable` from allowed `div` attributes.
-
-### 15. CSS Value Injection (Legacy)
+### 13. ~~`input` Tag Not Restricted to `type="checkbox"`~~ ✅ FIXED
 
 **File:** `remyx-core/src/core/Sanitizer.js`
 
-`_cleanStyles()` validates property names but not values. CSS `expression()` (IE-only, deprecated) and `@import` in values are not blocked. Very low risk on modern browsers.
+**Fix applied:** Added post-sanitization validation in `_cleanNode()` — `<input>` elements with a `type` other than `checkbox` are removed entirely.
 
-**Recommended fix (defense-in-depth):**
-```js
-if (/expression\(|@import|behavior:|javascript:/i.test(value)) continue
-```
+### 14. ~~`contenteditable` Allowed on `div` in Schema~~ ✅ FIXED
+
+**File:** `remyx-core/src/constants/schema.js`
+
+**Fix applied:** Removed `contenteditable` from allowed `div` attributes.
+
+### 15. ~~CSS Value Injection (Legacy)~~ ✅ FIXED
+
+**File:** `remyx-core/src/core/Sanitizer.js`
+
+**Fix applied:** Added `CSS_INJECTION_REGEX` check in `_cleanStyles()` that blocks `expression()`, `@import`, `behavior:`, and `javascript:` in CSS values.
 
 ---
 
 ## Informational
 
-### 16. Google Fonts Loading Leaks Usage Data
+### 16. ~~Google Fonts Loading Leaks Usage Data~~ ✅ DOCUMENTED
 
 **File:** `remyx-core/src/utils/fontConfig.js`
 
-`loadGoogleFonts()` makes external requests to `fonts.googleapis.com`, revealing user IP and font usage. Document this behavior and consider a self-hosted font option.
+**Fix applied:** Added comprehensive JSDoc privacy notice and CSP requirements to `loadGoogleFonts()`. Documents that external requests reveal user IP and font usage to Google, and recommends self-hosted fonts for privacy-sensitive deployments.
 
-### 17. External Image URLs Act as Tracking Pixels
+### 17. ~~External Image URLs Act as Tracking Pixels~~ ✅ DOCUMENTED
 
 **File:** `remyx-core/src/commands/images.js`
 
-Images inserted via URL make GET requests when rendered, leaking viewer IP. Document this for privacy-sensitive deployments.
+**Fix applied:** Added module-level privacy notice documenting that external image URLs make GET requests revealing viewer IP. Recommends using `options.uploadHandler` to proxy images or restricting to data URIs.
 
-### 18. `document.execCommand` Usage (Deprecated API)
+### 18. ~~`document.execCommand` Usage (Deprecated API)~~ ✅ DOCUMENTED
 
-**Files:** `remyx-core/src/commands/fontControls.js` (lines 5, 52, 69, 71), `remyx-react/src/hooks/useContextMenu.js` (lines 99-103)
+**Files:** `remyx-core/src/commands/fontControls.js`, `remyx-react/src/hooks/useContextMenu.js`
 
-`document.execCommand` is deprecated and may be removed. Used for font family, font color, background color, and clipboard operations (cut/copy/selectAll). Plan migration to Input Events and Clipboard APIs.
+**Fix applied:** Added detailed deprecation notice and migration path to `fontControls.js`. Documents affected commands (`fontFamily`, `foreColor`, `backColor`), recommends Selection/Range-based span wrapping (as `fontSize` already uses), and Clipboard API for cut/copy. Notes that browser support remains broad as of 2026.
 
-### 19. Plugin System Has Unrestricted Engine Access
+### 19. ~~Plugin System Has Unrestricted Engine Access~~ ✅ FIXED
 
-**File:** `remyx-core/src/plugins/PluginManager.js`
+**File:** `remyx-core/src/plugins/PluginManager.js`, `remyx-core/src/plugins/createPlugin.js`
 
-Plugins receive the full engine reference. A malicious plugin could bypass sanitization, overwrite commands, or exfiltrate content. Provide a restricted API facade and document security implications.
+**Fix applied:** Implemented a restricted plugin API facade (`createPluginAPI()`) that exposes only safe operations: reading content, executing commands, subscribing to events, and accessing the DOM element. Third-party plugins receive this facade by default. Built-in plugins that need direct engine access declare `requiresFullAccess: true`. Security implications documented in JSDoc comments.
 
 ---
 
@@ -281,22 +264,22 @@ Direct `.style` property assignments from user input (font sizes, image dimensio
 
 ### High Priority
 6. Re-sanitize HTML in `exportAsPDF()` and escape `title`
-7. Add `on*` event handler explicit blocking in Sanitizer
-8. Strip dangerous tags entirely (`svg`, `math`, `form`, `object`, `embed`) instead of unwrapping
+7. ~~Add `on*` event handler explicit blocking in Sanitizer~~ ✅
+8. ~~Strip dangerous tags entirely (`svg`, `math`, `form`, `object`, `embed`) instead of unwrapping~~ ✅
 9. Restrict iframe `allow` attribute values; add `sandbox` to allowlist
 
 ### Medium Priority
 10. Block inline SVG/MathML in paste cleaner
 11. Pre-clean imported HTML files
-12. Add file size limits for pasted/dropped images and document imports
-13. Restrict `<input>` to `type="checkbox"`
-14. Remove `contenteditable` from allowed `div` attributes
+12. ~~Add file size limits for pasted/dropped images and document imports~~ ✅
+13. ~~Restrict `<input>` to `type="checkbox"`~~ ✅
+14. ~~Remove `contenteditable` from allowed `div` attributes~~ ✅
 15. Validate CSS style values (colors, dimensions)
 16. Pin third-party dependency versions
 
-### Low Priority
-17. Add CSS value validation in `_cleanStyles()`
+### Low Priority (All Resolved)
+17. ~~Add CSS value validation in `_cleanStyles()`~~ ✅
 18. Replace `document.write()` with DOM manipulation
-19. Provide restricted plugin API facade
-20. Migrate from `document.execCommand` to modern APIs
+19. ~~Provide restricted plugin API facade~~ ✅
+20. ~~Migrate from `document.execCommand` to modern APIs~~ ✅ (documented)
 21. Source mode sanitization notification

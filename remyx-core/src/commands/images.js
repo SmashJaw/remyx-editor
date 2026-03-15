@@ -1,3 +1,12 @@
+/**
+ * Image commands for the editor.
+ *
+ * **Privacy notice:** Images inserted via external URL (`http://`, `https://`) will
+ * make GET requests when rendered in the editor, revealing the viewer's IP address
+ * and user-agent to the image host. This can be exploited as a tracking pixel.
+ * For privacy-sensitive deployments, use an upload handler (`options.uploadHandler`)
+ * to proxy images through your own server, or restrict to data URIs only.
+ */
 export function registerImageCommands(engine) {
   engine.commands.register('insertImage', {
     execute(eng, { src, alt = '', width, height }) {

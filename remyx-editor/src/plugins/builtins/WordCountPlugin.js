@@ -6,6 +6,7 @@ export function WordCountPlugin() {
 
   return createPlugin({
     name: 'wordCount',
+    requiresFullAccess: true, // Writes to engine._wordCount
     init(engine) {
       const update = () => {
         const text = engine.getText().trim()

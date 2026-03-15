@@ -3,6 +3,7 @@ import { createPlugin } from '../createPlugin.js'
 export function PlaceholderPlugin(placeholderText = 'Start typing...') {
   return createPlugin({
     name: 'placeholder',
+    requiresFullAccess: true, // Needs direct eventBus and element access
     init(engine) {
       const update = () => {
         if (engine.isEmpty()) {

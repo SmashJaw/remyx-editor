@@ -72,6 +72,13 @@ export const DEFAULT_MENU_BAR = [
   ]},
 ]
 
+/**
+ * Default maximum file size for pasted/dropped images and documents (10 MB).
+ * Files exceeding this limit will be rejected with a warning.
+ * Can be overridden via `options.maxFileSize` on the editor instance.
+ */
+export const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024
+
 export const HEADING_OPTIONS = [
   { label: 'Normal', value: 'p', tag: 'p' },
   { label: 'Heading 1', value: 'h1', tag: 'h1' },

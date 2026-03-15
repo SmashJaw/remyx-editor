@@ -1,6 +1,7 @@
 import { cleanPastedHTML, looksLikeMarkdown } from '../utils/pasteClean.js'
 import { markdownToHtml } from '../utils/markdownConverter.js'
 import { isImportableFile, convertDocument } from '../utils/documentConverter.js'
+import { DEFAULT_MAX_FILE_SIZE } from '../constants/defaults.js'
 
 export class DragDrop {
   constructor(engine) {
@@ -93,11 +94,28 @@ export class DragDrop {
     this.engine.eventBus.emit('drop', { files, html })
   }
 
+  /**
+   * Check if a file exceeds the configured maximum size.
+   * @param {File} file
+   * @returns {boolean} true if the file is too large
+   */
+  _exceedsMaxFileSize(file) {
+    const maxSize = this.engine.options.maxFileSize ?? DEFAULT_MAX_FILE_SIZE
+    if (maxSize > 0 && file.size > maxSize) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+      const limitMB = (maxSize / (1024 * 1024)).toFixed(0)
+      console.warn(`[Remyx] File "${file.name}" (${sizeMB} MB) exceeds the ${limitMB} MB limit.`)
+      this.engine.eventBus.emit('file:too-large', { file, maxSize })
+      return true
+    }
+    return false
+  }
+
   _handleImageDrop(e, imageFiles) {
     this._setCursorAtDropPoint(e)
     this.engine.history.snapshot()
 
-    imageFiles.forEach((file) => {
+    imageFiles.filter((f) => !this._exceedsMaxFileSize(f)).forEach((file) => {
       if (this.engine.options.uploadHandler) {
         this.engine.options.uploadHandler(file).then((url) => {
           this.engine.commands.execute('insertImage', { src: url, alt: file.name })
@@ -116,7 +134,7 @@ export class DragDrop {
     this._setCursorAtDropPoint(e)
     this.engine.history.snapshot()
 
-    files.forEach((file) => {
+    files.filter((f) => !this._exceedsMaxFileSize(f)).forEach((file) => {
       convertDocument(file)
         .then((html) => {
           const sanitized = this.engine.sanitizer.sanitize(html)

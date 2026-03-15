@@ -45,6 +45,14 @@ export function addFonts(fonts, fontsToAdd, options = {}) {
  * Load Google Fonts by injecting a stylesheet link into the document head.
  * Fonts that are already loaded will not be loaded again.
  *
+ * **Privacy notice:** This function makes external requests to `fonts.googleapis.com`
+ * and `fonts.gstatic.com`, which reveals the user's IP address, browser user-agent,
+ * and which fonts are being loaded to Google. For privacy-sensitive deployments,
+ * consider self-hosting fonts instead. See: https://google-webfonts-helper.herokuapp.com/
+ *
+ * **CSP note:** Requires `font-src fonts.gstatic.com` and `style-src fonts.googleapis.com`
+ * in your Content-Security-Policy header.
+ *
  * @param {string[]} fontFamilies - Google Font family names (e.g. ['Roboto', 'Open Sans', 'Lato:wght@400;700'])
  * @returns {HTMLLinkElement | null} The injected link element, or null if all fonts were already loaded
  *

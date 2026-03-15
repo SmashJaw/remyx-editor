@@ -1,3 +1,18 @@
+/**
+ * Font formatting commands.
+ *
+ * **Deprecation notice:** Several commands in this module use `document.execCommand()`,
+ * which is deprecated by the W3C and may be removed from browsers in the future.
+ * Affected commands: `fontFamily` (execCommand 'fontName'), `foreColor`, `backColor`
+ * (execCommand 'hiliteColor'/'backColor').
+ *
+ * Migration path: Replace with Selection/Range-based span wrapping (similar to
+ * the `fontSize` command which already uses this approach). The Clipboard API
+ * should replace execCommand('cut'/'copy') in useContextMenu.js.
+ *
+ * Current browser support for execCommand remains broad (as of 2026), so this is
+ * not an urgent issue, but should be addressed in a future major version.
+ */
 export function registerFontCommands(engine) {
   engine.commands.register('fontFamily', {
     execute(eng, family) {

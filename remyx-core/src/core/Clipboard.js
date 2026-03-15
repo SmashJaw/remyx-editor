@@ -1,6 +1,7 @@
 import { cleanPastedHTML, looksLikeMarkdown } from '../utils/pasteClean.js'
 import { markdownToHtml } from '../utils/markdownConverter.js'
 import { isImportableFile, convertDocument } from '../utils/documentConverter.js'
+import { DEFAULT_MAX_FILE_SIZE } from '../constants/defaults.js'
 
 export class Clipboard {
   constructor(engine) {
@@ -41,7 +42,7 @@ export class Clipboard {
     // Handle importable document files (PDF, DOCX, etc.)
     const importableFiles = files.filter((f) => !f.type.startsWith('image/') && isImportableFile(f))
     if (importableFiles.length > 0) {
-      importableFiles.forEach((file) => {
+      importableFiles.filter((f) => !this._exceedsMaxFileSize(f)).forEach((file) => {
         convertDocument(file)
           .then((html) => {
             const sanitized = this.engine.sanitizer.sanitize(html)
@@ -120,7 +121,26 @@ export class Clipboard {
     }, 0)
   }
 
+  /**
+   * Check if a file exceeds the configured maximum size.
+   * @param {File} file
+   * @returns {boolean} true if the file is too large
+   */
+  _exceedsMaxFileSize(file) {
+    const maxSize = this.engine.options.maxFileSize ?? DEFAULT_MAX_FILE_SIZE
+    if (maxSize > 0 && file.size > maxSize) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+      const limitMB = (maxSize / (1024 * 1024)).toFixed(0)
+      console.warn(`[Remyx] File "${file.name}" (${sizeMB} MB) exceeds the ${limitMB} MB limit.`)
+      this.engine.eventBus.emit('file:too-large', { file, maxSize })
+      return true
+    }
+    return false
+  }
+
   _handleImagePaste(file) {
+    if (this._exceedsMaxFileSize(file)) return
+
     if (this.engine.options.uploadHandler) {
       this.engine.options.uploadHandler(file).then((url) => {
         this.engine.commands.execute('insertImage', { src: url, alt: file.name })

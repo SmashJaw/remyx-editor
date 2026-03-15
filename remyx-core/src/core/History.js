@@ -75,8 +75,10 @@ export class History {
     this._redoStack.push({ html: currentHtml, bookmark: currentBookmark })
 
     const state = this._undoStack.pop()
-    this.engine.element.innerHTML = state.html
-    this._lastSnapshot = state.html
+    // Re-sanitize to ensure no unsafe content is restored from history
+    const sanitizedHtml = this.engine.sanitizer.sanitize(state.html)
+    this.engine.element.innerHTML = sanitizedHtml
+    this._lastSnapshot = sanitizedHtml
 
     if (state.bookmark) {
       this.engine.selection.restore(state.bookmark)
@@ -96,8 +98,10 @@ export class History {
     this._undoStack.push({ html: currentHtml, bookmark: currentBookmark })
 
     const state = this._redoStack.pop()
-    this.engine.element.innerHTML = state.html
-    this._lastSnapshot = state.html
+    // Re-sanitize to ensure no unsafe content is restored from history
+    const sanitizedHtml = this.engine.sanitizer.sanitize(state.html)
+    this.engine.element.innerHTML = sanitizedHtml
+    this._lastSnapshot = sanitizedHtml
 
     if (state.bookmark) {
       this.engine.selection.restore(state.bookmark)

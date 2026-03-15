@@ -40,6 +40,7 @@ export function AutolinkPlugin() {
 
   return createPlugin({
     name: 'autolink',
+    requiresFullAccess: true, // Needs direct DOM event listener access
     init(engine) {
       _handler = (e) => {
         if (e.key !== ' ' && e.key !== 'Enter') return
