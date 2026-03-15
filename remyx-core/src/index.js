@@ -37,7 +37,7 @@ export { PlaceholderPlugin } from './plugins/builtins/PlaceholderPlugin.js'
 // Utilities
 export { htmlToMarkdown, markdownToHtml } from './utils/markdownConverter.js'
 export { cleanPastedHTML, looksLikeMarkdown } from './utils/pasteClean.js'
-export { convertDocument, isImportableFile, getSupportedExtensions, getSupportedFormatNames } from './utils/documentConverter.js'
+export { convertDocument, isImportableFile, getSupportedExtensions, getSupportedFormatNames } from './utils/documentConverter/index.js'
 export { exportAsPDF, exportAsDocx, exportAsMarkdown } from './utils/exportUtils.js'
 export { loadGoogleFonts, removeFonts, addFonts } from './utils/fontConfig.js'
 export { formatHTML } from './utils/formatHTML.js'
@@ -45,8 +45,9 @@ export { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpt
 export { isMac, getModKey } from './utils/platform.js'
 
 // Theme configuration
-export { createTheme, THEME_VARIABLES, THEME_PRESETS } from './utils/themeConfig.js'
-export { createToolbarItemTheme, resolveToolbarItemStyle, resolveSeparatorStyle, TOOLBAR_ITEM_STYLE_KEYS } from './utils/themeConfig.js'
+export { createTheme, THEME_VARIABLES } from './utils/themeConfig.js'
+export { THEME_PRESETS } from './utils/themePresets.js'
+export { createToolbarItemTheme, resolveToolbarItemStyle, resolveSeparatorStyle, TOOLBAR_ITEM_STYLE_KEYS } from './utils/toolbarItemTheme.js'
 
 // Toolbar configuration
 export { TOOLBAR_PRESETS, removeToolbarItems, addToolbarItems, createToolbar } from './utils/toolbarConfig.js'

@@ -2,6 +2,9 @@
  * Paste cleaning pipeline for rich text from various sources.
  * Handles Microsoft Word, Google Docs, LibreOffice, Apple Pages,
  * and other rich text editors.
+ *
+ * Source detection runs only the relevant cleaner pipeline,
+ * avoiding unnecessary regex passes for unrelated sources.
  */
 
 // Pre-compiled regex patterns for list detection (hoisted from inner loop)
@@ -17,7 +20,7 @@ export function cleanPastedHTML(html) {
 
   let cleaned = html
 
-  // ── Strip meta/head wrappers that some sources include ──
+  // ── Strip meta/head wrappers that some sources include (always run) ──
   cleaned = cleaned.replace(/<meta[^>]*>/gi, '')
   cleaned = cleaned.replace(/<\/?html[^>]*>/gi, '')
   cleaned = cleaned.replace(/<head[\s\S]*?<\/head>/gi, '')
@@ -26,57 +29,71 @@ export function cleanPastedHTML(html) {
   cleaned = cleaned.replace(/<title[\s\S]*?<\/title>/gi, '')
   cleaned = cleaned.replace(/<link[^>]*>/gi, '')
 
-  // ── Microsoft Word cleanup ──
-  cleaned = cleaned.replace(/<!--\[if[\s\S]*?endif\]-->/gi, '')
-  cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
-  cleaned = cleaned.replace(/<o:p[\s\S]*?<\/o:p>/gi, '')
-  cleaned = cleaned.replace(/<w:[\s\S]*?<\/w:[\s\S]*?>/gi, '')
-  cleaned = cleaned.replace(/<m:[\s\S]*?<\/m:[\s\S]*?>/gi, '')
-  cleaned = cleaned.replace(/<\/?(xml|st1|v:|o:)[^>]*>/gi, '')
+  // ── Detect paste source ──
+  const isWord = /mso-|class="Mso|<o:p|<w:/.test(html)
+  const isGoogleDocs = /docs-internal|id="h\.[a-z0-9]+"/.test(html)
+  const isLibreOffice = /<text:|<office:|class="P\d+"/.test(html)
+  const isApplePages = /apple-content-edited|class="[sp]\d+"/.test(html)
 
-  // Remove mso-* styles (Word-specific CSS)
-  cleaned = cleaned.replace(/\s*mso-[^:]+:[^;"]+;?/gi, '')
+  // ── Microsoft Word cleanup (only if Word detected) ──
+  if (isWord) {
+    cleaned = cleaned.replace(/<!--\[if[\s\S]*?endif\]-->/gi, '')
+    cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
+    cleaned = cleaned.replace(/<o:p[\s\S]*?<\/o:p>/gi, '')
+    cleaned = cleaned.replace(/<w:[\s\S]*?<\/w:[\s\S]*?>/gi, '')
+    cleaned = cleaned.replace(/<m:[\s\S]*?<\/m:[\s\S]*?>/gi, '')
+    cleaned = cleaned.replace(/<\/?(xml|st1|v:|o:)[^>]*>/gi, '')
 
-  // Remove class="Mso*" (Word paragraph classes)
-  cleaned = cleaned.replace(/\s*class="Mso[^"]*"/gi, '')
+    // Remove mso-* styles (Word-specific CSS)
+    cleaned = cleaned.replace(/\s*mso-[^:]+:[^;"]+;?/gi, '')
 
-  // Remove Word-specific attributes
-  cleaned = cleaned.replace(/\s*lang="[^"]*"/gi, '')
+    // Remove class="Mso*" (Word paragraph classes)
+    cleaned = cleaned.replace(/\s*class="Mso[^"]*"/gi, '')
 
-  // ── Google Docs cleanup ──
-  cleaned = cleaned.replace(/<b\s+id="docs-internal[^"]*"[^>]*>([\s\S]*?)<\/b>/gi, '$1')
-  cleaned = cleaned.replace(/\s*id="docs-internal[^"]*"/gi, '')
-  cleaned = cleaned.replace(/\s*id="h\.[a-z0-9]+"/gi, '')
-  cleaned = cleaned.replace(/\s*class="c\d+"/gi, '')
-  cleaned = cleaned.replace(/\s*dir="ltr"/gi, '')
-  cleaned = cleaned.replace(/\s*role="presentation"/gi, '')
+    // Remove Word-specific attributes
+    cleaned = cleaned.replace(/\s*lang="[^"]*"/gi, '')
+  }
 
-  // Google Docs wraps content in span with inline styles for weight/style
-  // Convert <span style="font-weight: 700"> to <strong>
-  cleaned = cleaned.replace(
-    /<span\s+style="[^"]*font-weight:\s*(700|bold)[^"]*">([\s\S]*?)<\/span>/gi,
-    '<strong>$2</strong>'
-  )
-  cleaned = cleaned.replace(
-    /<span\s+style="[^"]*font-style:\s*italic[^"]*">([\s\S]*?)<\/span>/gi,
-    '<em>$2</em>'
-  )
-  cleaned = cleaned.replace(
-    /<span\s+style="[^"]*text-decoration:\s*line-through[^"]*">([\s\S]*?)<\/span>/gi,
-    '<s>$2</s>'
-  )
+  // ── Google Docs cleanup (only if Google Docs detected) ──
+  if (isGoogleDocs) {
+    cleaned = cleaned.replace(/<b\s+id="docs-internal[^"]*"[^>]*>([\s\S]*?)<\/b>/gi, '$1')
+    cleaned = cleaned.replace(/\s*id="docs-internal[^"]*"/gi, '')
+    cleaned = cleaned.replace(/\s*id="h\.[a-z0-9]+"/gi, '')
+    cleaned = cleaned.replace(/\s*class="c\d+"/gi, '')
+    cleaned = cleaned.replace(/\s*dir="ltr"/gi, '')
+    cleaned = cleaned.replace(/\s*role="presentation"/gi, '')
 
-  // ── LibreOffice / OpenOffice cleanup ──
-  cleaned = cleaned.replace(/<\/?(text|office|table|draw|style|number|fo|svg):[^>]*>/gi, '')
-  cleaned = cleaned.replace(/\s*class="P\d+"/gi, '')
-  cleaned = cleaned.replace(/\s*class="T\d+"/gi, '')
-  cleaned = cleaned.replace(/\s*class="Table\d+"/gi, '')
+    // Google Docs wraps content in span with inline styles for weight/style
+    // Convert <span style="font-weight: 700"> to <strong>
+    cleaned = cleaned.replace(
+      /<span\s+style="[^"]*font-weight:\s*(700|bold)[^"]*">([\s\S]*?)<\/span>/gi,
+      '<strong>$2</strong>'
+    )
+    cleaned = cleaned.replace(
+      /<span\s+style="[^"]*font-style:\s*italic[^"]*">([\s\S]*?)<\/span>/gi,
+      '<em>$2</em>'
+    )
+    cleaned = cleaned.replace(
+      /<span\s+style="[^"]*text-decoration:\s*line-through[^"]*">([\s\S]*?)<\/span>/gi,
+      '<s>$2</s>'
+    )
+  }
 
-  // ── Apple Pages / iWork cleanup ──
-  cleaned = cleaned.replace(/\s*class="(s|p)\d+"/gi, '')
-  cleaned = cleaned.replace(/<div\s+apple-content-edited="true"[^>]*>/gi, '<div>')
+  // ── LibreOffice / OpenOffice cleanup (only if LibreOffice detected) ──
+  if (isLibreOffice) {
+    cleaned = cleaned.replace(/<\/?(text|office|table|draw|style|number|fo|svg):[^>]*>/gi, '')
+    cleaned = cleaned.replace(/\s*class="P\d+"/gi, '')
+    cleaned = cleaned.replace(/\s*class="T\d+"/gi, '')
+    cleaned = cleaned.replace(/\s*class="Table\d+"/gi, '')
+  }
 
-  // ── Common cleanup ──
+  // ── Apple Pages / iWork cleanup (only if Apple Pages detected) ──
+  if (isApplePages) {
+    cleaned = cleaned.replace(/\s*class="(s|p)\d+"/gi, '')
+    cleaned = cleaned.replace(/<div\s+apple-content-edited="true"[^>]*>/gi, '<div>')
+  }
+
+  // ── Common cleanup (always run) ──
 
   // Remove empty style attributes
   cleaned = cleaned.replace(/\s*style="\s*"/gi, '')
@@ -96,7 +113,7 @@ export function cleanPastedHTML(html) {
   // Remove empty divs
   cleaned = cleaned.replace(/<div[^>]*>\s*<\/div>/gi, '')
 
-  // ── Font tag conversion ──
+  // ── Font tag conversion (always run) ──
   // Use flexible regexes that match attributes anywhere in the tag (not just first position)
   cleaned = cleaned.replace(/<font\s[^>]*?face="([^"]*)"[^>]*>([\s\S]*?)<\/font>/gi,
     '<span style="font-family: $1">$2</span>')
@@ -105,14 +122,16 @@ export function cleanPastedHTML(html) {
   cleaned = cleaned.replace(/<font\s[^>]*?size="([^"]*)"[^>]*>([\s\S]*?)<\/font>/gi, '$2')
   cleaned = cleaned.replace(/<\/?font[^>]*>/gi, '')
 
-  // ── Normalize semantic tags ──
+  // ── Normalize semantic tags (always run) ──
   cleaned = cleaned.replace(/<b(\s|>)/gi, '<strong$1')
   cleaned = cleaned.replace(/<\/b>/gi, '</strong>')
   cleaned = cleaned.replace(/<i(\s|>)/gi, '<em$1')
   cleaned = cleaned.replace(/<\/i>/gi, '</em>')
 
-  // ── Convert Word-style list paragraphs to real lists ──
-  cleaned = convertWordListParagraphs(cleaned)
+  // ── Convert Word-style list paragraphs to real lists (only if Word detected) ──
+  if (isWord) {
+    cleaned = convertWordListParagraphs(cleaned)
+  }
 
   // ── Final whitespace cleanup ──
   cleaned = cleaned.replace(/(<br\s*\/?\s*>){3,}/gi, '<br><br>')

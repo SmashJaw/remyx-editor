@@ -76,7 +76,7 @@
 }
 
 .rmx-editor *, .rmx-editor *::before, .rmx-editor *::after {
-  box-sizing: border-box;
+  box-sizing: inherit;
 }
 
 /* ====== Fullscreen ====== */

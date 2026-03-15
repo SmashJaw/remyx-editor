@@ -1,18 +1,16 @@
 ![Remyx Editor](./docs/images/Remyx-Logo.svg)
 
-test
-
 # Remyx Editor
 
 A feature-rich WYSIWYG editor built on a framework-agnostic core with first-class React support. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
 
 ## Packages
 
-| Package                           | Version | Description                                                                      |
-| --------------------------------- | ------- | -------------------------------------------------------------------------------- |
-| [`@remyx/core`](./remyx-core/)    | 0.23.0  | Framework-agnostic engine, commands, plugins, utilities, and CSS themes          |
-| [`@remyx/react`](./remyx-react/)  | 0.23.0  | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
-| [`create-remyx`](./create-remyx/) | 0.23.0  | CLI scaffolding tool — choose JSX or TypeScript                                  |
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@remyx/core`](./remyx-core/) | 0.23.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](./remyx-react/) | 0.23.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
+| [`create-remyx`](./create-remyx/) | 0.23.0 | CLI scaffolding tool — choose JSX or TypeScript |
 
 ### Getting Started (New Project)
 
@@ -23,18 +21,17 @@ npm create remyx@latest my-editor
 ```
 
 You'll be prompted to pick:
-
 - **Language**: JavaScript (JSX) or TypeScript (TSX)
 - **PDF/DOCX import**: include or skip heavy document dependencies (~5 MB)
 
 ### Which package should I use?
 
-| Use case                            | Install                                            |
-| ----------------------------------- | -------------------------------------------------- |
-| New project (interactive setup)     | `npm create remyx@latest`                          |
-| React project                       | `npm install @remyx/core @remyx/react`             |
+| Use case | Install |
+| --- | --- |
+| New project (interactive setup) | `npm create remyx@latest` |
+| React project | `npm install @remyx/core @remyx/react` |
 | Vue / Svelte / Angular / Vanilla JS | `npm install @remyx/core` (build your own wrapper) |
-| Server-side HTML processing         | `npm install @remyx/core`                          |
+| Server-side HTML processing | `npm install @remyx/core` |
 
 ## Quick Start (React)
 
@@ -59,16 +56,10 @@ function App() {
 ## Quick Start (Core Only)
 
 ```js
-import {
-  EditorEngine,
-  registerFormattingCommands,
-  registerListCommands,
-} from '@remyx/core';
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyx/core';
 import '@remyx/core/style.css';
 
-const engine = new EditorEngine(document.querySelector('#editor'), {
-  outputFormat: 'html',
-});
+const engine = new EditorEngine(document.querySelector('#editor'), { outputFormat: 'html' });
 registerFormattingCommands(engine);
 registerListCommands(engine);
 engine.init();
@@ -102,10 +93,13 @@ npm run build        # build all packages
 
 - [@remyx/react README](./remyx-react/README.md) — full API docs, props, theming, plugins, toolbar, menu bar
 - [@remyx/core README](./remyx-core/README.md) — engine API, commands, utilities, building framework wrappers
-- [SECURITY.md](./docs/SECURITY.md) — security audit findings and remediation status
-- [ROADMAP.md](./docs/ROADMAP.md) — planned features and competitive analysis
+- [BUGS.md](./docs/BUGS.md) — known bugs and resolution status
+- [CLEANUP.md](./docs/CLEANUP.md) — cleanup tasks and technical debt
+- [OPTIMIZATION.md](./docs/OPTIMIZATION.md) — bundle size and runtime performance roadmap
 - [PLANNED_PACKAGES.md](./docs/PLANNED_PACKAGES.md) — multi-package restructure plan and progress
+- [ROADMAP.md](./docs/ROADMAP.md) — planned features and competitive analysis
+- [SECURITY.md](./docs/SECURITY.md) — security audit findings and remediation status
 
 ## License
 
-MIT
+Remyx Editor is [MIT licensed](./LICENSE).

@@ -183,6 +183,29 @@ import {
 } from '@remyx/core';
 ```
 
+## Tree-Shaking
+
+`@remyx/core` is designed for tree-shaking. Import only what you need for the smallest possible bundle:
+
+```js
+// Minimal — only the engine and the commands you use
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyx/core';
+```
+
+```js
+// Full — pulls in everything (larger bundle)
+import * as Remyx from '@remyx/core';
+```
+
+**Optional heavy dependencies:** `mammoth` (DOCX import) and `pdfjs-dist` (PDF import) are optional peer dependencies. Only install them if you need document import:
+
+```bash
+# Only if you need DOCX/PDF import
+npm install mammoth pdfjs-dist
+```
+
+**Theme modules are tree-shakeable:** Importing `createTheme` does not pull in `THEME_PRESETS` or the toolbar item theming utilities. These are separate modules that your bundler will exclude if unused.
+
 ## CSS
 
 Import the stylesheet for editor theming (light/dark modes, CSS custom properties):

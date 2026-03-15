@@ -14,7 +14,6 @@
 | --- | --- | --- | --- |
 | `@remyx/core` | 172 KB | 130 KB | 25.5 KB |
 | `@remyx/react` | 91 KB | 63 KB | 2.3 KB |
-| PDF worker (per package) | 1,577 KB | 1,187 KB | — |
 
 ---
 
@@ -32,190 +31,99 @@ CSS now ships from `@remyx/core` only. `@remyx/react` ships only its component-s
 
 ---
 
-### 3. Make PDF Worker Opt-In
+### ~~3. Make PDF Worker Opt-In~~ ✅ Complete
 
-The `pdfjs-dist` worker file is 1.5 MB (ES) / 1.2 MB (CJS) and ships in every build even if the consumer never uses PDF import. `documentConverter.js` already lazy-loads the library at runtime, but Vite still bundles the worker.
-
-**Options:**
-- Configure Vite to externalize `pdfjs-dist` worker via `build.rollupOptions.external`
-- Load worker from CDN at runtime (fallback already exists in `documentConverter.js`)
-- Move `pdfjs-dist` to `optionalDependencies` or `peerDependencies`
-
-**Estimated impact:** 1.5–2.6 MB removed from dist output per package.
+Externalized all `pdfjs-dist` subpath imports via regex pattern in Vite config (`/pdfjs-dist\/.*/`). Moved `mammoth` and `pdfjs-dist` from `dependencies` to optional `peerDependencies`. Consumers only install these when they need DOCX/PDF import.
 
 ---
 
-### 4. Lazy-Load Modal Components
+### ~~4. Lazy-Load Modal Components~~ ✅ Complete
 
-All modal components (`LinkModal`, `ImageModal`, `TablePickerModal`, `EmbedMediaModal`, `ExportModal`, `ImportDocumentModal`, `FindReplaceModal`, `AttachmentModal`) are statically imported in `RemyxEditor.jsx` but only rendered when the user opens them.
-
-**Target:**
-```jsx
-const LinkModal = lazy(() => import('./Modals/LinkModal.jsx'))
-const ImageModal = lazy(() => import('./Modals/ImageModal.jsx'))
-// ...wrap renders in <Suspense fallback={null}>
-```
-
-**Estimated impact:** 20–30 KB deferred from initial load, loaded on-demand per modal.
+All 9 modal components now use `React.lazy()` with dynamic imports and are wrapped in `<Suspense fallback={null}>`. Modals are only rendered when their `open` state is true, deferring ~20–30 KB from initial load.
 
 ---
 
 ## High — Significant Impact
 
-### 5. Split Selection State Into Granular Atoms
+### ~~5. Split Selection State Into Granular Atoms~~ ✅ Complete
 
-`useSelection.js` returns a single object containing formats, `hasSelection`, `selectionRect`, `focusedImage`, and `focusedTable`. Any change to any field triggers a re-render of every component that reads selection state — including every toolbar button.
-
-**Target:** Split into independent `useState` calls or use `useReducer` with selective updates. Components should only re-render when their specific slice changes.
-
-**Estimated impact:** 30–40% reduction in React re-renders during editing.
+`useSelection.js` now uses two separate `useState` calls — one for format state (15 fields) and one for UI state (4 fields). A `shallowEqual` bail-out prevents re-renders when a `selection:change` event fires but no values actually changed.
 
 ---
 
-### 6. Stabilize `useSelection` Event Handler
+### ~~6. Stabilize `useSelection` Event Handler~~ ✅ Complete
 
-`handleSelectionChange` in `useSelection.js` is recreated on every render because it's not wrapped in `useCallback`. The `useEffect` that subscribes to `selection:change` depends on it, causing the listener to be torn down and reattached continuously.
-
-**Fix:**
-```js
-const handleSelectionChange = useCallback((formats) => {
-  setState(prev => ({ ...prev, ...formats }))
-}, [])
-```
-
-**Estimated impact:** Eliminates unnecessary effect re-runs on every render cycle.
+`handleSelectionChange` was already wrapped in `useCallback` with `[]` dependencies. No additional changes needed.
 
 ---
 
-### 7. Debounce Window Resize/Scroll Listeners
+### ~~7. Debounce Window Resize/Scroll Listeners~~ ✅ Complete
 
-`RemyxEditor.jsx` attaches `resize` and `scroll` handlers that call `getBoundingClientRect()` synchronously. During scroll or resize, this triggers layout recalculation on every frame.
-
-**Target:** Debounce with 100–150 ms delay, or use `ResizeObserver` for the editor element and remove the window listener.
-
-**Estimated impact:** Eliminates layout thrashing during scroll/resize.
+Replaced `window.addEventListener('resize')` with `ResizeObserver` on the editor element. Both resize and scroll updates are throttled via `requestAnimationFrame`. Extracted into a dedicated `useEditorRect()` hook.
 
 ---
 
-### 8. Enable Terser Minification With Console Removal
+### ~~8. Enable Terser Minification With Console Removal~~ ✅ Complete
 
-Vite defaults to esbuild minification which is fast but produces slightly larger output than Terser. Production builds also retain `console.warn` and `console.error` calls.
-
-**Target:**
-```js
-build: {
-  minify: 'terser',
-  terserOptions: {
-    compress: { drop_console: true, passes: 2 },
-  },
-}
-```
-
-**Estimated impact:** 8–12% size reduction across all bundles.
+Both Vite configs now use `minify: 'terser'` with `drop_console: true` and `drop_debugger: true`. Added `terser` as a devDependency to both packages.
 
 ---
 
 ## Medium — Measurable Impact
 
-### 9. Split `documentConverter.js` by Format
+### ~~9. Split `documentConverter.js` by Format~~ ✅ Complete
 
-This 391-line file handles 7 document formats (DOCX, PDF, Markdown, HTML, plaintext, CSV, RTF) in a single module. RTF conversion alone is 40+ lines of regex. Most consumers only need 1–2 formats.
-
-**Target:** Split into `documentConverter/formats/docx.js`, `pdf.js`, `csv.js`, `rtf.js`, etc. with a dispatcher that dynamically imports only the needed converter.
-
-**Estimated impact:** 15–25 KB tree-shakeable when unused formats are excluded.
+Split the monolithic 392-line file into a `documentConverter/` directory with 9 files: `index.js` (dispatcher with dynamic imports), `shared.js` (common utilities), and 7 format-specific modules (`convertDocx.js`, `convertPdf.js`, `convertMarkdown.js`, `convertHtml.js`, `convertText.js`, `convertCsv.js`, `convertRtf.js`). Each converter is loaded on-demand.
 
 ---
 
-### 10. Make Paste Cleaners Modular
+### ~~10. Make Paste Cleaners Modular~~ ✅ Complete
 
-`pasteClean.js` handles Microsoft Word, Google Docs, LibreOffice, and Apple Pages in a single pipeline. All regex patterns and cleanup passes run regardless of the paste source.
-
-**Target:** Detect the paste source (Word uses `mso-*` classes, Google Docs uses `docs-internal` IDs) and run only the relevant cleaner. Export individual cleaners for consumers who want minimal bundles.
-
-**Estimated impact:** 5–10 KB for consumers who opt into minimal cleanup.
+Added source detection at the top of `cleanPastedHTML()` using regex patterns (`mso-` for Word, `docs-internal` for Google Docs, `<text:` for LibreOffice, `apple-content-edited` for Apple Pages). Source-specific cleanup pipelines now only run when the corresponding source is detected. Common cleanup always runs.
 
 ---
 
-### 11. Cache DOM Queries in Selection Hot Path
+### ~~11. Cache DOM Queries in Selection Hot Path~~ ✅ Complete
 
-`useSelection.js` runs `node.querySelector(':scope > img')` and `node.closest('table')` on every `selectionchange` event — which fires on every keystroke and mouse movement.
-
-**Target:** Cache the focused image/table reference in the `Selection` class and only update when `content:change` fires (which is less frequent than `selectionchange`).
-
-**Estimated impact:** 10–15% CPU reduction during heavy editing in complex documents.
+Added a `useRef` cache for focused image/table DOM references in `useSelection.js`. The cache is only cleared on `content:change` events (when the DOM may have mutated), avoiding redundant `querySelector` and `closest` calls on every `selection:change` event.
 
 ---
 
-### 12. Refactor `RemyxEditor.jsx` Into Sub-Hooks
+### ~~12. Refactor `RemyxEditor.jsx` Into Sub-Hooks~~ ✅ Complete
 
-At 407 lines, `RemyxEditor.jsx` mixes portal logic, config resolution, state management, modal management, and rect tracking in a single component. This makes it hard to optimize individual concerns.
-
-**Target:** Extract into `usePortalAttachment()`, `useResolvedConfig()`, `useEditorRect()` hooks. Aim for <250 lines in the main component.
-
-**Estimated impact:** Enables fine-grained memoization and easier future optimization.
+Extracted three custom hooks: `useResolvedConfig()` (config resolution and merge), `usePortalAttachment()` (portal/textarea binding), and `useEditorRect()` (rect tracking with ResizeObserver). `RemyxEditor.jsx` is now ~230 lines of hook calls and JSX.
 
 ---
 
-### 13. Restrict CSS Universal Selector
+### ~~13. Restrict CSS Universal Selector~~ ✅ Complete
 
-```css
-.rmx-editor *, .rmx-editor *::before, .rmx-editor *::after {
-  box-sizing: border-box;
-}
-```
-
-This applies to every descendant element. In large documents with thousands of elements, the browser must evaluate this selector for every node.
-
-**Target:** Scope to direct children and known element types, or use `inherit` from `.rmx-editor`.
-
-**Estimated impact:** Minor CSS parsing speedup in large documents.
+Changed the `.rmx-editor *` universal selector from `box-sizing: border-box` to `box-sizing: inherit`. The `.rmx-editor` root already sets `box-sizing: border-box`, so children inherit it through the cascade instead of matching a direct property assignment.
 
 ---
 
 ## Low — Polish
 
-### 14. Hide Sourcemaps From Distribution
+### ~~14. Hide Sourcemaps From Distribution~~ ✅ Complete
 
-Production builds include sourcemaps that add ~10 KB per bundle. Consumers rarely need library sourcemaps.
-
-**Target:** Set `build.sourcemap: 'hidden'` or `false` for production builds.
-
-**Estimated impact:** ~10 KB per bundle removed from published packages.
+Both Vite configs now set `sourcemap: false`, removing `.map` files from published `dist/` output.
 
 ---
 
-### 15. Document Tree-Shaking Best Practices
+### ~~15. Document Tree-Shaking Best Practices~~ ✅ Complete
 
-Consumers importing `* from '@remyx/core'` pull in all commands and utilities. Document minimal import patterns:
-
-```js
-// Minimal — tree-shakeable
-import { EditorEngine, Sanitizer } from '@remyx/core'
-
-// Full — pulls everything
-import * as Remyx from '@remyx/core'
-```
-
-**Estimated impact:** Helps consumers achieve smaller bundles without code changes.
+Added a "Tree-Shaking" section to the `@remyx/core` README documenting minimal vs full import patterns, optional heavy dependencies, and tree-shakeable theme modules.
 
 ---
 
-### 16. Lazy-Load Theme Configuration Utilities
+### ~~16. Lazy-Load Theme Configuration Utilities~~ ✅ Complete
 
-`themeConfig.js` (328 lines) with `createTheme()`, `applyTheme()`, and the full `THEME_VARIABLES` map is bundled for all consumers even though most use the default theme.
-
-**Target:** Provide as a separate subpath export: `import { createTheme } from '@remyx/core/theme'`.
-
-**Estimated impact:** ~5 KB reduction for consumers not using custom themes.
+Split `themeConfig.js` (329 lines) into three tree-shakeable modules: `themeConfig.js` (core `createTheme` + `THEME_VARIABLES`), `themePresets.js` (`THEME_PRESETS`), and `toolbarItemTheme.js` (per-item toolbar theming utilities). Consumers who don't import presets or toolbar theming get those modules eliminated by their bundler.
 
 ---
 
-### 17. Wrap `Toolbar` in `React.memo`
+### ~~17. Wrap `Toolbar` in `React.memo`~~ ✅ Complete
 
-The `Toolbar` component itself is not wrapped in `React.memo`, so it re-renders whenever its parent renders — even if `config`, `engine`, and `selectionState` haven't changed. Individual toolbar items (`ToolbarButton`, `ToolbarDropdown`, etc.) are already memoized but the parent is not.
-
-**Estimated impact:** 20–30% fewer component tree re-renders during editing.
+The `Toolbar` component is now wrapped in `React.memo`. Combined with the `shallowEqual` bail-out in `useSelection` (#5), toolbar re-renders are significantly reduced during editing.
 
 ---
 
@@ -223,8 +131,8 @@ The `Toolbar` component itself is not wrapped in `React.memo`, so it re-renders 
 
 | Priority | Items | Estimated Size Savings | Performance Gain |
 | --- | --- | --- | --- |
-| Critical | #1–#2 ✅, #3–#4 | ~75 KB saved + 2.6 MB worker | Modal load deferred |
-| High | #5–#8 | ~10 KB (terser) | 30–40% fewer re-renders |
-| Medium | #9–#13 | ~25 KB (tree-shake) | 10–15% CPU in hot paths |
-| Low | #14–#17 | ~15 KB | Better DX |
-| **Total** | **17 items** | **~145 KB + worker** | **Significant** |
+| Critical | #1–#4 ✅ | ~75 KB saved + 2.6 MB worker | Modal load deferred |
+| High | #5–#8 ✅ | ~10 KB (terser) | 30–40% fewer re-renders |
+| Medium | #9–#13 ✅ | ~25 KB (tree-shake) | 10–15% CPU in hot paths |
+| Low | #14–#17 ✅ | ~15 KB | Better DX |
+| **Total** | **17 items ✅** | **~145 KB + worker** | **Significant** |

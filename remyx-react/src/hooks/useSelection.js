@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
-const DEFAULT_STATE = {
+const DEFAULT_FORMAT = {
   bold: false,
   italic: false,
   underline: false,
@@ -18,54 +18,105 @@ const DEFAULT_STATE = {
   fontSize: null,
   foreColor: null,
   backColor: null,
+}
+
+const DEFAULT_UI = {
   hasSelection: false,
   selectionRect: null,
   focusedImage: null,
   focusedTable: null,
 }
 
+const FORMAT_KEYS = Object.keys(DEFAULT_FORMAT)
+
+/**
+ * Shallow compare two objects by a set of keys.
+ * Returns true if all values are identical (===).
+ */
+function shallowEqual(a, b, keys) {
+  for (const key of keys) {
+    if (a[key] !== b[key]) return false
+  }
+  return true
+}
+
 export function useSelection(engine) {
-  const [state, setState] = useState(DEFAULT_STATE)
+  const [formatState, setFormatState] = useState(DEFAULT_FORMAT)
+  const [uiState, setUiState] = useState(DEFAULT_UI)
+
+  // Cache focused image/table DOM references to avoid unnecessary state updates
+  const cachedFocusRef = useRef({ image: null, table: null })
 
   const handleSelectionChange = useCallback((formats) => {
-    setState((prev) => {
-      const sel = window.getSelection()
-      const hasSelection = sel && !sel.isCollapsed && sel.toString().length > 0
-
-      let selectionRect = null
-      if (hasSelection && sel.rangeCount > 0) {
-        selectionRect = sel.getRangeAt(0).getBoundingClientRect()
+    // Update format state — bail out if nothing changed
+    setFormatState(prev => {
+      const next = {}
+      for (const key of FORMAT_KEYS) {
+        next[key] = key in formats ? formats[key] : DEFAULT_FORMAT[key]
       }
+      return shallowEqual(prev, next, FORMAT_KEYS) ? prev : next
+    })
 
-      // Check for focused image/table
-      let focusedImage = null
-      let focusedTable = null
-      if (sel && sel.focusNode) {
-        const node = sel.focusNode.nodeType === Node.TEXT_NODE ? sel.focusNode.parentElement : sel.focusNode
-        if (node) {
-          const img = node.tagName === 'IMG' ? node : node.querySelector?.(':scope > img')
-          if (img) focusedImage = img
+    // Compute UI state
+    const sel = window.getSelection()
+    const hasSelection = sel && !sel.isCollapsed && sel.toString().length > 0
 
-          const table = node.closest?.('table')
-          if (table) focusedTable = table
-        }
+    let selectionRect = null
+    if (hasSelection && sel.rangeCount > 0) {
+      selectionRect = sel.getRangeAt(0).getBoundingClientRect()
+    }
+
+    // DOM queries for focused image/table
+    let focusedImage = null
+    let focusedTable = null
+    if (sel && sel.focusNode) {
+      const node = sel.focusNode.nodeType === Node.TEXT_NODE ? sel.focusNode.parentElement : sel.focusNode
+      if (node) {
+        const img = node.tagName === 'IMG' ? node : node.querySelector?.(':scope > img')
+        if (img) focusedImage = img
+
+        const table = node.closest?.('table')
+        if (table) focusedTable = table
       }
+    }
 
-      return {
-        ...formats,
-        hasSelection,
-        selectionRect,
-        focusedImage,
-        focusedTable,
+    // Use cached references if the actual DOM element hasn't changed
+    if (focusedImage === cachedFocusRef.current.image && focusedTable === cachedFocusRef.current.table) {
+      focusedImage = cachedFocusRef.current.image
+      focusedTable = cachedFocusRef.current.table
+    } else {
+      cachedFocusRef.current = { image: focusedImage, table: focusedTable }
+    }
+
+    // Update UI state — bail out if nothing changed
+    setUiState(prev => {
+      if (prev.hasSelection === hasSelection &&
+          prev.focusedImage === focusedImage &&
+          prev.focusedTable === focusedTable &&
+          !hasSelection) {
+        return prev
       }
+      return { hasSelection, selectionRect, focusedImage, focusedTable }
     })
   }, [])
 
+  // Subscribe to selection changes
   useEffect(() => {
     if (!engine) return
     const unsub = engine.eventBus.on('selection:change', handleSelectionChange)
     return unsub
   }, [engine, handleSelectionChange])
 
-  return state
+  // Clear cached DOM references when content changes (DOM may have mutated)
+  useEffect(() => {
+    if (!engine) return
+    const clearCache = () => {
+      cachedFocusRef.current = { image: null, table: null }
+    }
+    const unsub = engine.eventBus.on('content:change', clearCache)
+    return unsub
+  }, [engine])
+
+  // Return combined object for backward compatibility
+  return { ...formatState, ...uiState }
 }

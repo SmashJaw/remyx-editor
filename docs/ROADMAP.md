@@ -36,6 +36,19 @@ A living document outlining planned features, improvements, and long-term direct
 - Copy/paste between Remyx tables and external spreadsheets (Excel, Google Sheets)
 - Freeze header row on scroll for large tables
 
+## Code Block Syntax Highlighting
+
+- Language-specific syntax highlighting inside fenced code blocks using a lightweight library (Prism, Shiki, or Highlight.js)
+- Language selector dropdown on code blocks — pick from common languages (JavaScript, Python, TypeScript, HTML, CSS, SQL, Bash, JSON, etc.)
+- Auto-detect language from content when no language is specified
+- Theme-aware highlighting — colors adapt to light/dark editor themes and custom theme presets
+- Line numbers toggle per code block
+- Copy-to-clipboard button on code blocks
+- Markdown round-trip: preserve language identifiers (` ```js `, ` ```python `) in markdown output
+- Lazy-loaded highlighting engine — syntax library only loaded when a code block is present
+- Extensible language registry — consumers can add custom language grammars via plugin or prop
+- Inline code spans with optional mini-highlighting for single-line snippets
+
 ## Expanded Plugin Architecture
 
 - Formal `createPlugin()` lifecycle hooks: `onInit`, `onDestroy`, `onContentChange`, `onSelectionChange`

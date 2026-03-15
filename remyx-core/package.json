@@ -1,6 +1,6 @@
 {
   "name": "@remyx/core",
-  "version": "0.23.0",
+  "version": "0.23.12",
   "type": "module",
   "main": "./dist/remyx-core.cjs",
   "module": "./dist/remyx-core.js",
@@ -15,13 +15,20 @@
   },
   "files": ["dist"],
   "dependencies": {
-    "mammoth": "^1.11.0",
     "marked": "^15.0.0",
-    "pdfjs-dist": "^5.5.207",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2"
   },
+  "peerDependencies": {
+    "mammoth": "^1.11.0",
+    "pdfjs-dist": "^5.5.207"
+  },
+  "peerDependenciesMeta": {
+    "mammoth": { "optional": true },
+    "pdfjs-dist": { "optional": true }
+  },
   "devDependencies": {
+    "terser": "^5.37.0",
     "vite": "^7.3.1"
   },
   "scripts": {
