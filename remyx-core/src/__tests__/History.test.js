@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+
 import { History } from '../core/History.js'
 
 describe('History', () => {
@@ -13,13 +13,13 @@ describe('History', () => {
 
     mockEngine = {
       element,
-      eventBus: { emit: vi.fn() },
+      eventBus: { emit: jest.fn() },
       selection: {
-        save: vi.fn().mockReturnValue(null),
-        restore: vi.fn(),
+        save: jest.fn().mockReturnValue(null),
+        restore: jest.fn(),
       },
       sanitizer: {
-        sanitize: vi.fn((html) => html),
+        sanitize: jest.fn((html) => html),
       },
     }
     history = new History(mockEngine)
@@ -97,9 +97,10 @@ describe('History', () => {
     })
 
     it('should restore previous state', () => {
+      // snapshot saves current state ('initial') to undo stack
       history.snapshot()
+      // change content without snapshotting — undo should restore to the saved state
       mockEngine.element.innerHTML = '<p>changed</p>'
-      history.snapshot()
       history.undo()
       expect(mockEngine.element.innerHTML).toBe('<p>initial</p>')
     })

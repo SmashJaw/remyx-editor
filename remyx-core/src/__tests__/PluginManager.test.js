@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+
 import { PluginManager } from '../plugins/PluginManager.js'
 
 describe('PluginManager', () => {
@@ -9,24 +9,24 @@ describe('PluginManager', () => {
     mockEngine = {
       element: document.createElement('div'),
       commands: {
-        register: vi.fn(),
-        execute: vi.fn(),
+        register: jest.fn(),
+        execute: jest.fn(),
       },
       eventBus: {
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
+        on: jest.fn(),
+        off: jest.fn(),
+        emit: jest.fn(),
       },
       selection: {
-        getSelection: vi.fn(),
-        getRange: vi.fn(),
-        getActiveFormats: vi.fn().mockReturnValue({}),
+        getSelection: jest.fn(),
+        getRange: jest.fn(),
+        getActiveFormats: jest.fn().mockReturnValue({}),
       },
-      history: { snapshot: vi.fn() },
-      keyboard: { register: vi.fn() },
-      getHTML: vi.fn().mockReturnValue(''),
-      getText: vi.fn().mockReturnValue(''),
-      isEmpty: vi.fn().mockReturnValue(true),
+      history: { snapshot: jest.fn() },
+      keyboard: { register: jest.fn() },
+      getHTML: jest.fn().mockReturnValue(''),
+      getText: jest.fn().mockReturnValue(''),
+      isEmpty: jest.fn().mockReturnValue(true),
       options: { theme: 'light' },
     }
     manager = new PluginManager(mockEngine)
@@ -40,7 +40,7 @@ describe('PluginManager', () => {
     })
 
     it('should warn and skip plugins without a name', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
       manager.register({})
       manager.register(null)
       expect(consoleSpy).toHaveBeenCalledTimes(2)
@@ -48,7 +48,7 @@ describe('PluginManager', () => {
     })
 
     it('should warn on duplicate registration', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
       manager.register({ name: 'test' })
       manager.register({ name: 'test' })
       expect(consoleSpy).toHaveBeenCalledWith('Plugin "test" already registered')
@@ -56,7 +56,7 @@ describe('PluginManager', () => {
     })
 
     it('should register plugin commands', () => {
-      const cmd = { name: 'test-cmd', execute: vi.fn() }
+      const cmd = { name: 'test-cmd', execute: jest.fn() }
       manager.register({ name: 'test', commands: [cmd] })
       expect(mockEngine.commands.register).toHaveBeenCalledWith('test-cmd', cmd)
     })
@@ -69,7 +69,7 @@ describe('PluginManager', () => {
 
   describe('initAll', () => {
     it('should call init on all plugins', () => {
-      const initFn = vi.fn()
+      const initFn = jest.fn()
       manager.register({ name: 'test', init: initFn })
       manager.initAll()
       expect(initFn).toHaveBeenCalled()
@@ -106,7 +106,7 @@ describe('PluginManager', () => {
     })
 
     it('should catch and log errors from plugin init', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       manager.register({
         name: 'bad-plugin',
         init() { throw new Error('init failed') },
@@ -124,7 +124,7 @@ describe('PluginManager', () => {
 
   describe('destroyAll', () => {
     it('should call destroy on all plugins', () => {
-      const destroyFn = vi.fn()
+      const destroyFn = jest.fn()
       manager.register({ name: 'test', destroy: destroyFn })
       manager.destroyAll()
       expect(destroyFn).toHaveBeenCalled()
@@ -159,7 +159,7 @@ describe('PluginManager', () => {
     })
 
     it('should catch and log errors from plugin destroy', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       manager.register({
         name: 'bad-plugin',
         destroy() { throw new Error('destroy failed') },

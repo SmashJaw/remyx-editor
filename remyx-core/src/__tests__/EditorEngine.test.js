@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+
 import { EditorEngine } from '../core/EditorEngine.js'
 import { registerFormattingCommands } from '../commands/formatting.js'
 
@@ -171,14 +171,14 @@ describe('EditorEngine', () => {
   describe('focus / blur', () => {
     it('should call focus on the element', () => {
       engine.init()
-      const focusSpy = vi.spyOn(element, 'focus')
+      const focusSpy = jest.spyOn(element, 'focus')
       engine.focus()
       expect(focusSpy).toHaveBeenCalled()
     })
 
     it('should call blur on the element', () => {
       engine.init()
-      const blurSpy = vi.spyOn(element, 'blur')
+      const blurSpy = jest.spyOn(element, 'blur')
       engine.blur()
       expect(blurSpy).toHaveBeenCalled()
     })
@@ -186,13 +186,13 @@ describe('EditorEngine', () => {
 
   describe('executeCommand', () => {
     it('should delegate to commands.execute', () => {
-      const spy = vi.spyOn(engine.commands, 'execute').mockReturnValue(true)
+      const spy = jest.spyOn(engine.commands, 'execute').mockReturnValue(true)
       engine.executeCommand('bold')
       expect(spy).toHaveBeenCalledWith('bold')
     })
 
     it('should pass additional arguments', () => {
-      const spy = vi.spyOn(engine.commands, 'execute').mockReturnValue(true)
+      const spy = jest.spyOn(engine.commands, 'execute').mockReturnValue(true)
       engine.executeCommand('setColor', '#ff0000')
       expect(spy).toHaveBeenCalledWith('setColor', '#ff0000')
     })
@@ -200,14 +200,14 @@ describe('EditorEngine', () => {
 
   describe('event emission', () => {
     it('should provide on/off for event subscription', () => {
-      const handler = vi.fn()
+      const handler = jest.fn()
       engine.on('test', handler)
       engine.eventBus.emit('test', 'data')
       expect(handler).toHaveBeenCalledWith('data')
     })
 
     it('should allow unsubscribing via off', () => {
-      const handler = vi.fn()
+      const handler = jest.fn()
       engine.on('test', handler)
       engine.off('test', handler)
       engine.eventBus.emit('test', 'data')
@@ -215,7 +215,7 @@ describe('EditorEngine', () => {
     })
 
     it('on should return an unsubscribe function', () => {
-      const handler = vi.fn()
+      const handler = jest.fn()
       const unsub = engine.on('test', handler)
       unsub()
       engine.eventBus.emit('test', 'data')
@@ -224,7 +224,7 @@ describe('EditorEngine', () => {
 
     it('should emit focus event on element focus', () => {
       engine.init()
-      const handler = vi.fn()
+      const handler = jest.fn()
       engine.on('focus', handler)
       element.dispatchEvent(new Event('focus'))
       expect(handler).toHaveBeenCalled()
@@ -232,7 +232,7 @@ describe('EditorEngine', () => {
 
     it('should emit blur event on element blur', () => {
       engine.init()
-      const handler = vi.fn()
+      const handler = jest.fn()
       engine.on('blur', handler)
       element.dispatchEvent(new Event('blur'))
       expect(handler).toHaveBeenCalled()
@@ -241,7 +241,7 @@ describe('EditorEngine', () => {
     it('should emit content:change on input', () => {
       engine.init()
       element.innerHTML = '<p>text</p>'
-      const handler = vi.fn()
+      const handler = jest.fn()
       engine.on('content:change', handler)
       element.dispatchEvent(new Event('input'))
       expect(handler).toHaveBeenCalled()

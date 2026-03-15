@@ -1,0 +1,15 @@
+{
+  "name": "create-remyx",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/create-remyx",
+  "projectType": "application",
+  "tags": ["scope:cli"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/create-remyx/index.js"
+      }
+    }
+  }
+}

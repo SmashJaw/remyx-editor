@@ -8,6 +8,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [Infra] — 2026-03-15
+
+### Added
+
+- **Jest test framework** — Replaced Vitest with Jest + Babel for unit testing across the monorepo. Multi-project configuration (`remyx-core`, `remyx-react`) with `jest-environment-jsdom`.
+- **Babel configuration** — Added `babel.config.js` with `@babel/preset-env` (node: current) and `@babel/preset-react` (automatic runtime) for ESM + JSX transform in tests.
+- **344 unit tests** — 311 `@remyx/core` tests across 15 suites + 33 `@remyx/react` tests across 3 suites.
+- **New `@remyx/core` test suites** — KeyboardManager, markdownConverter, platform, themeConfig, toolbarConfig, fontConfig, themePresets (86 new tests).
+- **New `@remyx/react` test suites** — useModal hook (13 tests), ToolbarButton component (10 tests), ToolbarDropdown component (10 tests).
+- **Playwright e2e tests** — 109 end-to-end tests covering editor initialization, text formatting, lists, links, tables, undo/redo, keyboard shortcuts, and more.
+
+### Removed
+
+- **Vitest** — Removed `vitest` dependency, `vitest.config.js`, and all Vitest-specific imports (`vi.fn`, `vi.spyOn`, `import from 'vitest'`).
+
+### Changed
+
+- **Test commands** — `npm run test` now runs `npx nx run-many -t test` (Jest); `npm run test:watch` now runs `jest --watch`.
+- **Nx project targets** — `test` targets in `project.json` files updated from `vitest run --project X` to `jest --selectProjects X`.
+
+---
+
+## [Infra] — 2026-03-15
+
+### Added
+
+- **Nx integration** — Installed `nx` and `@nx/js` for task orchestration, caching, and release management.
+- **`project.json` for all packages** — `remyx-core` (library), `remyx-react` (library), `create-remyx` (application) with build/dev/lint/test/analyze targets.
+- **Dependency-aware builds** — `remyx-react` build automatically triggers `remyx-core` build first via `dependsOn: ["^build"]`.
+- **Nx caching** — Task results cached locally in `.nx/cache/`; repeated builds replay instantly.
+- **Affected commands** — `npm run affected:build`, `affected:test`, `affected:lint` run tasks only on changed packages.
+- **`npm run graph`** — Interactive dependency graph visualization.
+- **`npm run release` / `release:dry`** — Nx release for versioning and npm publishing with dry-run preview.
+- **NX.md** — Comprehensive guide covering workspace setup, task running, npm publishing (first-time setup through CI automation), and troubleshooting.
+
+### Changed
+
+- **Root scripts migrated to Nx** — `build:all`, `build:core`, `build:react`, `lint`, `test`, `analyze:*` now use `npx nx` for caching and dependency ordering.
+- **`@remyx/core` dev dependency** — Changed from registry version to `file:../remyx-core` in `@remyx/react` for local workspace resolution.
+
+---
+
 ## [@remyx/react 0.24.0] — 2026-03-15
 
 ### Added
@@ -32,7 +74,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Vitest test suite** — 8 test files covering EditorEngine, EventBus, CommandRegistry, History, Sanitizer, PluginManager, Selection, and utilities.
+- **Unit test suite** — 8 test files covering EditorEngine, EventBus, CommandRegistry, History, Sanitizer, PluginManager, Selection, and utilities.
 - **JSDoc type annotations** — Comprehensive `@param`/`@returns`/`@typedef` annotations on all core modules (EditorEngine, Selection, EventBus, CommandRegistry, History, Sanitizer, PluginManager, createPlugin).
 - **`tsconfig.json`** — Root TypeScript config with `checkJs: true` for IDE type checking; `npm run typecheck` script.
 - **Bundle analysis** — `rollup-plugin-visualizer` (conditional via `ANALYZE` env var); `npm run analyze:core`/`analyze:react` scripts.
@@ -98,7 +140,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **CSS universal selector** — Changed `box-sizing: border-box` to `box-sizing: inherit` for `.rmx-editor *`.
 - **Magic numbers extracted** — `HEADING_BASE_FONT_SIZE`, `HEADING_FONT_SIZE_STEP`, `GENERATED_ID_LENGTH`, `DEFAULT_EDITOR_HEIGHT`.
 - **Package metadata added** — `description`, `keywords`, `repository`, `bugs`, `homepage`, `author`, `license`, and `sideEffects` fields.
-- **`.gitignore` updated** — Added `.code-workspace`, `coverage/`, `.vitest/`, `.claude/`.
+- **`.gitignore` updated** — Added `.code-workspace`, `coverage/`, `.claude/`.
 
 ### Security
 

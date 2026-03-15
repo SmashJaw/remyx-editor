@@ -22,16 +22,16 @@ The `remyx-editor` standalone package has been removed entirely. All source code
 
 ## ~~High — Missing Tests~~ ✅ Resolved
 
-- [x] **Set up test infrastructure** — ✅ Vitest configured with jsdom environment, `vitest.config.js` at root. Scripts: `npm test`, `npm run test:watch`.
+- [x] **Set up test infrastructure** — ✅ Jest configured with jsdom environment, multi-project `jest.config.js` at root. Scripts: `npm test`, `npm run test:watch`. Playwright for e2e: `npm run e2e`.
 - [x] **Core engine tests** — ✅ `EditorEngine.test.js` covers init/destroy, getHTML/setHTML, executeCommand, isEmpty, focus/blur.
 - [x] **Command tests** — ✅ Covered via EditorEngine integration tests with registerFormattingCommands.
 - [x] **Sanitizer tests** — ✅ `Sanitizer.test.js` covers XSS prevention, tag allowlisting, attribute filtering, style cleaning.
 - [x] **History tests** — ✅ `History.test.js` covers undo/redo, canUndo/canRedo, snapshot management, stack limits.
 - [x] **Plugin system tests** — ✅ `PluginManager.test.js` covers register, initAll, destroyAll, restricted API facade, `requiresFullAccess`.
 - [x] **Utility tests** — ✅ `utilities.test.js` covers htmlToMarkdown, markdownToHtml, looksLikeMarkdown, formatHTML, generateId.
-- [x] **React hook tests** — Deferred to follow-up: requires @testing-library/react integration with engine mocking.
-- [x] **Component tests** — Deferred to follow-up: requires full component rendering setup.
-- [x] **E2E tests** — Deferred to follow-up: requires Playwright setup.
+- [x] **React hook tests** — ✅ `useModal.test.jsx` (13 tests) using @testing-library/react `renderHook`.
+- [x] **Component tests** — ✅ `ToolbarButton.test.jsx` (10 tests), `ToolbarDropdown.test.jsx` (10 tests) using @testing-library/react.
+- [x] **E2E tests** — ✅ Playwright configured with 109 end-to-end tests covering editor interactions.
 
 ---
 
@@ -113,7 +113,7 @@ The `remyx-editor` standalone package has been removed entirely. All source code
 - [x] **`.DS_Store` tracked in git** — ✅ Already in `.gitignore` and not tracked.
 - [x] **Stale file deletions** — ✅ No stale deletions remain; files were moved and committed.
 - [x] **`.claude/` directory** — ✅ Added to `.gitignore`.
-- [x] **Add `.gitignore` entries** — ✅ Added `.code-workspace`, `coverage/`, `.vitest/`, `vite.config.*.timestamp-*`, `dist/`.
+- [x] **Add `.gitignore` entries** — ✅ Added `.code-workspace`, `coverage/`, `vite.config.*.timestamp-*`, `dist/`.
 
 ---
 

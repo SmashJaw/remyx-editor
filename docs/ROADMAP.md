@@ -3,7 +3,7 @@
 # Remyx Editor Roadmap
 
 **Current Version:** 0.24.0
-**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), feature-complete for core editing
+**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), Nx workspace, feature-complete for core editing
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.
 
@@ -15,6 +15,7 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~Create `@remyx/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
 - ~~Standalone `remyx-editor` package~~ — removed; consumers use `@remyx/react` directly
 - ~~npm workspaces monorepo setup~~
+- ~~Nx task orchestration, caching, and release management~~ — See [NX.md](./NX.md)
 - See [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) for the full restructure plan
 
 ## Autosave
@@ -346,8 +347,8 @@ A living document outlining planned features, improvements, and long-term direct
 
 ## Quality Improvements
 
-- Comprehensive unit test suite (Vitest) for engine, commands, sanitizer, and converters
-- End-to-end tests (Playwright) covering toolbar interactions, paste, drag-and-drop, and modals
+- ✅ Comprehensive unit test suite (Jest, 344 tests) for engine, commands, sanitizer, converters, hooks, and components
+- ✅ End-to-end tests (Playwright, 109 tests) covering toolbar interactions, paste, drag-and-drop, and modals
 - Visual regression tests for theme and layout stability
 - Accessibility audit: full WCAG 2.1 AA compliance, screen reader testing, keyboard navigation
 - RTL (right-to-left) language support with `dir="rtl"` auto-detection

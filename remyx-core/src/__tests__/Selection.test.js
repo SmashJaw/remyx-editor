@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+
 import { Selection } from '../core/Selection.js'
 
 describe('Selection', () => {

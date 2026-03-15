@@ -1,0 +1,44 @@
+{
+  "name": "remyx-react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/remyx-react/src",
+  "projectType": "library",
+  "tags": ["scope:react"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/remyx-react"
+      },
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vite build --watch",
+        "cwd": "packages/remyx-react"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint packages/remyx-react/src"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "jest --selectProjects remyx-react"
+      }
+    },
+    "analyze": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ANALYZE=true vite build",
+        "cwd": "packages/remyx-react"
+      }
+    }
+  }
+}

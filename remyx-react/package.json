@@ -34,7 +34,7 @@
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@remyx/core": "0.23.4",
+    "@remyx/core": "file:../remyx-core",
     "@vitejs/plugin-react": "5.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
