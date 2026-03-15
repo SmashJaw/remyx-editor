@@ -51,7 +51,7 @@ export function WordCountButton({ engine }) {
   const WordCountIcon = ICON_MAP.findReplace
 
   return (
-    <div ref={ref} className="rmx-wordcount-btn-wrap" style={{ position: 'relative', display: 'inline-flex' }}>
+    <div ref={ref} className="rmx-wordcount-btn-wrap rmx-inline-flex-relative">
       <button
         className={`rmx-toolbar-btn ${open ? 'rmx-active' : ''}`}
         onClick={(e) => {

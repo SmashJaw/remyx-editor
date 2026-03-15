@@ -2,7 +2,7 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 0.23.16
+**Current Version:** 0.24.0
 **Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), feature-complete for core editing
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.

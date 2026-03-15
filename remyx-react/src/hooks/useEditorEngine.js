@@ -24,6 +24,26 @@ import {
   markdownToHtml,
 } from '@remyx/core'
 
+/** All built-in command registration functions, invoked in order during engine init */
+const COMMAND_REGISTRARS = [
+  registerFormattingCommands,
+  registerHeadingCommands,
+  registerAlignmentCommands,
+  registerListCommands,
+  registerLinkCommands,
+  registerImageCommands,
+  registerTableCommands,
+  registerBlockCommands,
+  registerFontCommands,
+  registerMediaCommands,
+  registerFindReplaceCommands,
+  registerSourceModeCommands,
+  registerFullscreenCommands,
+  registerMarkdownToggleCommands,
+  registerAttachmentCommands,
+  registerImportDocumentCommands,
+]
+
 export function useEditorEngine(editAreaRef, options, readyTrigger) {
   const engineRef = useRef(null)
   const [ready, setReady] = useState(false)
@@ -39,23 +59,10 @@ export function useEditorEngine(editAreaRef, options, readyTrigger) {
     const opts = optionsRef.current
     const engine = new EditorEngine(editAreaRef.current, opts)
 
-    // Register all built-in commands
-    registerFormattingCommands(engine)
-    registerHeadingCommands(engine)
-    registerAlignmentCommands(engine)
-    registerListCommands(engine)
-    registerLinkCommands(engine)
-    registerImageCommands(engine)
-    registerTableCommands(engine)
-    registerBlockCommands(engine)
-    registerFontCommands(engine)
-    registerMediaCommands(engine)
-    registerFindReplaceCommands(engine)
-    registerSourceModeCommands(engine)
-    registerFullscreenCommands(engine)
-    registerMarkdownToggleCommands(engine)
-    registerAttachmentCommands(engine)
-    registerImportDocumentCommands(engine)
+    // Register all built-in commands via registry loop
+    for (const register of COMMAND_REGISTRARS) {
+      register(engine)
+    }
 
     // Register undo/redo commands
     engine.commands.register('undo', {
@@ -123,7 +130,7 @@ export function useEditorEngine(editAreaRef, options, readyTrigger) {
     engine.on('blur', () => optionsRef.current.onBlur?.())
 
     return engine
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps — intentional: uses optionsRef for latest values, editAreaRef is stable
 
   useEffect(() => {
     const engine = initEngine()

@@ -1,8 +1,20 @@
+/**
+ * A simple publish/subscribe event system.
+ */
 export class EventBus {
+  /**
+   * Creates a new EventBus instance with an empty listener map.
+   */
   constructor() {
     this._listeners = new Map()
   }
 
+  /**
+   * Subscribes a handler to an event.
+   * @param {string} event - The event name to listen for
+   * @param {Function} handler - The callback function to invoke when the event fires
+   * @returns {Function} An unsubscribe function that removes this listener when called
+   */
   on(event, handler) {
     if (!this._listeners.has(event)) {
       this._listeners.set(event, new Set())
@@ -11,6 +23,12 @@ export class EventBus {
     return () => this.off(event, handler)
   }
 
+  /**
+   * Removes a specific handler from an event.
+   * @param {string} event - The event name to unsubscribe from
+   * @param {Function} handler - The handler function to remove
+   * @returns {void}
+   */
   off(event, handler) {
     const handlers = this._listeners.get(event)
     if (handlers) {
@@ -21,6 +39,12 @@ export class EventBus {
     }
   }
 
+  /**
+   * Subscribes a handler that will be called at most once, then automatically removed.
+   * @param {string} event - The event name to listen for
+   * @param {Function} handler - The callback function to invoke once
+   * @returns {Function} An unsubscribe function that removes this listener when called
+   */
   once(event, handler) {
     const wrapper = (...args) => {
       this.off(event, wrapper)
@@ -29,6 +53,13 @@ export class EventBus {
     return this.on(event, wrapper)
   }
 
+  /**
+   * Emits an event, invoking all registered handlers with the given data.
+   * Errors in individual handlers are caught and logged without interrupting other handlers.
+   * @param {string} event - The event name to emit
+   * @param {*} [data] - Optional data to pass to each handler
+   * @returns {void}
+   */
   emit(event, data) {
     const handlers = this._listeners.get(event)
     if (handlers) {
@@ -42,6 +73,11 @@ export class EventBus {
     }
   }
 
+  /**
+   * Removes all listeners for a specific event, or all listeners entirely.
+   * @param {string} [event] - The event name to clear. If omitted, all listeners are removed.
+   * @returns {void}
+   */
   removeAllListeners(event) {
     if (event) {
       this._listeners.delete(event)

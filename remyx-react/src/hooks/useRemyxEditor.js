@@ -14,12 +14,35 @@ import {
   registerFindReplaceCommands,
   registerSourceModeCommands,
   registerFullscreenCommands,
+  registerMarkdownToggleCommands,
+  registerAttachmentCommands,
+  registerImportDocumentCommands,
   WordCountPlugin,
   PlaceholderPlugin,
   AutolinkPlugin,
   htmlToMarkdown,
   markdownToHtml,
 } from '@remyx/core'
+
+/** All built-in command registration functions, invoked in order during engine init */
+const COMMAND_REGISTRARS = [
+  registerFormattingCommands,
+  registerHeadingCommands,
+  registerAlignmentCommands,
+  registerListCommands,
+  registerLinkCommands,
+  registerImageCommands,
+  registerTableCommands,
+  registerBlockCommands,
+  registerFontCommands,
+  registerMediaCommands,
+  registerFindReplaceCommands,
+  registerSourceModeCommands,
+  registerFullscreenCommands,
+  registerMarkdownToggleCommands,
+  registerAttachmentCommands,
+  registerImportDocumentCommands,
+]
 
 /**
  * useRemyxEditor - A hook to attach a full WYSIWYG editor to any existing
@@ -148,20 +171,10 @@ export function useRemyxEditor(targetRef, options = {}) {
     // Create and initialize the engine
     const engine = new EditorEngine(editable, options)
 
-    // Register all commands
-    registerFormattingCommands(engine)
-    registerHeadingCommands(engine)
-    registerAlignmentCommands(engine)
-    registerListCommands(engine)
-    registerLinkCommands(engine)
-    registerImageCommands(engine)
-    registerTableCommands(engine)
-    registerBlockCommands(engine)
-    registerFontCommands(engine)
-    registerMediaCommands(engine)
-    registerFindReplaceCommands(engine)
-    registerSourceModeCommands(engine)
-    registerFullscreenCommands(engine)
+    // Register all built-in commands via registry loop
+    for (const register of COMMAND_REGISTRARS) {
+      register(engine)
+    }
 
     engine.commands.register('undo', {
       execute(eng) { eng.history.undo() },
@@ -220,7 +233,7 @@ export function useRemyxEditor(targetRef, options = {}) {
     engine.on('blur', () => options.onBlur?.())
 
     return engine
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps — intentional: uses refs for latest values, targetRef is stable
 
   useEffect(() => {
     const engine = initEditor()

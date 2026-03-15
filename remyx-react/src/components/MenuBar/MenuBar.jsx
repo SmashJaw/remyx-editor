@@ -5,6 +5,7 @@ export function MenuBar({ config, engine, selectionState, onOpenModal }) {
   const [openMenu, setOpenMenu] = useState(null)
   const [hoverMode, setHoverMode] = useState(false)
   const barRef = useRef(null)
+  const triggerRefs = useRef([])
 
   // Close on click outside or Escape
   useEffect(() => {
@@ -21,6 +22,10 @@ export function MenuBar({ config, engine, selectionState, onOpenModal }) {
       if (e.key === 'Escape') {
         setOpenMenu(null)
         setHoverMode(false)
+        // Return focus to the trigger that opened this menu
+        if (openMenu !== null) {
+          triggerRefs.current[openMenu]?.focus()
+        }
       }
     }
 
@@ -53,13 +58,68 @@ export function MenuBar({ config, engine, selectionState, onOpenModal }) {
     setHoverMode(false)
   }, [])
 
+  const handleBarKeyDown = useCallback((e) => {
+    const triggers = triggerRefs.current.filter(Boolean)
+    const currentIndex = triggers.indexOf(document.activeElement)
+
+    switch (e.key) {
+      case 'ArrowRight': {
+        e.preventDefault()
+        const next = currentIndex < triggers.length - 1 ? currentIndex + 1 : 0
+        triggers[next]?.focus()
+        if (openMenu !== null) setOpenMenu(next)
+        break
+      }
+      case 'ArrowLeft': {
+        e.preventDefault()
+        const prev = currentIndex > 0 ? currentIndex - 1 : triggers.length - 1
+        triggers[prev]?.focus()
+        if (openMenu !== null) setOpenMenu(prev)
+        break
+      }
+      case 'ArrowDown': {
+        e.preventDefault()
+        if (openMenu === null && currentIndex >= 0) {
+          setOpenMenu(currentIndex)
+          setHoverMode(true)
+        }
+        // Focus first item in the open dropdown
+        const menuEl = barRef.current?.querySelectorAll('.rmx-menubar-menu')?.[0]
+        if (menuEl) {
+          const firstItem = menuEl.querySelector('[role="menuitem"]')
+          firstItem?.focus()
+        }
+        break
+      }
+      case 'Home': {
+        e.preventDefault()
+        triggers[0]?.focus()
+        if (openMenu !== null) setOpenMenu(0)
+        break
+      }
+      case 'End': {
+        e.preventDefault()
+        triggers[triggers.length - 1]?.focus()
+        if (openMenu !== null) setOpenMenu(triggers.length - 1)
+        break
+      }
+    }
+  }, [openMenu])
+
   if (!engine || !config) return null
 
   return (
-    <div className="rmx-menubar" ref={barRef} role="menubar">
+    <div
+      className="rmx-menubar"
+      ref={barRef}
+      role="menubar"
+      aria-label="Editor menu"
+      onKeyDown={handleBarKeyDown}
+    >
       {config.map((menu, index) => (
         <div key={menu.label} className="rmx-menubar-dropdown">
           <button
+            ref={(el) => { triggerRefs.current[index] = el }}
             className={`rmx-menubar-trigger ${openMenu === index ? 'rmx-open' : ''}`}
             onClick={(e) => {
               e.preventDefault()
@@ -71,11 +131,12 @@ export function MenuBar({ config, engine, selectionState, onOpenModal }) {
             role="menuitem"
             aria-haspopup="true"
             aria-expanded={openMenu === index}
+            tabIndex={index === 0 ? 0 : -1}
           >
             {menu.label}
           </button>
           {openMenu === index && (
-            <div className="rmx-menubar-menu" role="menu">
+            <div className="rmx-menubar-menu" role="menu" aria-label={menu.label}>
               {menu.items.map((item, i) => (
                 <MenuItem
                   key={typeof item === 'string' ? `${item}-${i}` : item.label || item.command || i}

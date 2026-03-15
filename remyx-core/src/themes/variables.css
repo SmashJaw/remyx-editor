@@ -8,7 +8,7 @@
   --rmx-border: #e2e8f0;
   --rmx-border-subtle: #f1f5f9;
 
-  /* Toolbar */
+  /* ---- Toolbar ---- */
   --rmx-toolbar-bg: #ffffff;
   --rmx-toolbar-border: #e2e8f0;
   --rmx-toolbar-button-hover: #f1f5f9;
@@ -16,37 +16,37 @@
   --rmx-toolbar-icon: #64748b;
   --rmx-toolbar-icon-active: #4f46e5;
 
-  /* Accent / Primary */
+  /* ---- Accent / Primary ---- */
   --rmx-primary: #6366f1;
   --rmx-primary-hover: #4f46e5;
   --rmx-primary-light: #e0e7ff;
   --rmx-focus-ring: #6366f1;
   --rmx-selection: #c7d2fe;
 
-  /* Feedback */
+  /* ---- Feedback ---- */
   --rmx-danger: #ef4444;
   --rmx-danger-light: rgba(239, 68, 68, 0.08);
 
-  /* UI */
+  /* ---- UI ---- */
   --rmx-placeholder: #94a3b8;
   --rmx-modal-bg: #ffffff;
   --rmx-modal-overlay: rgba(15, 23, 42, 0.45);
   --rmx-statusbar-bg: #f8fafc;
   --rmx-statusbar-text: #94a3b8;
 
-  /* Shadows */
+  /* ---- Shadows ---- */
   --rmx-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
   --rmx-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
   --rmx-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
   --rmx-shadow-float: 0 8px 30px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
 
-  /* Typography */
+  /* ---- Typography ---- */
   --rmx-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   --rmx-font-size: 13px;
   --rmx-content-font-size: 16px;
   --rmx-content-line-height: 1.7;
 
-  /* Spacing & Shape */
+  /* ---- Spacing & Shape ---- */
   --rmx-radius: 8px;
   --rmx-radius-sm: 6px;
   --rmx-radius-inner: 6px;
@@ -54,7 +54,7 @@
   --rmx-spacing-sm: 8px;
   --rmx-spacing-md: 12px;
 
-  /* Transitions */
+  /* ---- Transitions ---- */
   --rmx-transition-fast: 0.12s ease;
   --rmx-transition-normal: 0.18s ease;
 
@@ -77,6 +77,36 @@
 
 .rmx-editor *, .rmx-editor *::before, .rmx-editor *::after {
   box-sizing: inherit;
+}
+
+/* ====== Skip Navigation Link ====== */
+.rmx-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100001;
+  padding: 8px 16px;
+  background: var(--rmx-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 0 0 var(--rmx-radius-sm) var(--rmx-radius-sm);
+  white-space: nowrap;
+}
+
+.rmx-skip-link:focus {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  outline: 2px solid var(--rmx-focus-ring);
+  outline-offset: 2px;
 }
 
 /* ====== Fullscreen ====== */
@@ -1286,6 +1316,49 @@
   .rmx-find-input {
     width: 120px;
   }
+}
+
+/* ====== Utility Classes ====== */
+.rmx-inline-flex-relative {
+  position: relative;
+  display: inline-flex;
+}
+
+.rmx-sr-only {
+  display: none;
+}
+
+.rmx-upload-filename {
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.rmx-form-error {
+  color: var(--rmx-error, #dc2626);
+}
+
+.rmx-import-preview {
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--rmx-border, #e2e8f0);
+  border-radius: var(--rmx-radius-inner, 4px);
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--rmx-surface, #fff);
+}
+
+.rmx-radio-group {
+  display: flex;
+  gap: 8px;
+}
+
+.rmx-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 13px;
 }
 
 /* ====== File Attachment Chip ====== */

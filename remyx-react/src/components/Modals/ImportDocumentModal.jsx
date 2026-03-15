@@ -59,7 +59,7 @@ export function ImportDocumentModal({ open, onClose, engine }) {
           type="file"
           accept={getSupportedExtensions()}
           onChange={handleFileChange}
-          style={{ display: 'none' }}
+          className="rmx-sr-only"
         />
         <button
           type="button"
@@ -73,14 +73,14 @@ export function ImportDocumentModal({ open, onClose, engine }) {
           Supported: {formats}
         </p>
         {file && !converting && !error && (
-          <p className="rmx-upload-hint" style={{ marginTop: 4, fontWeight: 500 }}>
+          <p className="rmx-upload-hint rmx-upload-filename">
             {file.name}
           </p>
         )}
       </div>
 
       {error && (
-        <div className="rmx-form-group" style={{ color: 'var(--rmx-error, #dc2626)' }}>
+        <div className="rmx-form-group rmx-form-error">
           {error}
         </div>
       )}
@@ -91,24 +91,14 @@ export function ImportDocumentModal({ open, onClose, engine }) {
             <label className="rmx-form-label">Preview</label>
             <div
               className="rmx-import-preview"
-              style={{
-                maxHeight: 200,
-                overflow: 'auto',
-                border: '1px solid var(--rmx-border, #e2e8f0)',
-                borderRadius: 'var(--rmx-radius-inner, 4px)',
-                padding: '8px 12px',
-                fontSize: 13,
-                lineHeight: 1.5,
-                background: 'var(--rmx-surface, #fff)',
-              }}
               dangerouslySetInnerHTML={{ __html: engine?.sanitizer ? engine.sanitizer.sanitize(preview) : '' }}
             />
           </div>
 
           <div className="rmx-form-group">
             <label className="rmx-form-label">Insert Mode</label>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 13 }}>
+            <div className="rmx-radio-group">
+              <label className="rmx-radio-label">
                 <input
                   type="radio"
                   name="insertMode"
@@ -118,7 +108,7 @@ export function ImportDocumentModal({ open, onClose, engine }) {
                 />
                 Insert at cursor
               </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 13 }}>
+              <label className="rmx-radio-label">
                 <input
                   type="radio"
                   name="insertMode"

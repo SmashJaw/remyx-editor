@@ -7,6 +7,7 @@ export function AttachmentModal({ open, onClose, engine }) {
   const [filename, setFilename] = useState('')
   const [filesize, setFilesize] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
   const fileInputRef = useRef(null)
 
   const hasUploadHandler = !!engine?.options?.uploadHandler
@@ -28,6 +29,7 @@ export function AttachmentModal({ open, onClose, engine }) {
     setFilename('')
     setFilesize(null)
     setUploading(false)
+    setError('')
     setTab('url')
   }
 
@@ -40,13 +42,16 @@ export function AttachmentModal({ open, onClose, engine }) {
 
     if (engine.options.uploadHandler) {
       setUploading(true)
+      setError('')
       engine.options.uploadHandler(file)
         .then((resultUrl) => {
           setUrl(resultUrl)
           setTab('url')
           setUploading(false)
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error('File upload failed:', err)
+          setError(err.message || 'File upload failed. Please try again.')
           setUploading(false)
         })
     }
@@ -96,6 +101,12 @@ export function AttachmentModal({ open, onClose, engine }) {
               File upload is not available. Provide an <code>uploadHandler</code> prop to enable uploads, or use the URL tab to link to a file directly.
             </p>
           )}
+        </div>
+      )}
+
+      {error && (
+        <div className="rmx-form-group" style={{ color: 'var(--rmx-error, #dc2626)' }}>
+          {error}
         </div>
       )}
 

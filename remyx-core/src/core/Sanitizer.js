@@ -11,12 +11,34 @@ const DANGEROUS_REMOVE_TAGS = new Set([
   'script', 'style', 'svg', 'math', 'form', 'object', 'embed', 'applet', 'template',
 ])
 
+/**
+ * @typedef {Object} SanitizerOptions
+ * @property {Object} [allowedTags] - Map of allowed tag names to arrays of allowed attribute names
+ * @property {string[]} [allowedStyles] - List of allowed CSS property names
+ */
+
+/**
+ * Sanitizes HTML content by removing disallowed tags, attributes, and styles.
+ * Prevents XSS through event handler attributes, javascript: URLs, and CSS injection.
+ */
 export class Sanitizer {
+  /**
+   * Creates a new Sanitizer instance.
+   * @param {SanitizerOptions} [options={}] - Sanitizer configuration
+   */
   constructor(options = {}) {
     this.allowedTags = options.allowedTags || ALLOWED_TAGS
     this.allowedStyles = options.allowedStyles || ALLOWED_STYLES
   }
 
+  /**
+   * Sanitizes an HTML string by parsing it and removing disallowed elements,
+   * attributes, event handlers, javascript: URLs, and dangerous CSS values.
+   * Dangerous tags (script, style, svg, etc.) are removed with all children;
+   * other disallowed tags are unwrapped (children preserved).
+   * @param {string} html - The HTML string to sanitize
+   * @returns {string} The sanitized HTML string, or empty string if input is falsy
+   */
   sanitize(html) {
     if (!html) return ''
     const parser = new DOMParser()
@@ -25,6 +47,13 @@ export class Sanitizer {
     return doc.body.innerHTML
   }
 
+  /**
+   * Recursively cleans a DOM node by removing disallowed children, attributes,
+   * and sanitizing styles and href values.
+   * @private
+   * @param {Node} node - The DOM node to clean
+   * @returns {void}
+   */
   _cleanNode(node) {
     const children = Array.from(node.childNodes)
     for (const child of children) {
@@ -95,6 +124,13 @@ export class Sanitizer {
     }
   }
 
+  /**
+   * Cleans inline styles on an element, keeping only allowed CSS properties
+   * and blocking CSS injection vectors.
+   * @private
+   * @param {HTMLElement} element - The element whose styles should be cleaned
+   * @returns {void}
+   */
   _cleanStyles(element) {
     const style = element.style
     const cleanedStyles = []

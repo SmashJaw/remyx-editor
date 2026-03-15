@@ -68,7 +68,7 @@ export function usePortalAttachment({ attachTo, value, defaultValue, onChange })
       }
       setPortalContainer(null)
     }
-  }, [attachTo]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [attachTo]) // eslint-disable-line react-hooks/exhaustive-deps — intentional: only re-run when target ref changes, not when value/onChange change
 
   // Sync changes back to the attached element
   const handleChange = useCallback((html) => {

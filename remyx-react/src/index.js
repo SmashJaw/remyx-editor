@@ -10,3 +10,6 @@ export { useEditorEngine } from './hooks/useEditorEngine.js'
 
 // React config provider
 export { RemyxConfigProvider, useRemyxConfig } from './config/RemyxConfigProvider.jsx'
+
+// Error boundary
+export { EditorErrorBoundary } from './components/ErrorBoundary.jsx'

@@ -6,6 +6,7 @@ export function ImageModal({ open, onClose, engine }) {
   const [src, setSrc] = useState('')
   const [alt, setAlt] = useState('')
   const [width, setWidth] = useState('')
+  const [error, setError] = useState('')
   const fileInputRef = useRef(null)
 
   const handleSubmit = (e) => {
@@ -20,16 +21,21 @@ export function ImageModal({ open, onClose, engine }) {
     setSrc('')
     setAlt('')
     setWidth('')
+    setError('')
   }
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (!file) return
 
+    setError('')
     if (engine.options.uploadHandler) {
       engine.options.uploadHandler(file).then((url) => {
         setSrc(url)
         setTab('url')
+      }).catch((err) => {
+        console.error('Image upload failed:', err)
+        setError(err.message || 'Image upload failed. Please try again.')
       })
     } else {
       const reader = new FileReader()
@@ -79,6 +85,12 @@ export function ImageModal({ open, onClose, engine }) {
           <p className="rmx-upload-hint">or drag and drop an image into the editor</p>
         </div>
       )}
+
+      {error && (
+        <div className="rmx-form-group" style={{ color: 'var(--rmx-error, #dc2626)' }}>
+          {error}
+        </div>
+      )}}
 
       <form onSubmit={handleSubmit} className="rmx-modal-form">
         {tab === 'url' && (

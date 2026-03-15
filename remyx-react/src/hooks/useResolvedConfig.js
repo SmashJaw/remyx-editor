@@ -55,6 +55,9 @@ export function useResolvedConfig(props) {
     toolbarItemTheme,
     sanitize,
     shortcuts,
+    baseHeadingLevel,
+    onError,
+    errorFallback,
   } = merged
 
   // Resolve menu bar config
@@ -103,7 +106,10 @@ export function useResolvedConfig(props) {
     toolbarItemTheme,
     sanitize,
     shortcuts,
+    baseHeadingLevel,
     menuBarConfig,
     effectiveToolbar,
+    onError,
+    errorFallback,
   }
 }

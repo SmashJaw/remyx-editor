@@ -3,7 +3,7 @@
 # Security Audit — Remyx Editor
 
 **Last audited:** 2026-03-15
-**Version:** 0.23.16
+**Version:** 0.24.0
 **Scope:** Full source audit of `packages/remyx-core/src/` and `packages/remyx-react/src/`
 
 ---

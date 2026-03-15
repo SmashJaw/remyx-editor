@@ -8,6 +8,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [@remyx/react 0.24.0] — 2026-03-15
+
+### Added
+
+- **ErrorBoundary** — `EditorErrorBoundary` component wraps the editor; accepts `onError` and `errorFallback` props.
+- **`onError` callback prop** — Wired to engine events: `plugin:error`, `editor:error`, `upload:error`.
+- **`baseHeadingLevel` prop** — Offsets heading levels to fit the host page's heading hierarchy (e.g., `baseHeadingLevel={2}` renders H1 as `<h2>`).
+- **Skip navigation link** — Visually-hidden "Skip to editor content" link at the top of the editor for keyboard users.
+- **Focus trapping in modals** — Tab/Shift+Tab cycles within open modals; focus restored on close.
+- **WAI-ARIA menu pattern** — Full `role="menubar"`, `role="menu"`, `role="menuitem"`, arrow key navigation with Home/End support.
+- **CONTRIBUTING.md** — Comprehensive contributing guide covering setup, architecture, plugins, commands, and PR process.
+
+### Changed
+
+- **Command registration refactored** — Repetitive `registerXCommands(engine)` calls replaced with `COMMAND_REGISTRARS` loop in `useEditorEngine` and `useRemyxEditor`.
+- **Static inline styles to CSS classes** — `StatusBar`, `ImportDocumentModal` inline styles moved to `.rmx-*` CSS classes.
+- **`eslint-disable` comments documented** — All 3 suppressed dependency warnings investigated and annotated as intentional (ref-based stable callback pattern).
+
+---
+
+## [@remyx/core 0.24.0] — 2026-03-15
+
+### Added
+
+- **Vitest test suite** — 8 test files covering EditorEngine, EventBus, CommandRegistry, History, Sanitizer, PluginManager, Selection, and utilities.
+- **JSDoc type annotations** — Comprehensive `@param`/`@returns`/`@typedef` annotations on all core modules (EditorEngine, Selection, EventBus, CommandRegistry, History, Sanitizer, PluginManager, createPlugin).
+- **`tsconfig.json`** — Root TypeScript config with `checkJs: true` for IDE type checking; `npm run typecheck` script.
+- **Bundle analysis** — `rollup-plugin-visualizer` (conditional via `ANALYZE` env var); `npm run analyze:core`/`analyze:react` scripts.
+- **`editor:error` event** — `init()` emits `{ phase, error }` on failure.
+- **`plugin:error` event** — PluginManager emits on init/destroy failures for consumer error handling.
+- **`upload:error` event** — Clipboard and DragDrop emit on uploadHandler rejection.
+- **GitHub Actions CI** — `.github/workflows/ci.yml` runs lint, build, and test on every push/PR.
+- **Husky + lint-staged** — Pre-commit hook runs `eslint --fix` on staged `.js`/`.jsx` files.
+- **Source maps re-enabled** — Production builds emit `.map` files for debugging.
+
+### Changed
+
+- **Error handling hardened** — `EditorEngine.init()` wrapped in try/catch; modal export/import/upload operations show user-visible error states; `Selection.setRange()` catches detached-node errors.
+- **CSS variables.css organized** — Section comment headers standardized throughout; utility classes added.
+- **DevDependencies pinned** — All `^` ranges in devDependencies replaced with exact versions for reproducible builds.
+
+---
+
+## [Docs] — 2026-03-15
+
+### Added
+
+- **CONTRIBUTING.md** — Comprehensive contributing guide covering getting started, project structure, development workflow, adding commands, creating plugins, pull request process, code style guidelines, and commit message conventions.
+
+---
+
 ## [@remyx/react 0.23.41] — 2026-03-15
 
 ### Changed

@@ -66,6 +66,9 @@ export class Clipboard {
             filename: file.name,
             filesize: file.size,
           })
+        }).catch((err) => {
+          console.error(`File upload failed for "${file.name}":`, err)
+          this.engine.eventBus.emit('upload:error', { file, error: err })
         })
       })
       return
@@ -144,6 +147,9 @@ export class Clipboard {
     if (this.engine.options.uploadHandler) {
       this.engine.options.uploadHandler(file).then((url) => {
         this.engine.commands.execute('insertImage', { src: url, alt: file.name })
+      }).catch((err) => {
+        console.error(`Image upload failed for "${file.name}":`, err)
+        this.engine.eventBus.emit('upload:error', { file, error: err })
       })
     } else {
       const reader = new FileReader()

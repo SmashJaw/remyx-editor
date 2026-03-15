@@ -16,6 +16,7 @@ import { ImageResizeHandles } from './EditArea/ImageResizeHandles.jsx'
 import { TableControls } from './EditArea/TableControls.jsx'
 import { StatusBar, WordCountButton } from './StatusBar/StatusBar.jsx'
 import { ContextMenu } from './ContextMenu/ContextMenu.jsx'
+import { EditorErrorBoundary } from './ErrorBoundary.jsx'
 
 // Lazy-loaded modal components — only loaded when opened
 const LinkModal = React.lazy(() => import('./Modals/LinkModal.jsx').then(m => ({ default: m.LinkModal })))
@@ -37,7 +38,7 @@ export default function RemyxEditor(props) {
     className, style, uploadHandler, outputFormat,
     showFloatingToolbar, showContextMenu, fonts, googleFonts,
     statusBar, customTheme, toolbarItemTheme, sanitize, shortcuts,
-    menuBarConfig, effectiveToolbar,
+    baseHeadingLevel, menuBarConfig, effectiveToolbar, onError, errorFallback,
   } = useResolvedConfig(props)
 
   const editAreaRef = useRef(null)
@@ -78,6 +79,7 @@ export default function RemyxEditor(props) {
     uploadHandler,
     sanitize,
     shortcuts,
+    baseHeadingLevel,
   }, portalContainer)
 
   const selectionState = useSelection(engine)
@@ -114,6 +116,17 @@ export default function RemyxEditor(props) {
     return () => engine.element?.removeEventListener('keydown', handleKeyDown)
   }, [engine, openModal])
 
+  // Wire onError callback to engine error events
+  useEffect(() => {
+    if (!engine || !onError) return
+    const unsubs = [
+      engine.eventBus.on('plugin:error', ({ name, error }) => onError(error, { source: 'plugin', pluginName: name })),
+      engine.eventBus.on('editor:error', ({ phase, error }) => onError(error, { source: 'engine', phase })),
+      engine.eventBus.on('upload:error', ({ file, error }) => onError(error, { source: 'upload', file })),
+    ]
+    return () => unsubs.forEach(unsub => unsub())
+  }, [engine, onError])
+
   const handleOpenModal = useCallback((name, data) => {
     openModal(name, data)
   }, [openModal])
@@ -136,6 +149,10 @@ export default function RemyxEditor(props) {
       className={`rmx-editor rmx-theme-${theme} ${className}`}
       style={mergedStyle}
     >
+      <a className="rmx-skip-link" href="#rmx-edit-area">
+        Skip to editor content
+      </a>
+
       {menuBarConfig && (
         <MenuBar
           config={menuBarConfig}
@@ -163,6 +180,7 @@ export default function RemyxEditor(props) {
           ref={editAreaRef}
           style={editAreaStyle}
           readOnly={readOnly}
+          id="rmx-edit-area"
         />
 
         {showFloatingToolbar && (
@@ -281,11 +299,17 @@ export default function RemyxEditor(props) {
     </div>
   )
 
+  const wrappedTree = (
+    <EditorErrorBoundary onError={onError} fallback={errorFallback}>
+      {editorTree}
+    </EditorErrorBoundary>
+  )
+
   // When attachTo is provided, render via portal into the target's location
   if (attachTo) {
     if (!portalContainer) return null
-    return createPortal(editorTree, portalContainer)
+    return createPortal(wrappedTree, portalContainer)
   }
 
-  return editorTree
+  return wrappedTree
 }

@@ -8,8 +8,8 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyx/core`](./remyx-core/) | 0.23.16 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyx/react`](./remyx-react/) | 0.23.41 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
+| [`@remyx/core`](./remyx-core/) | 0.24.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](./remyx-react/) | 0.24.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
 | [`create-remyx`](./create-remyx/) | 0.23.4 | CLI scaffolding tool — choose JSX or TypeScript |
 
 ### Getting Started (New Project)

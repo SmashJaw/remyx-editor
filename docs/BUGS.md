@@ -3,7 +3,7 @@
 # Known Bugs
 
 **Last updated:** 2026-03-15
-**Version:** 0.23.16
+**Version:** 0.24.0
 
 A prioritized list of confirmed bugs discovered through codebase analysis. **All 10 bugs have been resolved.**
 

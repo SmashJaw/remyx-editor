@@ -1,35 +1,43 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyx/core'
 
 export function ExportModal({ open, onClose, engine }) {
-  const handlePDF = () => {
-    exportAsPDF(engine.getHTML())
-    onClose()
+  const [error, setError] = useState('')
+
+  const handleExport = (exportFn) => {
+    try {
+      setError('')
+      exportFn(engine.getHTML())
+      onClose()
+    } catch (err) {
+      console.error('Export failed:', err)
+      setError(err.message || 'Export failed. Please try again.')
+    }
   }
 
-  const handleMarkdown = () => {
-    exportAsMarkdown(engine.getHTML())
-    onClose()
-  }
-
-  const handleDocx = () => {
-    exportAsDocx(engine.getHTML())
+  const handleClose = () => {
+    setError('')
     onClose()
   }
 
   return (
-    <ModalOverlay title="Export Document" open={open} onClose={onClose} width={360}>
+    <ModalOverlay title="Export Document" open={open} onClose={handleClose} width={360}>
+      {error && (
+        <div className="rmx-form-group" style={{ color: 'var(--rmx-error, #dc2626)' }}>
+          {error}
+        </div>
+      )}
       <div className="rmx-export-options">
-        <button type="button" className="rmx-export-btn" onClick={handlePDF}>
+        <button type="button" className="rmx-export-btn" onClick={() => handleExport(exportAsPDF)}>
           <span className="rmx-export-btn-label">PDF</span>
           <span className="rmx-export-btn-hint">Opens print dialog to save as PDF</span>
         </button>
-        <button type="button" className="rmx-export-btn" onClick={handleMarkdown}>
+        <button type="button" className="rmx-export-btn" onClick={() => handleExport(exportAsMarkdown)}>
           <span className="rmx-export-btn-label">Markdown</span>
           <span className="rmx-export-btn-hint">Downloads .md file</span>
         </button>
-        <button type="button" className="rmx-export-btn" onClick={handleDocx}>
+        <button type="button" className="rmx-export-btn" onClick={() => handleExport(exportAsDocx)}>
           <span className="rmx-export-btn-label">Word Document</span>
           <span className="rmx-export-btn-hint">Downloads .doc file</span>
         </button>
