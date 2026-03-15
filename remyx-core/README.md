@@ -2,7 +2,7 @@
 
 Framework-agnostic core engine for the [Remyx Editor](../remyx-editor/). Provides the editor engine, commands, plugin system, utilities, and CSS themes — with zero framework dependencies.
 
-Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`remyx-editor`](../remyx-editor/) instead, which includes this package plus React components and hooks.
+Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyx/react`](../remyx-react/) (or the all-in-one [`remyx-editor`](../remyx-editor/)), which includes this package plus React components and hooks.
 
 ## Installation
 
@@ -201,7 +201,7 @@ When creating a wrapper for a new framework, your package should:
 4. Use `@remyx/core/style.css` for base theming and add component-specific CSS
 5. Re-export `@remyx/core` for convenience so consumers don't need both packages
 
-See [`remyx-editor`](../remyx-editor/) (the React wrapper) as a reference implementation.
+See [`@remyx/react`](../remyx-react/) as the reference implementation.
 
 ## License
 

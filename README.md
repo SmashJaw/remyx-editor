@@ -1,16 +1,90 @@
-# React + Vite
+# Remyx Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A feature-rich WYSIWYG editor built on a framework-agnostic core with first-class React support. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
 
-Currently, two official plugins are available:
+## Packages
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@remyx/core`](./remyx-core/) | 0.23.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](./remyx-react/) | 0.23.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
+| [`remyx-editor`](./remyx-editor/) | 0.23.0 | All-in-one React package (re-exports `@remyx/core` + React layer) |
 
-## React Compiler
+### Which package should I use?
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Use case | Install |
+| --- | --- |
+| React project (simplest) | `npm install remyx-editor` |
+| React project (modular) | `npm install @remyx/core @remyx/react` |
+| Vue / Svelte / Angular / Vanilla JS | `npm install @remyx/core` (build your own wrapper) |
+| Server-side HTML processing | `npm install @remyx/core` |
 
-## Expanding the ESLint configuration
+## Quick Start (React)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```jsx
+import { RemyxEditor } from 'remyx-editor';
+import 'remyx-editor/style.css';
+
+function App() {
+  const [content, setContent] = useState('');
+  return (
+    <RemyxEditor
+      value={content}
+      onChange={setContent}
+      placeholder="Start typing..."
+      height={400}
+    />
+  );
+}
+```
+
+## Quick Start (Core Only)
+
+```js
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyx/core';
+import '@remyx/core/style.css';
+
+const engine = new EditorEngine(document.querySelector('#editor'), { outputFormat: 'html' });
+registerFormattingCommands(engine);
+registerListCommands(engine);
+engine.init();
+```
+
+## Architecture
+
+```
+@remyx/core ←── @remyx/react
+            ←── (future: @remyx/vue, @remyx/svelte, @remyx/angular, @remyx/vanilla)
+
+remyx-editor (meta) ──→ @remyx/core + React layer (backward-compatible)
+```
+
+## Monorepo Structure
+
+```
+packages/
+  remyx-core/     → @remyx/core         80 exports, 0 framework deps
+  remyx-react/    → @remyx/react        React components + hooks + TS types
+  remyx-editor/   → remyx-editor        All-in-one (backward-compatible)
+```
+
+## Development
+
+```bash
+npm install          # install all workspace dependencies
+npm run dev          # start Vite dev server with demo app
+npm run build        # build all packages
+```
+
+## Documentation
+
+- [remyx-editor README](./remyx-editor/README.md) — full API docs, props, theming, plugins, toolbar, menu bar
+- [@remyx/core README](./remyx-core/README.md) — engine API, commands, utilities, building framework wrappers
+- [@remyx/react README](./remyx-react/README.md) — React-specific components, hooks, and TypeScript support
+- [SECURITY.md](./SECURITY.md) — security audit findings and remediation status
+- [ROADMAP.md](./ROADMAP.md) — planned features and competitive analysis
+- [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) — multi-package restructure plan and progress
+
+## License
+
+MIT

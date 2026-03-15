@@ -1,0 +1,33 @@
+{
+  "name": "@remyx/react",
+  "version": "0.23.0",
+  "type": "module",
+  "main": "./dist/remyx-react.cjs",
+  "module": "./dist/remyx-react.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/remyx-react.js",
+      "require": "./dist/remyx-react.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": ["dist"],
+  "peerDependencies": {
+    "@remyx/core": ">=0.23.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@remyx/core": "^0.23.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "vite": "^7.3.1"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  }
+}

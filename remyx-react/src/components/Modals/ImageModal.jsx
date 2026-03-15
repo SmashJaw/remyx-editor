@@ -1,0 +1,128 @@
+import React, { useState, useRef } from 'react'
+import { ModalOverlay } from './ModalOverlay.jsx'
+
+export function ImageModal({ open, onClose, engine }) {
+  const [tab, setTab] = useState('url')
+  const [src, setSrc] = useState('')
+  const [alt, setAlt] = useState('')
+  const [width, setWidth] = useState('')
+  const fileInputRef = useRef(null)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!src.trim()) return
+    engine.executeCommand('insertImage', {
+      src,
+      alt,
+      width: width ? `${width}px` : undefined,
+    })
+    onClose()
+    setSrc('')
+    setAlt('')
+    setWidth('')
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    if (engine.options.uploadHandler) {
+      engine.options.uploadHandler(file).then((url) => {
+        setSrc(url)
+        setTab('url')
+      })
+    } else {
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        setSrc(ev.target.result)
+        setTab('url')
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  return (
+    <ModalOverlay title="Insert Image" open={open} onClose={onClose}>
+      <div className="rmx-tabs">
+        <button
+          type="button"
+          className={`rmx-tab ${tab === 'url' ? 'rmx-active' : ''}`}
+          onClick={() => setTab('url')}
+        >
+          URL
+        </button>
+        <button
+          type="button"
+          className={`rmx-tab ${tab === 'upload' ? 'rmx-active' : ''}`}
+          onClick={() => setTab('upload')}
+        >
+          Upload
+        </button>
+      </div>
+
+      {tab === 'upload' && (
+        <div className="rmx-upload-area">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            className="rmx-btn rmx-btn-upload"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Choose Image File
+          </button>
+          <p className="rmx-upload-hint">or drag and drop an image into the editor</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="rmx-modal-form">
+        {tab === 'url' && (
+          <div className="rmx-form-group">
+            <label className="rmx-form-label">Image URL</label>
+            <input
+              type="url"
+              className="rmx-form-input"
+              value={src}
+              onChange={(e) => setSrc(e.target.value)}
+              placeholder="https://example.com/image.jpg"
+              required
+              autoFocus
+            />
+          </div>
+        )}
+        <div className="rmx-form-group">
+          <label className="rmx-form-label">Alt Text</label>
+          <input
+            type="text"
+            className="rmx-form-input"
+            value={alt}
+            onChange={(e) => setAlt(e.target.value)}
+            placeholder="Image description"
+          />
+        </div>
+        <div className="rmx-form-group">
+          <label className="rmx-form-label">Width (px)</label>
+          <input
+            type="number"
+            className="rmx-form-input"
+            value={width}
+            onChange={(e) => setWidth(e.target.value)}
+            placeholder="Auto"
+            min="50"
+          />
+        </div>
+        <div className="rmx-modal-actions">
+          <button type="button" className="rmx-btn" onClick={onClose}>Cancel</button>
+          <button type="submit" className="rmx-btn rmx-btn-primary" disabled={!src.trim()}>
+            Insert
+          </button>
+        </div>
+      </form>
+    </ModalOverlay>
+  )
+}

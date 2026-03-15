@@ -1,0 +1,120 @@
+/* ── Code Editor Container ── */
+.rmx-code-editor {
+  display: flex;
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius-sm, 6px);
+  background: var(--rmx-statusbar-bg, #f8fafc);
+  overflow: hidden;
+  min-height: 300px;
+  max-height: 500px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.rmx-code-editor:focus-within {
+  border-color: var(--rmx-primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* ── Line Number Gutter ── */
+.rmx-code-gutter {
+  flex-shrink: 0;
+  padding: 14px 0;
+  background: var(--rmx-bg, #ffffff);
+  border-right: 1px solid var(--rmx-border-subtle, #e5e7eb);
+  user-select: none;
+  overflow: hidden;
+  text-align: right;
+  min-width: 44px;
+}
+
+.rmx-code-line-number {
+  padding: 0 12px 0 8px;
+  color: var(--rmx-text-secondary, #94a3b8);
+  opacity: 0.6;
+  font-size: 12px;
+  line-height: 1.6;
+  height: calc(13px * 1.6);
+}
+
+/* ── Code Body (overlay container) ── */
+.rmx-code-body {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Highlighted Pre Layer (behind) ── */
+.rmx-code-highlight {
+  margin: 0;
+  padding: 14px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: var(--rmx-text, #1e293b);
+  pointer-events: none;
+  overflow: hidden;
+  font: inherit;
+  line-height: inherit;
+  min-height: 100%;
+}
+
+.rmx-code-highlight code {
+  font: inherit;
+  background: none;
+  padding: 0;
+  border: none;
+}
+
+/* ── Transparent Textarea (on top) ── */
+.rmx-code-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 14px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--rmx-text, #1e293b);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+  -webkit-text-fill-color: transparent;
+}
+
+.rmx-code-input::selection {
+  background: var(--rmx-selection, rgba(99, 102, 241, 0.2));
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Syntax Token Colors (Light Theme) ── */
+/* HTML tokens */
+.rmx-syn-tag { color: #1a7f37; }
+.rmx-syn-attr-name { color: #8250df; }
+.rmx-syn-attr-value { color: #0550ae; }
+.rmx-syn-comment { color: #6e7781; font-style: italic; }
+.rmx-syn-entity { color: #0550ae; }
+.rmx-syn-doctype { color: #6e7781; }
+
+/* Markdown tokens */
+.rmx-syn-heading { color: #1a7f37; font-weight: 600; }
+.rmx-syn-bold { font-weight: 700; color: #24292f; }
+.rmx-syn-italic { font-style: italic; color: #24292f; }
+.rmx-syn-code { color: #cf222e; background: rgba(175, 184, 193, 0.12); border-radius: 3px; padding: 1px 3px; }
+.rmx-syn-code-fence { color: #6e7781; }
+.rmx-syn-link { color: #0969da; }
+.rmx-syn-url { color: #0550ae; }
+.rmx-syn-image { color: #8250df; }
+.rmx-syn-list-marker { color: #cf222e; font-weight: 600; }
+.rmx-syn-blockquote { color: #6e7781; }
+.rmx-syn-hr { color: #6e7781; }

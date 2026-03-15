@@ -4,12 +4,13 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 ## Packages
 
-| Package | Description |
-| --- | --- |
-| [`@remyx/core`](../remyx-core/) | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`remyx-editor`](./) | React components, hooks, and config provider (re-exports `@remyx/core`) |
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@remyx/core`](../remyx-core/) | 0.23.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](../remyx-react/) | 0.23.0 | React components, hooks, and TypeScript declarations |
+| [`remyx-editor`](./) | 0.23.0 | All-in-one React package (re-exports both) |
 
-`remyx-editor` is the all-in-one package for React projects — it includes everything from `@remyx/core` plus the React integration layer. Use `@remyx/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
+`remyx-editor` is the all-in-one package for React projects — it includes everything from `@remyx/core` plus the React integration layer. For modular installs, use `@remyx/core` + `@remyx/react`. Use `@remyx/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
 
 ## Screenshots
 
@@ -799,14 +800,14 @@ const MyPlugin = createPlugin({
 
 ## Exports
 
-All exports are available from `remyx-editor`. Core-only exports are also available from `@remyx/core`.
+All exports are available from `remyx-editor`. Core-only exports are also available from `@remyx/core`. React components and hooks are also available from `@remyx/react`.
 
 ```js
-// React components & hooks (remyx-editor only)
+// React components & hooks (remyx-editor or @remyx/react)
 import { RemyxEditor, useRemyxEditor } from 'remyx-editor';
 import { RemyxConfigProvider } from 'remyx-editor';
 
-// Everything below is also available from '@remyx/core'
+// Everything below is also available from '@remyx/core' or '@remyx/react'
 
 // Toolbar
 import { TOOLBAR_PRESETS, DEFAULT_TOOLBAR, removeToolbarItems, addToolbarItems, createToolbar } from 'remyx-editor';

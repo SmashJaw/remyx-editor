@@ -1,11 +1,19 @@
 # Remyx Editor Roadmap
 
-**Current Version:** 0.22.16-beta
-**Status:** Feature-complete for core editing, not yet thoroughly tested
+**Current Version:** 0.23.0
+**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), feature-complete for core editing
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.
 
 ---
+
+## ~~Multi-Package Architecture~~ ✅ Shipped (v0.23.0)
+
+- ~~Extract framework-agnostic core into `@remyx/core`~~ — 49 files, 80 exports, zero framework deps
+- ~~Create `@remyx/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
+- ~~Backward-compatible `remyx-editor` meta-package~~ — re-exports both packages
+- ~~npm workspaces monorepo setup~~
+- See [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) for the full restructure plan
 
 ## Autosave
 
@@ -95,14 +103,36 @@ A living document outlining planned features, improvements, and long-term direct
 - Configurable transport: WebSocket, WebRTC, or custom
 - `collaborationProvider` prop — bring your own signaling server or use a hosted option
 
+## Nx Monorepo Integration
+
+- Migrate from npm workspaces to [Nx](https://nx.dev/) for monorepo orchestration
+- **Task pipeline**: define `build`, `test`, and `lint` target dependencies so `@remyx/react` automatically builds `@remyx/core` first
+- **Computation caching**: Nx caches build and test outputs locally — rebuilds only what changed
+- **Remote caching**: enable Nx Cloud for shared CI/local cache across the team (optional, free tier available)
+- **Affected commands**: `nx affected:build` and `nx affected:test` run only against packages touched by a PR, dramatically speeding up CI
+- **Project graph**: `nx graph` visualizes package dependencies (`core` → `react` → `editor`) for onboarding and debugging
+- **Generators**: scaffold new framework wrappers (`@remyx/vue`, `@remyx/svelte`, `@remyx/angular`) with consistent structure via Nx generators
+- **Release management**: `nx release` for coordinated versioning, changelog generation, and npm publishing across all packages
+- **Enforce module boundaries**: lint rules preventing `@remyx/core` from importing `react` or `@remyx/react` from importing framework-specific code it shouldn't
+- **Parallel execution**: Nx runs independent targets in parallel with configurable concurrency, utilizing all CPU cores
+- **Migration path**: incremental adoption — add `nx.json` and per-package `project.json` files without changing existing `package.json` scripts or Vite configs
+
 ## ~~Multiple Editor Instances~~ ✅ Shipped
 
 - ~~Full instance isolation: each editor gets its own engine, history, and event bus~~
 - ~~No DOM ID collisions — all selectors scoped to the editor root~~
-- ~~Shared configuration via a `<RemyxProvider>` context wrapper~~
+- ~~Shared configuration via a `<RemyxConfigProvider>` context wrapper~~
 - Inter-editor communication bus for linked editors (e.g., source + preview)
 - Memory-efficient shared singleton for icons, sanitizer schema, and toolbar config
 - ~~Stress-tested with 10+ concurrent editors on a single page~~
+
+## ~~Menu Bar~~ ✅ Shipped
+
+- ~~Application-style menus (File, Edit, View, Insert, Format) with submenus~~
+- ~~Custom menu bar configuration with nested items and separators~~
+- ~~Auto-deduplication: items in menu bar removed from toolbar~~
+- ~~Keyboard navigation, hover-to-switch, escape-to-close~~
+- ~~Dark/light/custom theme support~~
 
 ## Security Hardening
 
@@ -111,11 +141,16 @@ A living document outlining planned features, improvements, and long-term direct
 - Sanitizer: explicit `on*` event handler blocklist as defense-in-depth
 - Sanitizer: fully remove dangerous tags (`script`, `style`, `svg`, `math`, `form`, `object`, `embed`) instead of unwrapping
 - Sanitizer: restrict `<input>` to `type="checkbox"` only
+- Markdown parser: set `html: false` to block raw HTML injection
 - URL protocol validation on `insertLink`, `insertImage`, and `window.open` calls
+- Data URI validation: block `image/svg+xml` data URIs
+- Iframe `sandbox` attribute on embedded media
 - File size limits on pasted/dropped images (configurable, 10 MB default)
 - Plugin sandboxing: restricted engine facade, prevent command overwriting
 - CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies
 - Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)
+- Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal
+- See [SECURITY.md](./SECURITY.md) for the full audit report and remediation priorities
 
 ## External Configuration
 
@@ -129,12 +164,13 @@ A living document outlining planned features, improvements, and long-term direct
 
 | Framework | Status | Package |
 | --- | --- | --- |
-| **React** | Available | `remyx-editor` |
-| **Vue 3** | Planned | `remyx-editor-vue` |
-| **Angular** | Planned | `remyx-editor-angular` |
-| **Svelte** | Planned | `remyx-editor-svelte` |
-| **Vanilla JS** | Planned | `remyx-editor-core` |
-| **Node.js (SSR)** | Planned | Server-side HTML sanitization & rendering |
+| **React** | ✅ Available | `@remyx/react` / `remyx-editor` |
+| **Core (framework-agnostic)** | ✅ Available | `@remyx/core` |
+| **Vue 3** | Planned | `@remyx/vue` |
+| **Angular** | Planned | `@remyx/angular` |
+| **Svelte 5** | Planned | `@remyx/svelte` |
+| **Vanilla JS / Web Component** | Planned | `@remyx/vanilla` |
+| **Node.js (SSR)** | Planned | `@remyx/ssr` |
 | **Django** | Planned | `django-remyx` form widget + template tag |
 | **Rails** | Planned | `remyx-rails` Action Text integration |
 
@@ -283,6 +319,15 @@ A living document outlining planned features, improvements, and long-term direct
 - **Drag-and-drop toolbar customization**: let users rearrange toolbar buttons at runtime
 - **Color palette presets**: save and reuse custom color palettes across text and background colors
 - **Typography controls**: line height, letter spacing, paragraph spacing adjustments
+
+## Build & DevOps
+
+- Nx monorepo integration (see above) — task orchestration, caching, affected commands
+- GitHub Actions CI pipeline: build → lint → test on every PR, with Nx-powered caching
+- Automated npm publishing via `nx release` on tagged commits
+- Pre-commit hooks (Husky + lint-staged) for consistent code quality
+- Bundle size tracking: fail CI if any package exceeds its size budget
+- Automated dependency updates (Renovate or Dependabot) with auto-merge for passing patch bumps
 
 ## Quality Improvements
 
