@@ -707,6 +707,7 @@
   box-shadow: var(--rmx-shadow-float);
   z-index: 100;
   animation: rmx-scale-in 0.15s ease;
+  will-change: transform;
 }
 
 /* ====== Image Resize Handles ====== */
@@ -846,6 +847,7 @@
   z-index: 10000;
   padding: 4px;
   animation: rmx-scale-in 0.12s ease;
+  will-change: transform;
 }
 
 .rmx-context-menu-item {
@@ -895,6 +897,7 @@
   box-shadow: var(--rmx-shadow-lg);
   animation: rmx-slide-up 0.2s ease;
   border: 1px solid var(--rmx-border);
+  will-change: transform;
 }
 
 .rmx-modal-header {

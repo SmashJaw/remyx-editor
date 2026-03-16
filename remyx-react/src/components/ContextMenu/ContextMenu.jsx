@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function ContextMenu({ contextMenu, onHide, onOpenModal }) {
+function ContextMenuInner({ contextMenu, onHide, onOpenModal }) {
   if (!contextMenu.visible) return null
 
   return (
@@ -37,3 +37,5 @@ export function ContextMenu({ contextMenu, onHide, onOpenModal }) {
     </div>
   )
 }
+
+export const ContextMenu = React.memo(ContextMenuInner)

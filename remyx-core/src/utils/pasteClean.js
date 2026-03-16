@@ -27,6 +27,10 @@ export function cleanPastedHTML(html) {
   cleaned = cleaned.replace(/<\/?body[^>]*>/gi, '')
   cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, '')
   cleaned = cleaned.replace(/<title[\s\S]*?<\/title>/gi, '')
+  // Strip dangerous embedded content (SVG can contain scripts, MathML can contain exploits)
+  cleaned = cleaned.replace(/<svg[\s\S]*?<\/svg>/gi, '')
+  cleaned = cleaned.replace(/<math[\s\S]*?<\/math>/gi, '')
+  cleaned = cleaned.replace(/<object[\s\S]*?<\/object>/gi, '')
   cleaned = cleaned.replace(/<link[^>]*>/gi, '')
 
   // ── Detect paste source ──

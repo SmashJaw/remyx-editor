@@ -1,11 +1,12 @@
-import { useEffect, useRef, useCallback } from 'react'
+import React, { useEffect, useRef, useCallback } from 'react'
 import { CloseIcon } from '../../icons/index.jsx'
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
-export function ModalOverlay({ title, open, onClose, children, width = 420 }) {
+function ModalOverlayInner({ title, open, onClose, children, width = 420 }) {
   const ref = useRef(null)
   const previousFocusRef = useRef(null)
+  const focusableRef = useRef([])
 
   // Save previously focused element when opening
   useEffect(() => {
@@ -36,6 +37,13 @@ export function ModalOverlay({ title, open, onClose, children, width = 420 }) {
     }
   }, [open])
 
+  // Cache focusable elements when modal opens or content changes
+  useEffect(() => {
+    if (open && ref.current) {
+      focusableRef.current = Array.from(ref.current.querySelectorAll(FOCUSABLE_SELECTOR))
+    }
+  }, [open])
+
   // Handle Escape and focus trapping (Tab / Shift+Tab)
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Escape') {
@@ -44,7 +52,7 @@ export function ModalOverlay({ title, open, onClose, children, width = 420 }) {
     }
 
     if (e.key === 'Tab' && ref.current) {
-      const focusable = Array.from(ref.current.querySelectorAll(FOCUSABLE_SELECTOR))
+      const focusable = focusableRef.current.length > 0 ? focusableRef.current : Array.from(ref.current.querySelectorAll(FOCUSABLE_SELECTOR))
       if (focusable.length === 0) {
         e.preventDefault()
         return
@@ -95,3 +103,5 @@ export function ModalOverlay({ title, open, onClose, children, width = 420 }) {
     </div>
   )
 }
+
+export const ModalOverlay = React.memo(ModalOverlayInner)

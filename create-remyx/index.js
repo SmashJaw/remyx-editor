@@ -2,10 +2,9 @@
 
 import { stdin, stdout, argv, exit, cwd } from 'node:process'
 import { createInterface } from 'node:readline'
-import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync, cpSync } from 'node:fs'
-import { resolve, join, basename } from 'node:path'
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { resolve, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { execSync } from 'node:child_process'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -14,7 +13,6 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const bold = (s) => `\x1b[1m${s}\x1b[22m`
 const cyan = (s) => `\x1b[36m${s}\x1b[39m`
 const green = (s) => `\x1b[32m${s}\x1b[39m`
-const yellow = (s) => `\x1b[33m${s}\x1b[39m`
 const dim = (s) => `\x1b[2m${s}\x1b[22m`
 const red = (s) => `\x1b[31m${s}\x1b[39m`
 

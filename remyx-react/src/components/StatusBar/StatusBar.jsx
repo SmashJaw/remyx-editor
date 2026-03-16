@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ICON_MAP } from '../../icons/index.jsx'
 
-export function StatusBar({ engine, position = 'bottom' }) {
-  const [counts, setCounts] = useState(() => engine?._wordCount || { wordCount: 0, charCount: 0 })
+function StatusBarInner({ engine, position = 'bottom' }) {
+  const [counts, setCounts] = useState({ wordCount: 0, charCount: 0 })
 
   useEffect(() => {
     if (!engine) return
@@ -26,8 +26,10 @@ export function StatusBar({ engine, position = 'bottom' }) {
   )
 }
 
-export function WordCountButton({ engine }) {
-  const [counts, setCounts] = useState(() => engine?._wordCount || { wordCount: 0, charCount: 0 })
+export const StatusBar = React.memo(StatusBarInner)
+
+function WordCountButtonInner({ engine }) {
+  const [counts, setCounts] = useState({ wordCount: 0, charCount: 0 })
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
@@ -84,3 +86,5 @@ export function WordCountButton({ engine }) {
     </div>
   )
 }
+
+export const WordCountButton = React.memo(WordCountButtonInner)

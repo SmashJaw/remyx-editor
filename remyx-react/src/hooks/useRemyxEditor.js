@@ -100,9 +100,19 @@ export function useRemyxEditor(targetRef, options = {}) {
 
     // Create the wrapper container
     const container = document.createElement('div')
-    container.className = `rmx-editor rmx-theme-${options.theme || 'light'} ${options.className || ''}`
+    const safeTheme = /^[a-zA-Z0-9_-]+$/.test(options.theme) ? options.theme : 'light'
+    container.className = `rmx-editor rmx-theme-${safeTheme} ${options.className || ''}`
     if (options.style) {
-      Object.assign(container.style, options.style)
+      const ALLOWED_STYLE_KEYS = new Set([
+        'width', 'height', 'minHeight', 'maxHeight', 'minWidth', 'maxWidth',
+        'margin', 'padding', 'border', 'borderRadius', 'background', 'backgroundColor',
+        'color', 'fontSize', 'fontFamily', 'overflow', 'overflowY', 'overflowX',
+      ])
+      for (const [key, val] of Object.entries(options.style)) {
+        if (ALLOWED_STYLE_KEYS.has(key)) {
+          container.style[key] = val
+        }
+      }
     }
     containerRef.current = container
 
@@ -159,12 +169,12 @@ export function useRemyxEditor(targetRef, options = {}) {
       }
     } else {
       // For div / other elements: replace the element's content with the editor
-      const originalContent = target.innerHTML
+      const originalContent = target.textContent
       target.innerHTML = ''
       target.appendChild(container)
 
       cleanupRef.current = () => {
-        target.innerHTML = originalContent
+        target.textContent = originalContent
       }
     }
 
@@ -233,7 +243,7 @@ export function useRemyxEditor(targetRef, options = {}) {
     engine.on('blur', () => options.onBlur?.())
 
     return engine
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps — intentional: uses refs for latest values, targetRef is stable
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const engine = initEditor()

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { ICON_MAP, ChevronRightIcon } from '../../icons/index.jsx'
 import { TOOLTIP_MAP, SHORTCUT_MAP, MODAL_COMMANDS, getShortcutLabel, getCommandActiveState } from '@remyx/core'
 
@@ -25,7 +25,7 @@ function focusMenuSibling(container, direction) {
   items[next]?.focus()
 }
 
-export function MenuItem({ item, engine, selectionState, onOpenModal, onClose }) {
+function MenuItemInner({ item, engine, selectionState, onOpenModal, onClose }) {
   // Separator
   if (item === '---') {
     return <div className="rmx-menubar-separator" role="separator" />
@@ -116,6 +116,8 @@ export function MenuItem({ item, engine, selectionState, onOpenModal, onClose })
     </button>
   )
 }
+
+export const MenuItem = React.memo(MenuItemInner)
 
 function SubMenuItem({ label, items, engine, selectionState, onOpenModal, onClose }) {
   const [open, setOpen] = useState(false)

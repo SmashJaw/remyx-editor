@@ -1,4 +1,5 @@
 import { getExtension } from './shared.js'
+import { cleanPastedHTML } from '../pasteClean.js'
 
 /**
  * Supported document formats with their MIME types and extensions.
@@ -96,5 +97,7 @@ export async function convertDocument(file) {
   }
 
   const mod = await converters[format]()
-  return mod.default(file)
+  const raw = await mod.default(file)
+  // Pre-clean imported HTML to strip script/style/object tags
+  return typeof raw === 'string' ? cleanPastedHTML(raw) : raw
 }

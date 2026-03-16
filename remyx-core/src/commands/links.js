@@ -1,3 +1,11 @@
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
+function validateUrl(url) {
+  if (!url) return url
+  if (DANGEROUS_PROTOCOL.test(url)) return '#'
+  return url
+}
+
 export function registerLinkCommands(engine) {
   engine.commands.register('insertLink', {
     execute(eng, { href, text, target = '_blank' }) {
@@ -17,7 +25,8 @@ export function registerLinkCommands(engine) {
         }
       } else {
         const displayText = text || href
-        const html = `<a href="${escapeAttr(href)}" target="${escapeAttr(target)}"${target === '_blank' ? ' rel="noopener noreferrer"' : ''}>${escapeHTML(displayText)}</a>`
+        const safeHref = validateUrl(href)
+        const html = `<a href="${escapeAttr(safeHref)}" target="${escapeAttr(target)}"${target === '_blank' ? ' rel="noopener noreferrer"' : ''}>${escapeHTML(displayText)}</a>`
         selection.insertHTML(html)
       }
     },
@@ -29,7 +38,7 @@ export function registerLinkCommands(engine) {
     execute(eng, { href, text, target }) {
       const linkEl = eng.selection.getClosestElement('a')
       if (!linkEl) return
-      if (href !== undefined) linkEl.href = href
+      if (href !== undefined) linkEl.href = validateUrl(href)
       if (text !== undefined) linkEl.textContent = text
       if (target !== undefined) {
         linkEl.target = target

@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
 export function ImageModal({ open, onClose, engine }) {
   const [tab, setTab] = useState('url')
   const [src, setSrc] = useState('')
@@ -12,6 +14,7 @@ export function ImageModal({ open, onClose, engine }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!src.trim()) return
+    if (DANGEROUS_PROTOCOL.test(src)) return
     engine.executeCommand('insertImage', {
       src,
       alt,

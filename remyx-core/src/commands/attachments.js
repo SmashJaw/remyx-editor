@@ -1,3 +1,5 @@
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
 /**
  * Format bytes into a human-readable file size string.
  */
@@ -30,7 +32,7 @@ export function registerAttachmentCommands(engine) {
       }
 
       const a = document.createElement('a')
-      a.href = url
+      a.href = DANGEROUS_PROTOCOL.test(url) ? '#' : url
       a.className = 'rmx-attachment'
       a.setAttribute('data-attachment', 'true')
       a.setAttribute('data-filename', filename)

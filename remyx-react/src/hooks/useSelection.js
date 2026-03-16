@@ -63,7 +63,12 @@ export function useSelection(engine) {
 
     let selectionRect = null
     if (hasSelection && sel.rangeCount > 0) {
-      selectionRect = sel.getRangeAt(0).getBoundingClientRect()
+      try {
+        selectionRect = sel.getRangeAt(0).getBoundingClientRect()
+      } catch {
+        // DOM mutations between rangeCount check and getRangeAt can clear the selection
+        selectionRect = null
+      }
     }
 
     // DOM queries for focused image/table

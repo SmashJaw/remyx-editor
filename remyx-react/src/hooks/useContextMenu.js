@@ -110,7 +110,12 @@ export function useContextMenu(engine, editorRef) {
         { separator: true },
         { label: 'Edit Link', command: 'editLinkModal', data: linkEl },
         { label: 'Remove Link', command: () => engine.executeCommand('removeLink') },
-        { label: 'Open Link', command: () => window.open(linkEl.href, '_blank') },
+        { label: 'Open Link', command: () => {
+          const href = linkEl.href
+          if (!/^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i.test(href)) {
+            window.open(href, '_blank')
+          }
+        }},
       )
     }
 

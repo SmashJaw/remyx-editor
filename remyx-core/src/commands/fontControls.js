@@ -33,6 +33,8 @@ export function registerFontCommands(engine) {
   engine.commands.register('fontSize', {
     execute(eng, size) {
       if (!size) return
+      // Validate numeric value
+      if (!/^\d+(\.\d+)?(px|pt|em|rem|%)$/.test(size)) return
       // execCommand fontSize uses 1-7 scale, so we use spans instead
       const sel = eng.selection.getSelection()
       if (!sel || sel.rangeCount === 0) return

@@ -23,8 +23,9 @@ export function ImageResizeHandles({ image, engine, editorRect }) {
     if (!resizing) return
 
     const handleMouseMove = (e) => {
+      if (!startPos || !startSize) return
       const dx = e.clientX - startPos.x
-      const aspectRatio = startSize.height / startSize.width
+      const aspectRatio = startSize.width > 0 ? startSize.height / startSize.width : 1
       const newWidth = Math.max(50, startSize.width + dx)
       const newHeight = newWidth * aspectRatio
 

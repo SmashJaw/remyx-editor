@@ -2,10 +2,10 @@
 
 # Known Bugs
 
-**Last updated:** 2026-03-15
+**Last updated:** 2026-03-16
 **Version:** 0.24.0
 
-A prioritized list of confirmed bugs discovered through codebase analysis. **All 10 bugs have been resolved.**
+A prioritized list of confirmed bugs discovered through codebase analysis. All 10 original bugs have been resolved. **6 new bugs** found and **all resolved** in the 0.24.0 audit.
 
 ---
 
@@ -97,6 +97,84 @@ A prioritized list of confirmed bugs discovered through codebase analysis. **All
 
 ---
 
+## New Bugs (0.24.0 Audit)
+
+### 11. ✅ FIXED — Missing Null Check in ImageResizeHandles
+
+**Package:** `remyx-react`
+**File:** `src/components/EditArea/ImageResizeHandles.jsx` (lines 26–27)
+**Severity:** High
+
+`handleMouseMove` accesses `startPos.x` and `startSize.height` without null guards. Both `startPos` and `startSize` are state variables initialized as `null`. If the mousemove handler fires before state propagates after mousedown, accessing properties on `null` causes a runtime crash.
+
+**Fix:** Added `if (!startPos || !startSize) return` guard at the top of `handleMouseMove`.
+
+---
+
+### 12. ✅ FIXED — Division by Zero in Aspect Ratio Calculation
+
+**Package:** `remyx-react`
+**File:** `src/components/EditArea/ImageResizeHandles.jsx` (line 27)
+**Severity:** Medium
+
+```js
+const aspectRatio = startSize.height / startSize.width
+```
+
+If an image has `offsetWidth === 0` (hidden, removed, or zero-width image), this divides by zero, producing `Infinity`. The resulting `newHeight` becomes `"Infinitypx"` — invalid CSS that breaks rendering.
+
+**Fix:** Changed to `startSize.width > 0 ? startSize.height / startSize.width : 1`.
+
+---
+
+### 13. ✅ FIXED — `getRangeAt(0)` Can Throw in useSelection
+
+**Package:** `remyx-react`
+**File:** `src/hooks/useSelection.js` (lines 61–66)
+**Severity:** Low
+
+The code checks `sel.rangeCount > 0` before calling `getRangeAt(0)`, but DOM mutations between the check and the call can clear the selection, causing an "Index out of bounds" error.
+
+**Fix:** Wrapped `sel.getRangeAt(0).getBoundingClientRect()` in try/catch with `selectionRect = null` fallback.
+
+---
+
+### 14. ✅ FIXED — Form Submit Listener Accumulation in usePortalAttachment
+
+**Package:** `remyx-react`
+**File:** `src/hooks/usePortalAttachment.js` (lines 38–50)
+**Severity:** Low
+
+The empty `syncToForm` function is attached to the parent form's `submit` event. If the hook effect re-runs (e.g., `attachTo` ref changes), a new listener is added without first removing the old one. Over time, multiple identical no-op listeners accumulate.
+
+**Fix:** Removed the dead `syncToForm` handler and its event listener entirely.
+
+---
+
+### 15. ✅ FIXED — Stale Selection Offset in `Selection.restore()`
+
+**Package:** `remyx-core`
+**File:** `src/core/Selection.js` (lines 185–188)
+**Severity:** Low
+
+`restore()` calculates `Math.min(startNodeOffset, startNode.textContent.length)` but if the DOM structure changed significantly between `save()` and `restore()`, the offset may place the cursor at the wrong position within the correct node.
+
+**Fix:** Added explanatory comment documenting the known limitation. Already mitigated by existing try/catch with end-of-editor fallback.
+
+---
+
+### 16. ✅ FIXED — `sourceMode` State Variable Never Read
+
+**Package:** `remyx-react`
+**File:** `src/components/RemyxEditor.jsx` (line 93)
+**Severity:** Low
+
+`const [sourceMode, setSourceMode] = useState(false)` — `setSourceMode` is called to toggle source mode, but `sourceMode` itself is never read in the component. The UI likely relies on `engine.isSourceMode` instead, making this state variable redundant and causing unnecessary re-renders.
+
+**Fix:** Removed the unused `sourceMode` state variable and `setSourceMode` call from `RemyxEditor.jsx`.
+
+---
+
 ## Summary
 
 | Priority | # | Bug | Status |
@@ -111,5 +189,11 @@ A prioritized list of confirmed bugs discovered through codebase analysis. **All
 | **Low** | 8 | FindReplace negative index access | ✅ Fixed |
 | **Low** | 9 | `useContextMenu` stale engine closure | ✅ Not a bug |
 | **Low** | 10 | Paste font regex attribute order | ✅ Fixed |
+| **High** | 11 | ImageResizeHandles null crash | ✅ Fixed |
+| **Medium** | 12 | ImageResizeHandles division by zero | ✅ Fixed |
+| **Low** | 13 | `useSelection` getRangeAt race | ✅ Fixed |
+| **Low** | 14 | Form submit listener accumulation | ✅ Fixed |
+| **Low** | 15 | Stale selection offset in `restore()` | ✅ Fixed |
+| **Low** | 16 | Unused `sourceMode` state variable | ✅ Fixed |
 
-**All 10 bugs resolved as of 2026-03-15.**
+**16 resolved, 0 open as of 2026-03-16.**

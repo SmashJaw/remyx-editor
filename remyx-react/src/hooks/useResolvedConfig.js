@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useRemyxConfig } from '../config/RemyxConfigProvider.jsx'
+import { useRemyxConfig } from './useRemyxConfig.js'
 import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_MENU_BAR } from '@remyx/core'
 import { collectMenuBarCommands } from '../components/MenuBar/MenuBar.jsx'
 

@@ -15,7 +15,8 @@ export function registerMediaCommands(engine) {
       iframe.src = embedUrl
       iframe.setAttribute('frameborder', '0')
       iframe.setAttribute('allowfullscreen', 'true')
-      iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture')
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation allow-popups')
+      iframe.setAttribute('allow', 'autoplay; picture-in-picture')
       iframe.style.width = '100%'
       iframe.style.height = '100%'
 

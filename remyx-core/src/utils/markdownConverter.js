@@ -51,12 +51,35 @@ function getTurndown() {
   return turndownInstance
 }
 
+// Safe URL protocol allowlist for markdown-generated links and images
+const SAFE_URL_PROTOCOL = /^(https?:|mailto:|tel:|#|\/)/i
+
 function ensureMarkedConfigured() {
   if (!markedConfigured) {
     marked.setOptions({
       gfm: true,
       breaks: false,
     })
+
+    // Override link and image renderers to block dangerous protocols (javascript:, vbscript:, data:text/html)
+    const renderer = new marked.Renderer()
+    renderer.link = ({ href, title, tokens }) => {
+      const text = marked.Parser.parseInline(tokens)
+      if (href && !SAFE_URL_PROTOCOL.test(href)) {
+        return text
+      }
+      const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''
+      return `<a href="${href}"${titleAttr}>${text}</a>`
+    }
+    renderer.image = ({ href, title, text }) => {
+      if (href && !SAFE_URL_PROTOCOL.test(href) && !href.startsWith('data:image/')) {
+        return text || ''
+      }
+      const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''
+      return `<img src="${href}" alt="${text || ''}"${titleAttr} />`
+    }
+    marked.use({ renderer })
+
     markedConfigured = true
   }
 }

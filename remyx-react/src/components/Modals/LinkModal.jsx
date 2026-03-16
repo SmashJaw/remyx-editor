@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
 export function LinkModal({ open, onClose, engine, data }) {
   const [href, setHref] = useState('')
   const [text, setText] = useState('')
@@ -17,6 +19,7 @@ export function LinkModal({ open, onClose, engine, data }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!href.trim()) return
+    if (DANGEROUS_PROTOCOL.test(href)) return
 
     if (data?.href) {
       engine.executeCommand('editLink', { href, text, target })

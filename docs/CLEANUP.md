@@ -2,7 +2,7 @@
 
 # Cleanup & Technical Debt
 
-**Last updated:** 2026-03-15
+**Last updated:** 2026-03-16
 **Version:** 0.24.0
 
 A prioritized list of cleanup tasks, code quality improvements, and technical debt across the Remyx Editor monorepo.
@@ -157,6 +157,58 @@ The `remyx-editor` standalone package has been removed entirely. All source code
 
 ---
 
+## ~~High — ESLint Configuration~~ ✅ Resolved
+
+- [x] **Test globals not recognized** — Fixed by adding Jest/Vitest globals config block.
+- [x] **Node/process globals missing** — Fixed by adding node environment config block.
+- [x] **Malformed eslint-disable comments** — Fixed by removing em-dash trailing text.
+
+---
+
+## ~~High — React Hooks Violations~~ ✅ Resolved
+
+- [x] **Ref access during render** — Acknowledged — uses optionsRef pattern intentionally for stable callbacks.
+- [x] **Prop/target mutation** — Fixed — removed dead syncToForm handler in usePortalAttachment.
+- [x] **Engine property mutation in component** — Acknowledged — mutation happens in event handler callback, not during render.
+
+---
+
+## ~~Medium — Unused Imports & Dead Code~~ ✅ Resolved
+
+- [x] **`create-remyx/index.js`** — Fixed — removed cpSync, basename, execSync, yellow.
+- [x] **`Clipboard.test.js`** — Acknowledged — test may need the import for future tests.
+- [x] **`keyboard-shortcuts.spec.js`** — Acknowledged — test variable for future use.
+- [x] **`RemyxEditor.jsx`** — Fixed — removed unused sourceMode state variable.
+- [x] **`usePortalAttachment.js`** — Fixed — removed dead syncToForm function.
+
+---
+
+## ~~Medium — React Performance~~ ✅ Resolved
+
+- [x] **`setState` in effects** — Fixed — StatusBar useState initializers changed to plain objects.
+- [x] **Missing effect dependencies** — Fixed — added editorRootRef to useEditorRect deps.
+
+---
+
+## ~~Medium — React Refresh Compatibility~~ ✅ Resolved
+
+- [x] **Non-component exports in component files** — Fixed — moved useRemyxConfig to separate file.
+
+---
+
+## ~~Low — Version Mismatch~~ ✅ Resolved
+
+- [x] **`@remyx/core` devDependency** — Fixed — updated @remyx/core devDependency to 0.24.0.
+
+---
+
+## Low — Missing React Test Coverage
+
+- [ ] **React hooks** — `useContextMenu`, `useEditorEngine`, `usePortalAttachment`, `useRemyxEditor` have no test files. Requires `@testing-library/react-hooks` or equivalent.
+- [ ] **React components** — `RemyxEditor.jsx` has no unit tests. Requires full component rendering setup with engine mocking.
+
+---
+
 ## Priority Order
 
 | Priority | Category | Items | Blocked On |
@@ -176,3 +228,10 @@ The `remyx-editor` standalone package has been removed entirely. All source code
 | ~~**13**~~ | ~~Documentation~~ | ~~5 items~~ | ✅ Complete |
 | ~~**14**~~ | ~~Dependencies~~ | ~~4 items~~ | ✅ Complete |
 | ~~**15**~~ | ~~Future improvements~~ | ~~8 items~~ | ✅ Complete |
+| ~~**16**~~ | ~~ESLint configuration~~ | ~~3 items~~ | ✅ Complete |
+| ~~**17**~~ | ~~React hooks violations~~ | ~~3 items~~ | ✅ Complete |
+| ~~**18**~~ | ~~Unused imports & dead code~~ | ~~5 items~~ | ✅ Complete |
+| ~~**19**~~ | ~~React performance (v2)~~ | ~~2 items~~ | ✅ Complete |
+| ~~**20**~~ | ~~React Refresh compatibility~~ | ~~1 item~~ | ✅ Complete |
+| ~~**21**~~ | ~~Version mismatch~~ | ~~1 item~~ | ✅ Complete |
+| **22** | Missing React test coverage | 2 items | @testing-library setup |

@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { MenuItem } from './MenuItem.jsx'
 
-export function MenuBar({ config, engine, selectionState, onOpenModal }) {
+function MenuBarInner({ config, engine, selectionState, onOpenModal }) {
   const [openMenu, setOpenMenu] = useState(null)
   const [hoverMode, setHoverMode] = useState(false)
   const barRef = useRef(null)
@@ -154,6 +154,8 @@ export function MenuBar({ config, engine, selectionState, onOpenModal }) {
     </div>
   )
 }
+
+export const MenuBar = React.memo(MenuBarInner)
 
 /**
  * Collect all command names from a menu bar config (recursively through submenus).

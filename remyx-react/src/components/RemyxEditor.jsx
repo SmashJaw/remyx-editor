@@ -90,11 +90,9 @@ export default function RemyxEditor(props) {
   const editorRect = useEditorRect(editorRootRef, ready)
 
   // Handle source mode toggle
-  const [sourceMode, setSourceMode] = useState(false)
   useEffect(() => {
     if (!engine) return
     const unsub = engine.eventBus.on('mode:change', ({ sourceMode: sm }) => {
-      setSourceMode(sm)
       if (sm) {
         openModal('source')
       }
@@ -146,7 +144,7 @@ export default function RemyxEditor(props) {
   const editorTree = (
     <div
       ref={editorRootRef}
-      className={`rmx-editor rmx-theme-${theme} ${className}`}
+      className={`rmx-editor rmx-theme-${/^[a-zA-Z0-9_-]+$/.test(theme) ? theme : 'light'} ${className || ''}`}
       style={mergedStyle}
     >
       <a className="rmx-skip-link" href="#rmx-edit-area">

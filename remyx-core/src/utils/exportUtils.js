@@ -1,4 +1,5 @@
 import { htmlToMarkdown } from './markdownConverter.js'
+import { Sanitizer } from '../core/Sanitizer.js'
 
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
@@ -22,12 +23,17 @@ export function exportAsPDF(html, title = 'Document') {
   iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:0;height:0;'
   document.body.appendChild(iframe)
 
+  // Re-sanitize HTML and escape title to prevent XSS in export iframe
+  const sanitizer = new Sanitizer()
+  const safeHtml = sanitizer.sanitize(html)
+  const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
   const doc = iframe.contentDocument || iframe.contentWindow.document
   doc.open()
   doc.write(`<!DOCTYPE html>
 <html>
 <head>
-  <title>${title}</title>
+  <title>${safeTitle}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 20px; }
     h1, h2, h3, h4, h5, h6 { margin-top: 1.2em; margin-bottom: 0.4em; }
@@ -40,7 +46,7 @@ export function exportAsPDF(html, title = 'Document') {
     @media print { body { padding: 0; } }
   </style>
 </head>
-<body>${html}</body>
+<body>${safeHtml}</body>
 </html>`)
   doc.close()
 

@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
 export function AttachmentModal({ open, onClose, engine }) {
   const [tab, setTab] = useState('url')
   const [url, setUrl] = useState('')
@@ -15,6 +17,7 @@ export function AttachmentModal({ open, onClose, engine }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!url.trim()) return
+    if (DANGEROUS_PROTOCOL.test(url)) return
     engine.executeCommand('insertAttachment', {
       url,
       filename: filename || 'file',

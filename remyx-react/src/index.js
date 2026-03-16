@@ -9,7 +9,8 @@ export { useRemyxEditor } from './hooks/useRemyxEditor.js'
 export { useEditorEngine } from './hooks/useEditorEngine.js'
 
 // React config provider
-export { RemyxConfigProvider, useRemyxConfig } from './config/RemyxConfigProvider.jsx'
+export { RemyxConfigProvider } from './config/RemyxConfigProvider.jsx'
+export { useRemyxConfig } from './hooks/useRemyxConfig.js'
 
 // Error boundary
 export { EditorErrorBoundary } from './components/ErrorBoundary.jsx'

@@ -42,6 +42,13 @@ export function unwrapTag(element) {
 /** Length of the random suffix in generated IDs */
 const GENERATED_ID_LENGTH = 9
 
+/**
+ * Generates a non-cryptographic random ID for internal DOM element tracking.
+ * WARNING: Uses Math.random() which is NOT cryptographically secure.
+ * Do NOT use these IDs for security tokens, session IDs, or any
+ * security-critical purpose. Use crypto.getRandomValues() instead.
+ * @returns {string} A prefixed random ID like 'rmx-abc123def'
+ */
 export function generateId() {
   return 'rmx-' + Math.random().toString(36).substr(2, GENERATED_ID_LENGTH)
 }

@@ -17,7 +17,7 @@ export const ALLOWED_TAGS = {
   input: ['type', 'checked', 'disabled', 'class'],
   label: ['class'],
   mark: ['class'],
-  iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'allow', 'class', 'style'],
+  iframe: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'sandbox', 'class', 'style'],
 }
 
 export const ALLOWED_STYLES = [

@@ -182,6 +182,8 @@ export class Selection {
       charCount = nextCount
     }
 
+    // Note: offset may be imprecise if DOM changed significantly between save() and restore(),
+    // but the try/catch fallback below handles this by moving cursor to end of editor.
     if (startNode) {
       try {
         const range = document.createRange()
@@ -264,7 +266,10 @@ export class Selection {
 
   /**
    * Inserts HTML at the current selection using document.execCommand.
-   * @param {string} html - The HTML string to insert
+   * **IMPORTANT:** Callers MUST sanitize html before calling this method.
+   * This method does not sanitize input — passing unsanitized user content
+   * directly will create an XSS vulnerability.
+   * @param {string} html - The pre-sanitized HTML string to insert
    * @returns {void}
    */
   insertHTML(html) {

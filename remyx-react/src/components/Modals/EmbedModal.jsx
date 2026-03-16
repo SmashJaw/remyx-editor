@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
+const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+
 export function EmbedModal({ open, onClose, engine }) {
   const [url, setUrl] = useState('')
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!url.trim()) return
+    if (DANGEROUS_PROTOCOL.test(url)) return
     engine.executeCommand('embedMedia', { url })
     onClose()
     setUrl('')

@@ -34,28 +34,18 @@ export function usePortalAttachment({ attachTo, value, defaultValue, onChange })
       target.style.display = 'none'
       target.parentNode.insertBefore(container, target.nextSibling)
 
-      // Wire up form submit to sync value
-      const form = target.closest('form')
-      const syncToForm = () => {
-        // Value is kept in sync via onChange handler below
-      }
-      if (form) {
-        form.addEventListener('submit', syncToForm)
-      }
-
       attachCleanupRef.current = () => {
         target.style.display = ''
         if (container.parentNode) container.parentNode.removeChild(container)
-        if (form) form.removeEventListener('submit', syncToForm)
       }
     } else {
-      // For divs/other elements: save original content, render editor inside
-      const originalContent = target.innerHTML
+      // For divs/other elements: save original content as text, render editor inside
+      const originalContent = target.textContent
       target.innerHTML = ''
       target.appendChild(container)
 
       attachCleanupRef.current = () => {
-        target.innerHTML = originalContent
+        target.textContent = originalContent
       }
     }
 
@@ -68,7 +58,7 @@ export function usePortalAttachment({ attachTo, value, defaultValue, onChange })
       }
       setPortalContainer(null)
     }
-  }, [attachTo]) // eslint-disable-line react-hooks/exhaustive-deps — intentional: only re-run when target ref changes, not when value/onChange change
+  }, [attachTo]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync changes back to the attached element
   const handleChange = useCallback((html) => {

@@ -1,17 +1,31 @@
-import { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { ToolbarButton } from '../Toolbar/ToolbarButton.jsx'
 
 const FLOATING_COMMANDS = ['bold', 'italic', 'underline', 'strikethrough', 'link']
 
-export function FloatingToolbar({ visible, selectionRect, engine, selectionState, editorRect, onOpenModal }) {
+function FloatingToolbarInner({ visible, selectionRect, engine, selectionState, editorRect, onOpenModal }) {
   const ref = useRef(null)
+  const sizeRef = useRef({ width: 0, height: 0 })
   const [position, setPosition] = useState({ top: 0, left: 0 })
 
+  // Cache toolbar dimensions via ResizeObserver to avoid forced reflows
   useEffect(() => {
-    if (!visible || !selectionRect || !editorRect || !ref.current) return
+    if (!ref.current) return
+    const observer = new ResizeObserver(([entry]) => {
+      sizeRef.current = {
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      }
+    })
+    observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
 
-    const toolbarHeight = ref.current.offsetHeight
-    const toolbarWidth = ref.current.offsetWidth
+  useEffect(() => {
+    if (!visible || !selectionRect || !editorRect) return
+
+    const toolbarHeight = sizeRef.current.height || ref.current?.offsetHeight || 40
+    const toolbarWidth = sizeRef.current.width || ref.current?.offsetWidth || 200
 
     let top = selectionRect.top - editorRect.top - toolbarHeight - 8
     let left = selectionRect.left - editorRect.left + selectionRect.width / 2 - toolbarWidth / 2
@@ -59,3 +73,5 @@ export function FloatingToolbar({ visible, selectionRect, engine, selectionState
     </div>
   )
 }
+
+export const FloatingToolbar = React.memo(FloatingToolbarInner)

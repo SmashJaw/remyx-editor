@@ -40,7 +40,7 @@ export function useEditorRect(editorRootRef, ready) {
       window.removeEventListener('scroll', handleScroll, true)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [ready])
+  }, [editorRootRef, ready])
 
   return editorRect
 }

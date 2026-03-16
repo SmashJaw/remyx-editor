@@ -130,7 +130,7 @@ export function useEditorEngine(editAreaRef, options, readyTrigger) {
     engine.on('blur', () => optionsRef.current.onBlur?.())
 
     return engine
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps — intentional: uses optionsRef for latest values, editAreaRef is stable
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const engine = initEngine()

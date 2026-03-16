@@ -1,7 +1,8 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { renderHook } from '@testing-library/react'
-import { RemyxConfigProvider, useRemyxConfig } from '../config/RemyxConfigProvider.jsx'
+import { RemyxConfigProvider } from '../config/RemyxConfigProvider.jsx'
+import { useRemyxConfig } from '../hooks/useRemyxConfig.js'
 
 describe('RemyxConfigProvider', () => {
   it('provides config to children via useRemyxConfig', () => {

@@ -12,6 +12,9 @@ export function registerImageCommands(engine) {
     execute(eng, { src, alt = '', width, height }) {
       if (!src) return
 
+      // Block SVG data URIs — can contain executable JavaScript
+      if (/^data:image\/svg/i.test(src)) return
+
       // Ensure editor has focus (e.g. when called from a modal)
       eng.element.focus()
 
