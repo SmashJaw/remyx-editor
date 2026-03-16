@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [0.25.0] — 2026-03-15
+## [0.25.0] — 2026-03-16
 
 ### Added
 
@@ -17,12 +17,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Unit test coverage** — Statements 82.85%, Branches 74.11%, Functions 77.41%, Lines 85.21% (up from ~67%).
 - **Coverage HTML reports** — Unit coverage at `coverage/unit/index.html`, e2e report at `coverage/e2e/`.
 - **New test scripts** — `npm test`, `npm run test:watch`, `npm run test:coverage`, `npm run e2e`, `npm run e2e:report`.
+- **BENCHMARK.md** — Performance benchmark document covering build times, bundle sizes, test speed, lint speed, code-split chunk inventory, and improvement opportunities.
 
 ### Changed
 
+- **Scaffolding moved to `@remyx/react`** — Project scaffolding CLI relocated from `create-remyx` to `@remyx/react/create/` and renamed to `create-remyx-app` (`npx create-remyx-app`). The `create-remyx` package is now reserved for a future interactive CLI wizard.
+- **`create-remyx` repurposed** — Gutted scaffolding code; package now displays a redirect message. Will become an interactive editor configuration wizard (see ROADMAP.md).
 - **Test runner migrated from Vitest to Jest** — All existing tests converted from `vi.*` to `jest.*` API. Added `jest.config.js` and `babel.config.js` for JSX transform and module resolution.
 - **CONTRIBUTING.md updated** — Testing section now documents Jest and Playwright workflows, test structure, and writing guidelines.
 - **History test fix** — Corrected undo test assertion that expected wrong state after single undo step.
+- **Root package.json version** — Updated from 0.23.0 to 0.24.0 to match all sub-packages.
+- **`@remyx/react` peerDependencies** — `@remyx/core` constraint updated from `>=0.23.4` to `>=0.24.0`.
+
+### Security
+
+- **Audit fixes (commit 08d7117)** — Fixed 6 bugs, 26 security issues, 15 cleanup items, and 4 optimizations documented in BUGS.md, SECURITY.md, CLEANUP.md, and OPTIMIZATION.md.
 
 ---
 

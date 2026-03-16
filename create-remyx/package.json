@@ -1,22 +1,16 @@
 {
   "name": "create-remyx",
-  "version": "0.23.4",
+  "version": "0.24.0",
   "type": "module",
-  "description": "Scaffold a new Remyx Editor project with JSX or TypeScript",
+  "description": "Remyx CLI (to be repurposed)",
   "bin": {
     "create-remyx": "./index.js"
   },
   "files": [
-    "index.js",
-    "templates"
+    "index.js"
   ],
   "keywords": [
-    "create",
     "remyx",
-    "editor",
-    "wysiwyg",
-    "rich-text",
-    "scaffold",
     "cli"
   ],
   "license": "MIT"

@@ -39,7 +39,15 @@ Use `@remyx/core` directly if building a wrapper for another framework (Vue, Sve
 - [Output Formats](#output-formats)
 - [Attaching to Existing Elements](#attaching-to-existing-elements)
 - [Plugins](#plugins)
+- [Read-Only Mode](#read-only-mode)
+- [Error Handling](#error-handling)
+- [Engine Access](#engine-access)
+- [Import & Export Documents](#import--export-documents)
+- [Sanitization](#sanitization)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Heading Level Offset](#heading-level-offset)
+- [Floating Toolbar & Context Menu](#floating-toolbar--context-menu)
+- [Form Integration](#form-integration)
 - [Exports](#exports)
 - [TypeScript](#typescript)
 - [Using `@remyx/core` Directly](#using-remyxcore-directly)
@@ -853,6 +861,263 @@ const HighlightPlugin = createPlugin({
 });
 ```
 
+## Read-Only Mode
+
+Disable editing while keeping the full rendered output visible.
+
+```jsx
+<RemyxEditor value={content} readOnly={true} />
+```
+
+Combine with a toggle for preview mode:
+
+```jsx
+const [editing, setEditing] = useState(true);
+
+<button onClick={() => setEditing(!editing)}>
+  {editing ? 'Preview' : 'Edit'}
+</button>
+<RemyxEditor value={content} onChange={setContent} readOnly={!editing} />
+```
+
+## Error Handling
+
+### onError Callback
+
+Catch errors from plugins, the engine, and file uploads without crashing the app:
+
+```jsx
+<RemyxEditor
+  onError={(error, info) => {
+    if (info.source === 'plugin') {
+      console.warn(`Plugin "${info.pluginName}" failed:`, error);
+    } else if (info.source === 'upload') {
+      alert(`Upload failed: ${error.message}`);
+    } else if (info.source === 'engine') {
+      console.error(`Engine error in ${info.phase}:`, error);
+    }
+  }}
+/>
+```
+
+Error sources:
+
+| Source | Info Fields | Description |
+|---|---|---|
+| `'plugin'` | `pluginName` | Plugin init/destroy failure |
+| `'engine'` | `phase` | Engine initialization error |
+| `'upload'` | `file` | Upload handler rejection |
+
+### Custom Error Fallback
+
+Replace the default error UI with your own component:
+
+```jsx
+<RemyxEditor
+  errorFallback={
+    <div className="editor-error">
+      <p>Something went wrong. Please refresh.</p>
+    </div>
+  }
+/>
+```
+
+## Engine Access
+
+Use the `onReady` callback to access the `EditorEngine` instance for programmatic control.
+
+### Execute Commands
+
+```jsx
+function App() {
+  const engineRef = useRef(null);
+
+  return (
+    <>
+      <button onClick={() => engineRef.current?.executeCommand('bold')}>
+        Bold
+      </button>
+      <button onClick={() => engineRef.current?.executeCommand('insertLink', 'https://example.com')}>
+        Insert Link
+      </button>
+      <RemyxEditor onReady={(engine) => { engineRef.current = engine }} />
+    </>
+  );
+}
+```
+
+### Listen to Events
+
+```jsx
+<RemyxEditor
+  onReady={(engine) => {
+    engine.on('selection:change', ({ formats }) => {
+      console.log('Active formats:', formats); // { bold: true, italic: false, ... }
+    });
+
+    engine.on('command:executed', ({ name }) => {
+      console.log('Command run:', name);
+    });
+  }}
+  onFocus={() => console.log('Editor focused')}
+  onBlur={() => console.log('Editor blurred')}
+/>
+```
+
+### Read Content Programmatically
+
+```jsx
+<RemyxEditor
+  onReady={(engine) => {
+    // HTML content
+    const html = engine.getHTML();
+
+    // Plain text
+    const text = engine.getText();
+
+    // Stats
+    const words = engine.getWordCount();
+    const chars = engine.getCharCount();
+    const empty = engine.isEmpty();
+  }}
+/>
+```
+
+### Engine Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getHTML()` | `string` | Sanitized HTML content |
+| `setHTML(html)` | `void` | Set editor content |
+| `getText()` | `string` | Plain text content |
+| `isEmpty()` | `boolean` | True if no meaningful text |
+| `focus()` | `void` | Focus the editor |
+| `blur()` | `void` | Blur the editor |
+| `executeCommand(name, ...args)` | `any` | Execute a registered command |
+| `on(event, handler)` | `Function` | Subscribe (returns unsubscribe fn) |
+| `off(event, handler)` | `void` | Unsubscribe from event |
+| `getWordCount()` | `number` | Word count |
+| `getCharCount()` | `number` | Character count |
+| `destroy()` | `void` | Clean up the engine |
+
+### Engine Events
+
+| Event | Payload | When |
+|---|---|---|
+| `'content:change'` | — | Content was modified |
+| `'selection:change'` | `{ formats }` | Selection or formatting changed |
+| `'focus'` | — | Editor gained focus |
+| `'blur'` | — | Editor lost focus |
+| `'mode:change'` | — | Switched markdown/source mode |
+| `'command:executed'` | `{ name }` | After a command runs |
+| `'plugin:error'` | `{ name, error }` | Plugin failed |
+| `'editor:error'` | `{ phase, error }` | Engine error |
+| `'upload:error'` | `{ file, error }` | Upload failed |
+
+## Import & Export Documents
+
+### Programmatic Export
+
+```jsx
+import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyx/react';
+
+function ExportButtons({ content }) {
+  return (
+    <>
+      <button onClick={() => exportAsPDF(content, 'My Document')}>
+        Export PDF
+      </button>
+      <button onClick={() => exportAsDocx(content, 'document.doc')}>
+        Export Word
+      </button>
+      <button onClick={() => exportAsMarkdown(content, 'document.md')}>
+        Export Markdown
+      </button>
+    </>
+  );
+}
+```
+
+PDF export opens the browser print dialog. Word and Markdown exports trigger file downloads.
+
+### Programmatic Import
+
+```jsx
+import { convertDocument, isImportableFile } from '@remyx/react';
+
+async function handleFileSelect(file, engine) {
+  if (!isImportableFile(file)) {
+    alert('Unsupported format');
+    return;
+  }
+  const html = await convertDocument(file);
+
+  // Insert at cursor
+  engine.executeCommand('importDocument', { html, mode: 'insert' });
+
+  // Or replace entire content
+  engine.executeCommand('importDocument', { html, mode: 'replace' });
+}
+```
+
+Supported import formats: PDF, DOCX, Markdown, HTML, TXT, CSV, TSV, RTF.
+
+### Toolbar Export & Import
+
+The editor ships with built-in toolbar buttons for both:
+
+```jsx
+<RemyxEditor
+  toolbar={[
+    ['bold', 'italic', 'underline'],
+    ['importDocument', 'export'],  // import & export buttons
+  ]}
+/>
+```
+
+The `importDocument` button opens a modal for file selection. The `export` button opens a modal with format options.
+
+## Sanitization
+
+Control which HTML tags, attributes, and CSS properties are allowed in editor content.
+
+### Custom Allowlists
+
+```jsx
+<RemyxEditor
+  sanitize={{
+    allowedTags: {
+      // Tag name → array of allowed attributes
+      p: ['class', 'style'],
+      strong: [],
+      em: [],
+      a: ['href', 'target', 'rel', 'title'],
+      img: ['src', 'alt', 'width', 'height'],
+      h1: ['class'], h2: ['class'], h3: ['class'],
+      ul: [], ol: [], li: [],
+      blockquote: ['class'],
+      code: ['class'],
+      pre: ['class'],
+    },
+    allowedStyles: [
+      'color', 'background-color', 'font-size', 'text-align',
+      'font-weight', 'font-style',
+    ],
+  }}
+/>
+```
+
+### Default Security
+
+Without custom sanitization, the editor applies these protections by default:
+
+- Strips `<script>`, `<style>`, `<svg>`, `<math>`, `<form>`, `<object>`, `<embed>` tags entirely
+- Blocks all `on*` event handler attributes (e.g., `onclick`, `onerror`)
+- Validates URL protocols — blocks `javascript:`, `vbscript:`, `data:text/html`
+- Blocks CSS injection (`expression()`, `@import`, `behavior:`)
+- Restricts `<input>` to `type="checkbox"` only
+- Sandboxes `<iframe>` elements
+
 ## Keyboard Shortcuts
 
 `mod` = `Cmd` on Mac, `Ctrl` on Windows/Linux.
@@ -877,6 +1142,173 @@ const HighlightPlugin = createPlugin({
 | `mod+Shift+U` | Source mode |
 | `mod+,` | Subscript |
 | `mod+.` | Superscript |
+
+### Custom Shortcuts
+
+Override default shortcuts by passing a `shortcuts` object:
+
+```jsx
+<RemyxEditor
+  shortcuts={{
+    bold: 'mod+shift+b',      // remap bold
+    insertLink: 'mod+l',      // remap link
+  }}
+/>
+```
+
+Register shortcuts programmatically via the engine:
+
+```jsx
+<RemyxEditor
+  onReady={(engine) => {
+    engine.keyboard.register('mod+shift+h', 'highlight');
+
+    // Get platform-specific label for display
+    const label = engine.keyboard.getShortcutLabel('mod+b');
+    // → '⌘B' on Mac, 'Ctrl+B' on Windows
+  }}
+/>
+```
+
+## Heading Level Offset
+
+When embedding the editor in a page that already has an `<h1>`, use `baseHeadingLevel` to offset heading levels so the editor's headings fit the page hierarchy:
+
+```jsx
+// Page has its own <h1>, so editor H1 renders as <h2>
+<h1>My Page Title</h1>
+<RemyxEditor baseHeadingLevel={2} />
+```
+
+| `baseHeadingLevel` | Editor H1 | Editor H2 | Editor H3 |
+|---|---|---|---|
+| `1` (default) | `<h1>` | `<h2>` | `<h3>` |
+| `2` | `<h2>` | `<h3>` | `<h4>` |
+| `3` | `<h3>` | `<h4>` | `<h5>` |
+
+All heading levels are clamped to a maximum of `<h6>`.
+
+## Floating Toolbar & Context Menu
+
+### Floating Toolbar
+
+A compact toolbar appears when text is selected, providing quick access to formatting:
+
+```jsx
+<RemyxEditor floatingToolbar={true} />   {/* enabled (default) */}
+<RemyxEditor floatingToolbar={false} />  {/* disabled */}
+```
+
+The floating toolbar shows bold, italic, underline, strikethrough, link, highlight, and heading options near the selection.
+
+### Context Menu
+
+Right-click on the editor content to access a context menu with relevant actions:
+
+```jsx
+<RemyxEditor contextMenu={true} />   {/* enabled (default) */}
+<RemyxEditor contextMenu={false} />  {/* disabled */}
+```
+
+The context menu adapts to the clicked element — links show edit/remove options, images show resize options, tables show row/column operations.
+
+### Combining with Minimal Toolbar
+
+For a clean writing experience, hide the main toolbar and rely on the floating toolbar and context menu:
+
+```jsx
+<RemyxEditor
+  toolbar={[]}
+  floatingToolbar={true}
+  contextMenu={true}
+  menuBar={false}
+  statusBar={false}
+  placeholder="Just start writing..."
+  height={500}
+/>
+```
+
+## Form Integration
+
+### Next.js / Remix Form
+
+```jsx
+function ArticleForm() {
+  const [content, setContent] = useState('');
+
+  return (
+    <form method="post" action="/api/articles">
+      <input type="text" name="title" placeholder="Title" />
+      <RemyxEditor value={content} onChange={setContent} height={400} />
+      <input type="hidden" name="body" value={content} />
+      <button type="submit">Publish</button>
+    </form>
+  );
+}
+```
+
+### Textarea Sync
+
+Attach to a `<textarea>` for native form submission — the textarea value stays in sync automatically:
+
+```jsx
+function CommentForm() {
+  const textareaRef = useRef(null);
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <textarea ref={textareaRef} name="comment" hidden />
+      <RemyxEditor
+        attachTo={textareaRef}
+        toolbar={[['bold', 'italic', 'link']]}
+        statusBar={false}
+        height={150}
+        placeholder="Write a comment..."
+      />
+      <button type="submit">Post</button>
+    </form>
+  );
+}
+```
+
+### Controlled with Validation
+
+```jsx
+function ValidatedEditor() {
+  const [content, setContent] = useState('');
+  const [error, setError] = useState('');
+  const engineRef = useRef(null);
+
+  const validate = () => {
+    const words = engineRef.current?.getWordCount() || 0;
+    if (words < 10) {
+      setError('Please write at least 10 words');
+      return false;
+    }
+    if (words > 5000) {
+      setError('Maximum 5000 words allowed');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
+  return (
+    <div>
+      <RemyxEditor
+        value={content}
+        onChange={(html) => { setContent(html); setError(''); }}
+        onReady={(engine) => { engineRef.current = engine }}
+        onBlur={validate}
+      />
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <button onClick={() => validate() && submitForm(content)}>
+        Submit
+      </button>
+    </div>
+  );
+}
+```
 
 ## Exports
 
@@ -1006,7 +1438,7 @@ engine.destroy();
 
 | Package | Version |
 | --- | --- |
-| `@remyx/core` | >= 0.23.4 |
+| `@remyx/core` | >= 0.24.0 |
 | `react` | >= 18.0.0 |
 | `react-dom` | >= 18.0.0 |
 

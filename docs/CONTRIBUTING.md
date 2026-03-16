@@ -53,7 +53,7 @@ remyx/
   packages/
     remyx-core/        @remyx/core      0.24.0  Framework-agnostic editor engine
     remyx-react/       @remyx/react     0.24.0  React components and hooks
-    create-remyx/      create-remyx     0.23.4   CLI scaffolding tool
+    create-remyx/      create-remyx     0.24.0  Reserved for future CLI tool
     docs/              (not published)           Documentation, changelog, roadmap
 ```
 
@@ -86,7 +86,7 @@ packages/remyx-react/src/
 
 ### create-remyx
 
-A single-file CLI (`index.js`) that scaffolds new projects from templates in `templates/`.
+Reserved for a future CLI tool. Project scaffolding has moved to `@remyx/react` — use `npx create-remyx-app`.
 
 ---
 

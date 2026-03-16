@@ -18,6 +18,7 @@ packages/
   remyx-svelte/        → @remyx/svelte       (Svelte components + actions)
   remyx-vanilla/       → @remyx/vanilla      (Vanilla JS / Web Component)
   remyx-ssr/           → @remyx/ssr          (Node.js server-side utilities)
+  create-remyx/        → create-remyx        (CLI wizard for scaffolding custom editors)
 ```
 
 ---
@@ -950,6 +951,105 @@ export default defineConfig({
 
 ---
 
+### Step 10: create-remyx CLI (`create-remyx`)
+
+**Goal:** Repurpose the `create-remyx` package as an interactive CLI wizard that scaffolds fully configured custom WYSIWYG editors. Unlike the original simple scaffolder (now in `@remyx/react` as `create-remyx-app`), this CLI guides users through feature selection and generates a project with all chosen options pre-wired.
+
+**Level of effort:** Medium-Large (2-3 sessions)
+
+#### 10a. Package structure
+
+```
+packages/create-remyx/
+  package.json
+  src/
+    index.js                  ← entry point, CLI runner
+    prompts/
+      framework.js            ← React / Vue / Svelte / Angular / Vanilla
+      features.js             ← toolbar, menu bar, status bar, floating toolbar, context menu
+      plugins.js              ← word count, autolink, placeholder, code, math, comments
+      theme.js                ← light / dark / custom, theme variable prompts
+      format.js               ← HTML / Markdown / both output format
+      addons.js               ← PDF/DOCX import, upload handler, collaboration stub
+      typescript.js            ← JS or TS preference
+      template.js             ← minimal / standard / full-featured
+    generators/
+      project.js              ← assemble project directory from selections
+      config.js               ← generate remyx.config.js / .ts with defineConfig()
+      viteConfig.js           ← generate framework-appropriate vite.config
+      packageJson.js          ← generate package.json with correct deps
+      pluginScaffold.js       ← --plugin mode: scaffold a plugin package
+    templates/
+      react/                  ← React project templates (minimal, standard, full)
+      vue/                    ← Vue project templates
+      svelte/                 ← Svelte project templates
+      angular/                ← Angular project templates
+      vanilla/                ← Vanilla JS project templates
+      plugin/                 ← Plugin authoring template
+    utils/
+      colors.js               ← ANSI color helpers (no deps)
+      prompt.js               ← readline wrapper
+```
+
+#### 10b. CLI modes
+
+| Mode | Command | Description |
+|---|---|---|
+| Interactive | `npx create-remyx` | Guided wizard with all prompts |
+| Quick | `npx create-remyx my-app --react --ts` | Skip prompts with flags |
+| Plugin | `npx create-remyx --plugin my-plugin` | Scaffold a plugin package |
+
+#### 10c. Generated config example
+
+The CLI generates a `remyx.config.js` that pre-configures the editor based on selections:
+
+```js
+import { defineConfig } from '@remyx/core'
+
+export default defineConfig({
+  outputFormat: 'html',
+  toolbar: [
+    ['undo', 'redo'],
+    ['bold', 'italic', 'underline', 'strikethrough'],
+    ['heading', 'blockquote', 'codeBlock'],
+    ['bulletList', 'orderedList'],
+    ['link', 'image', 'table'],
+  ],
+  menuBar: true,
+  statusBar: 'bottom',
+  theme: 'light',
+  plugins: ['wordCount', 'autolink', 'placeholder'],
+  placeholder: 'Start typing...',
+})
+```
+
+#### 10d. `packages/create-remyx/package.json`
+
+```json
+{
+  "name": "create-remyx",
+  "version": "0.25.0",
+  "type": "module",
+  "description": "Interactive CLI for scaffolding custom Remyx Editor projects",
+  "bin": {
+    "create-remyx": "./src/index.js"
+  },
+  "files": ["src"],
+  "keywords": ["create", "remyx", "editor", "wysiwyg", "scaffold", "cli", "wizard"],
+  "license": "MIT"
+}
+```
+
+#### 10e. Verification
+
+- Run `npx create-remyx test-app` — complete interactive wizard, verify generated project
+- Run `cd test-app && npm install && npm run dev` — confirm project runs
+- Run `npx create-remyx --plugin test-plugin` — verify plugin scaffold
+- Run `npx create-remyx test-app --react --ts` — verify quick mode
+- Verify generated `remyx.config.js` matches selected options
+
+---
+
 ## Execution Order & Dependencies
 
 ```
@@ -963,6 +1063,7 @@ Step 6  → @remyx/svelte           (depends on Step 1, parallel with 4-5,7-8)
 Step 7  → @remyx/vanilla          (depends on Step 1, parallel with 4-6,8)
 Step 8  → @remyx/ssr              (depends on Step 1, parallel with 4-7)
 Step 9  → Root monorepo update    (after Step 3, incrementally with 4-8)
+Step 10 → create-remyx CLI        (after Steps 4-7, needs framework templates)
 ```
 
 Steps 4-8 are fully independent and can be done in any order or in parallel.
@@ -982,8 +1083,9 @@ Steps 4-8 are fully independent and can be done in any order or in parallel.
 | 7 | `@remyx/vanilla` | Large | 3-4 | P1 — Widest compat |
 | 8 | `@remyx/ssr` | Small-Medium | 1-2 | P2 — Niche |
 | 9 | Root config | Small | 1 | P0 — Required |
+| 10 | `create-remyx` CLI | Medium-Large | 2-3 | P1 — DX onboarding |
 
-**Total estimated effort:** 15-24 sessions
+**Total estimated effort:** 17-27 sessions
 
 ---
 

@@ -167,6 +167,24 @@ A living document outlining planned features, improvements, and long-term direct
 - Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal
 - See [SECURITY.md](./SECURITY.md) for the full audit report and remediation priorities
 
+## create-remyx CLI
+
+Interactive CLI tool to help users build custom WYSIWYG editors with the right configuration for their use case.
+
+- `npx create-remyx` launches a guided setup wizard
+- Pick a framework: React, Vue, Svelte, Angular, or Vanilla JS
+- Choose features: toolbar layout, menu bar, status bar, floating toolbar, context menu
+- Select plugins: word count, autolink, placeholder, code highlighting, math, comments
+- Configure theme: light, dark, or custom with live preview of theme variables
+- Pick document formats: HTML output, Markdown output, or both
+- Optional add-ons: PDF/DOCX import, image upload handler scaffold, collaboration stub
+- Generate a ready-to-run project with Vite, framework bindings, and all selected options pre-configured
+- Output a `remyx.config.js` (or `.ts`) with the full `defineConfig()` setup
+- TypeScript or JavaScript scaffolding based on user preference
+- Template variants: minimal (bare editor), standard (toolbar + status bar), full-featured (all UI chrome)
+- Post-scaffold instructions: install, dev, build, and deploy
+- Plugin authoring mode: `npx create-remyx --plugin` scaffolds a plugin package with `createPlugin()` boilerplate, test setup, and build config
+
 ## External Configuration
 
 - Load toolbar layout, theme, fonts, and plugin list from a JSON/YAML config file
