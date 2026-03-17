@@ -20,11 +20,15 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "e2e": "npx playwright test",
-    "e2e:report": "npx playwright show-report coverage/e2e"
-  },
-  "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "e2e:report": "npx playwright show-report coverage/e2e",
+    "affected:build": "npx nx affected --target=build",
+    "affected:test": "npx nx affected --target=test",
+    "affected:lint": "npx nx affected --target=lint",
+    "graph": "npx nx graph",
+    "release": "npx nx release",
+    "release:dry-run": "npx nx release --dry-run",
+    "release:version": "npx nx release version",
+    "release:publish": "npx nx release publish"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
@@ -44,10 +48,11 @@
     "babel-jest": "^30.3.0",
     "eslint": "9.39.1",
     "eslint-plugin-react-hooks": "7.0.1",
-    "eslint-plugin-react-refresh": "0.4.24",
     "globals": "16.5.0",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "nx": "22.5.4"
+    "nx": "22.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   }
 }

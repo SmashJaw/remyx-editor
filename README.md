@@ -246,9 +246,6 @@ Heavy dependencies (`mammoth` for DOCX, `pdfjs-dist` for PDF) are optional peer 
 # Install dependencies
 npm install
 
-# Start dev server (Vite)
-npm run dev
-
 # Build all packages
 npm run build:all
 
@@ -256,7 +253,7 @@ npm run build:all
 npm run build:core
 npm run build:react
 
-# Run tests (857 unit tests)
+# Run tests (868 unit tests)
 npm test
 
 # Run tests in watch mode

@@ -32,7 +32,7 @@ async function main() {
   const projectArg = argv[2]
 
   console.log()
-  console.log(bold(cyan('  create-remyx-app')) + dim(' v0.24.0'))
+  console.log(bold(cyan('  create-remyx-app')) + dim(' v0.27.0'))
   console.log()
 
   const { ask, close } = createPrompt()
@@ -135,8 +135,8 @@ function buildPackageJson(name, useTypeScript, includeDocs) {
       preview: 'vite preview',
     },
     dependencies: {
-      '@remyx/core': '^0.24.0',
-      '@remyx/react': '^0.24.0',
+      '@remyx/core': '^0.27.0',
+      '@remyx/react': '^0.27.0',
       react: '^19.2.0',
       'react-dom': '^19.2.0',
     },

@@ -90,9 +90,7 @@ function formatNode(node, level, lines, indent) {
       continue
     }
 
-    const isBlock = BLOCK_ELEMENTS.has(tag)
     const isVoid = VOID_ELEMENTS.has(tag)
-    const isInline = INLINE_ELEMENTS.has(tag)
     const currentIndent = indent.repeat(Math.max(0, level))
 
     // Build the opening tag with attributes

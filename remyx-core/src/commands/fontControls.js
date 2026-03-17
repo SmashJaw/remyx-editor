@@ -19,7 +19,7 @@ export function registerFontCommands(engine) {
       if (!family) return
       document.execCommand('fontName', false, family)
     },
-    isActive(eng) {
+    isActive() {
       try {
         const val = document.queryCommandValue('fontName')
         return val || false
@@ -68,7 +68,7 @@ export function registerFontCommands(engine) {
       if (!color) return
       document.execCommand('foreColor', false, color)
     },
-    isActive(eng) {
+    isActive() {
       try {
         return document.queryCommandValue('foreColor') || false
       } catch {
@@ -88,7 +88,7 @@ export function registerFontCommands(engine) {
         document.execCommand('backColor', false, color)
       }
     },
-    isActive(eng) {
+    isActive() {
       try {
         return document.queryCommandValue('backColor') || false
       } catch {

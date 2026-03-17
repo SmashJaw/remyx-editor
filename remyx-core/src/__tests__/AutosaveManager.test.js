@@ -115,7 +115,7 @@ describe('AutosaveManager', () => {
       manager = new AutosaveManager(engine, { provider })
 
       const p1 = manager.save()
-      const p2 = manager.save() // should queue
+      manager.save() // should queue
 
       resolveSave()
       await p1

@@ -9,7 +9,7 @@
       "!{projectRoot}/**/*.test.{js,jsx}",
       "!{projectRoot}/**/*.spec.{js,jsx}",
       "!{projectRoot}/coverage/**",
-      "!{projectRoot}/.eslintrc.*"
+      "!{projectRoot}/eslint.config.*"
     ]
   },
   "targetDefaults": {

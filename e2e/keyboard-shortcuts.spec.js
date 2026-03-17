@@ -53,8 +53,6 @@ test.describe('Keyboard Shortcuts', () => {
     // Clear existing content and type new text
     await editArea.press(`${modifier}+a`)
     await editArea.pressSequentially('First text')
-    const contentBefore = await editArea.textContent()
-
     await editArea.pressSequentially(' extra')
     await editArea.press(`${modifier}+z`)
 

@@ -1,6 +1,6 @@
 {
   "name": "@remyx/react",
-  "version": "0.24.0",
+  "version": "0.27.0",
   "description": "React components and hooks for the Remyx rich-text editor",
   "keywords": ["wysiwyg", "editor", "rich-text", "react", "contenteditable", "react-editor", "text-editor"],
   "author": "Remyx",
@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/SmashJaw/remyx-editor/issues"
   },
-  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/master/packages/remyx-react#readme",
+  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/main/packages/remyx-react#readme",
   "type": "module",
   "main": "./dist/remyx-react.cjs",
   "module": "./dist/remyx-react.js",
@@ -32,12 +32,12 @@
   "files": ["dist", "create"],
   "sideEffects": false,
   "peerDependencies": {
-    "@remyx/core": ">=0.24.0",
+    "@remyx/core": ">=0.27.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@remyx/core": "0.24.0",
+    "@remyx/core": "0.27.0",
     "@vitejs/plugin-react": "5.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",

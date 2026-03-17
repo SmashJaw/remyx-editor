@@ -20,7 +20,11 @@ export function useSlashCommands(engine, editorRootRef, options = {}) {
   const filteredItemsRef = useRef(allItems)
 
   const filteredItems = filterSlashItems(allItems, query)
-  filteredItemsRef.current = filteredItems
+
+  // Sync ref in effect to avoid updating ref during render
+  useEffect(() => {
+    filteredItemsRef.current = filteredItems
+  }, [filteredItems])
 
   // Reset selected index when filtered items change
   useEffect(() => {
@@ -88,7 +92,7 @@ export function useSlashCommands(engine, editorRootRef, options = {}) {
       unsubClose()
       unsubKeydown()
     }
-  }, [engine, editorRootRef, onOpenModal]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [engine, editorRootRef, onOpenModal])
 
   const selectItem = useCallback((item) => {
     if (!engine) return

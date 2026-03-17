@@ -118,11 +118,11 @@ export class Clipboard {
     }
   }
 
-  _handleCopy(e) {
+  _handleCopy() {
     // Let browser handle default copy behavior
   }
 
-  _handleCut(e) {
+  _handleCut() {
     // Let browser handle default cut, just record for undo
     setTimeout(() => {
       this.engine.eventBus.emit('content:change')

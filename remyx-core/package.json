@@ -1,6 +1,6 @@
 {
   "name": "@remyx/core",
-  "version": "0.24.0",
+  "version": "0.27.0",
   "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
   "keywords": ["wysiwyg", "editor", "rich-text", "contenteditable", "html-editor", "text-editor", "sanitizer", "plugins"],
   "author": "Remyx",
@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/SmashJaw/remyx-editor/issues"
   },
-  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/master/packages/remyx-core#readme",
+  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/main/packages/remyx-core#readme",
   "type": "module",
   "main": "./dist/remyx-core.cjs",
   "module": "./dist/remyx-core.js",

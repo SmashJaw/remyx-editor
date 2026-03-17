@@ -1585,7 +1585,7 @@ engine.destroy();
 
 | Package | Version |
 | --- | --- |
-| `@remyx/core` | >= 0.24.0 |
+| `@remyx/core` | >= 0.27.0 |
 | `react` | >= 18.0.0 |
 | `react-dom` | >= 18.0.0 |
 

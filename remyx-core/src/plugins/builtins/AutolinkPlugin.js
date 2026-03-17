@@ -57,7 +57,7 @@ export function AutolinkPlugin() {
         const match = findLastURLMatch(text)
         if (!match) return
 
-        const { url, href, startIdx, endIdx } = match
+        const { href, startIdx, endIdx } = match
 
         // Ensure the matched range is before the cursor position
         const cursorOffset = sel.focusOffset

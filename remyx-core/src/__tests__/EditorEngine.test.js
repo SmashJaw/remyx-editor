@@ -1,6 +1,5 @@
 
 import { EditorEngine } from '../core/EditorEngine.js'
-import { registerFormattingCommands } from '../commands/formatting.js'
 
 describe('EditorEngine', () => {
   let engine

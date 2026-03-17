@@ -21,7 +21,7 @@ jest.mock('../constants/defaults.js', () => ({
 
 import { cleanPastedHTML, looksLikeMarkdown } from '../utils/pasteClean.js'
 import { markdownToHtml } from '../utils/markdownConverter.js'
-import { isImportableFile, convertDocument } from '../utils/documentConverter/index.js'
+import { isImportableFile } from '../utils/documentConverter/index.js'
 
 describe('DragDrop', () => {
   let dragDrop

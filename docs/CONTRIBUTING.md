@@ -36,8 +36,8 @@ cd remyx-editor
 # Install dependencies (npm workspaces will link all packages automatically)
 npm install
 
-# Start the development server
-npm run dev
+# Build all packages
+npm run build:all
 ```
 
 The `npm install` at the repo root resolves all workspace dependencies, including the internal link between `@remyx/react` and `@remyx/core`. You do not need to run install inside individual packages.
@@ -92,24 +92,22 @@ Reserved for a future CLI tool. Project scaffolding has moved to `@remyx/react` 
 
 ## Development Workflow
 
-All commands are run from the **repository root** unless stated otherwise.
+All commands are run from the **packages root** unless stated otherwise.
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start the Vite dev server (root app with hot reload) |
-| `npm run build` | Build the root app |
 | `npm run build:core` | Build `@remyx/core` only |
 | `npm run build:react` | Build `@remyx/react` only |
-| `npm run build:all` | Build core then react (in dependency order) |
+| `npm run build:all` | Build core then react (in dependency order via Nx) |
 | `npm run lint` | Run ESLint across the entire repo |
-| `npm run preview` | Preview the production build locally |
+| `npm run typecheck` | Type-check with TypeScript |
 
 ### Watch mode for packages
 
 When working on a package in isolation, use the package-level `dev` script which runs Vite in watch mode:
 
 ```bash
-cd packages/remyx-core
+cd remyx-core
 npm run dev    # vite build --watch
 ```
 
@@ -254,7 +252,7 @@ export function MyPlugin() {
      */
     init(api) {
       api.eventBus.on('content:change', () => {
-        console.log('Content changed')
+        // handle content change
       })
     },
 
