@@ -42,7 +42,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['vite.config.{js,ts}', '**/vite.config.{js,ts}', 'e2e/**/*.{js,ts}', 'create-remyx/**/*.js'],
+    files: ['vite.config.{js,ts}', '**/vite.config.{js,ts}', 'create-remyx/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,

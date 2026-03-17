@@ -262,9 +262,6 @@ npm run test:watch
 # Run tests with coverage
 npm run test:coverage
 
-# Run e2e tests (Playwright)
-npm run e2e
-
 # Lint
 npm run lint
 

@@ -117,7 +117,7 @@ Always build `@remyx/core` before `@remyx/react`, since React depends on Core. T
 
 ### Testing
 
-Jest is the unit test runner and Playwright handles end-to-end tests. Coverage reports are generated as HTML.
+Jest is the unit test runner. Coverage reports are generated as HTML.
 
 ```bash
 # Run all unit tests
@@ -128,21 +128,14 @@ npm run test:watch
 
 # Run unit tests with coverage report (output: coverage/unit/)
 npm run test:coverage
-
-# Run Playwright e2e tests (requires dev server)
-npm run e2e
-
-# View Playwright HTML report
-npm run e2e:report
 ```
 
 #### Test structure
 
 | Directory | Runner | Description |
 |---|---|---|
-| `packages/remyx-core/src/__tests__/` | Jest | Core engine, commands, plugins, utilities |
-| `packages/remyx-react/src/__tests__/` | Jest | React hooks, components, config provider |
-| `e2e/` | Playwright | Browser-based integration tests |
+| `remyx-core/src/__tests__/` | Jest | Core engine, commands, plugins, utilities |
+| `remyx-react/src/__tests__/` | Jest | React hooks, components, config provider |
 
 #### Writing tests
 

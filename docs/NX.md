@@ -70,7 +70,7 @@ Nx is already installed. After cloning the repo, just run:
 npm install
 ```
 
-This installs nx and all plugins (`@nx/js`, `@nx/eslint`, `@nx/jest`, `@nx/playwright`) as devDependencies.
+This installs nx and all plugins (`@nx/js`, `@nx/eslint`, `@nx/jest`) as devDependencies.
 
 To verify the setup:
 
