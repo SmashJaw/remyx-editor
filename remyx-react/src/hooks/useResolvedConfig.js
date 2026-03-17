@@ -59,7 +59,15 @@ export function useResolvedConfig(props) {
     onError,
     errorFallback,
     commandPalette: showCommandPalette = true,
+    autosave: autosaveProp = false,
   } = merged
+
+  // Normalize autosave config: true → { enabled: true }, false → { enabled: false }
+  const autosaveConfig = autosaveProp === true
+    ? { enabled: true }
+    : autosaveProp === false
+      ? { enabled: false }
+      : { enabled: true, ...autosaveProp }
 
   // Resolve menu bar config
   const menuBarConfig = menuBarProp === true ? DEFAULT_MENU_BAR
@@ -113,5 +121,6 @@ export function useResolvedConfig(props) {
     onError,
     errorFallback,
     showCommandPalette,
+    autosaveConfig,
   }
 }

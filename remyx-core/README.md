@@ -36,6 +36,10 @@ Use this package to build Remyx Editor integrations for any framework (Vue, Svel
   - [Creating Plugins](#creating-plugins)
   - [Plugin API (Restricted)](#plugin-api-restricted)
   - [Built-in Plugins](#built-in-plugins)
+- [Autosave](#autosave)
+  - [Storage Providers](#storage-providers)
+  - [AutosaveManager API](#autosavemanager-api)
+  - [Autosave Events](#autosave-events)
 - [Selection API](#selection-api)
 - [History (Undo/Redo)](#history-undoredo)
 - [Keyboard Shortcuts](#keyboard-shortcuts)
@@ -196,6 +200,10 @@ const engine = new EditorEngine(element, {
 | `plugin:registered` | `{ name }` | Plugin was registered |
 | `plugin:error` | `{ name, error }` | Plugin init/destroy error |
 | `wordcount:update` | `{ wordCount, charCount }` | Word/char count changed |
+| `autosave:saving` | — | Autosave started |
+| `autosave:saved` | `{ timestamp }` | Autosave succeeded |
+| `autosave:error` | `{ error }` | Autosave failed |
+| `autosave:recovered` | `{ recoveredContent, timestamp }` | Recovery data found on init |
 
 **Example — listening to events:**
 
@@ -507,6 +515,108 @@ const matches = filterSlashItems(SLASH_COMMAND_ITEMS, 'head');
 ```
 
 Each item has the shape `{ id, label, description, icon, keywords, category, action }`. The `action` function receives `(engine, openModal?)` and executes the command.
+
+## Autosave
+
+Framework-agnostic autosave engine with pluggable storage providers. Debounces saves after content changes, runs periodic interval saves, and detects recoverable content on startup.
+
+### Storage Providers
+
+Five built-in providers cover browser storage, filesystem, cloud, and custom backends:
+
+```js
+import {
+  LocalStorageProvider,
+  SessionStorageProvider,
+  FileSystemProvider,
+  CloudProvider,
+  CustomProvider,
+  createStorageProvider,
+} from '@remyx/core';
+```
+
+| Provider | Use Case | Config Shorthand |
+| --- | --- | --- |
+| `LocalStorageProvider` | Browser apps (default) | `'localStorage'` or omit |
+| `SessionStorageProvider` | Tab-scoped saves | `'sessionStorage'` |
+| `FileSystemProvider` | Node / Electron / Tauri | `{ writeFn, readFn, deleteFn }` |
+| `CloudProvider` | AWS S3, GCP, any HTTP API | `{ endpoint, headers, ... }` |
+| `CustomProvider` | Full consumer control | `{ save, load, clear }` |
+
+Each provider implements `save(key, content)`, `load(key)`, and `clear(key)`. Content is wrapped in a JSON envelope with `{ content, timestamp, version }`.
+
+**Factory function** — `createStorageProvider(config)` resolves shorthand strings or objects into provider instances:
+
+```js
+const local = createStorageProvider();                      // LocalStorageProvider
+const session = createStorageProvider('sessionStorage');     // SessionStorageProvider
+const cloud = createStorageProvider({                       // CloudProvider
+  endpoint: 'https://api.example.com/autosave',
+  headers: { Authorization: 'Bearer token123' },
+});
+const fs = createStorageProvider({                          // FileSystemProvider
+  writeFn: async (key, data) => writeFile(`/saves/${key}.json`, data),
+  readFn: async (key) => readFile(`/saves/${key}.json`),
+  deleteFn: async (key) => unlink(`/saves/${key}.json`),
+});
+```
+
+**CloudProvider options** for AWS S3 / GCP / custom APIs:
+
+```js
+const s3Provider = new CloudProvider({
+  endpoint: 'https://my-bucket.s3.amazonaws.com',
+  buildUrl: (key) => getPresignedUploadUrl(key),   // S3 presigned URL
+  buildLoadUrl: (key) => getPresignedDownloadUrl(key),
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  fetchFn: fetch, // optional custom fetch
+});
+```
+
+### AutosaveManager API
+
+```js
+import { AutosaveManager } from '@remyx/core';
+
+const manager = new AutosaveManager(engine, {
+  provider: 'localStorage',  // or any provider config
+  key: 'doc-123',            // storage key (default: 'rmx-default')
+  interval: 30000,           // periodic save interval in ms (default: 30s)
+  debounce: 2000,            // debounce delay after content change (default: 2s)
+  enabled: true,             // toggle on/off (default: true)
+});
+
+manager.init();              // start listening to content:change
+
+await manager.save();        // force an immediate save
+await manager.checkRecovery(engine.getHTML());  // check for recoverable content
+await manager.clearRecovery();                  // clear stored recovery data
+
+manager.destroy();           // cleanup timers, listeners, final save
+```
+
+### Autosave Events
+
+```js
+engine.eventBus.on('autosave:saving', () => {
+  console.log('Saving...');
+});
+
+engine.eventBus.on('autosave:saved', ({ timestamp }) => {
+  console.log(`Saved at ${new Date(timestamp).toLocaleTimeString()}`);
+});
+
+engine.eventBus.on('autosave:error', ({ error }) => {
+  console.error('Autosave failed:', error.message);
+});
+
+engine.eventBus.on('autosave:recovered', ({ recoveredContent, timestamp }) => {
+  if (confirm('Unsaved changes found. Restore?')) {
+    engine.setHTML(recoveredContent);
+  }
+});
+```
 
 ## Plugin System
 

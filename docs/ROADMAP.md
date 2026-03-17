@@ -2,8 +2,8 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 0.24.0
-**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), feature-complete for core editing
+**Current Version:** 0.26.0
+**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), autosave with pluggable storage, command palette
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.
 
@@ -17,13 +17,18 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~npm workspaces monorepo setup~~
 - See [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) for the full restructure plan
 
-## Autosave
+## ~~Autosave~~ ✅ Shipped (v0.26.0)
 
-- Periodic autosave to `localStorage` / `sessionStorage` with configurable interval
-- Crash-recovery banner: "Unsaved content was recovered — restore it?"
-- Optional server-side autosave via a user-supplied `onAutoSave(html)` callback
-- Debounced save on every content change with deduplication
-- Visual save-status indicator (Saved / Saving... / Unsaved)
+- ~~Periodic autosave to `localStorage` / `sessionStorage` with configurable interval~~
+- ~~Crash-recovery banner: "Unsaved content was recovered — restore it?"~~
+- ~~Server-side autosave~~ — implemented as pluggable storage providers (LocalStorage, SessionStorage, FileSystem, Cloud HTTP, Custom)
+- ~~Debounced save on every content change with deduplication~~
+- ~~Visual save-status indicator (Saved / Saving... / Unsaved)~~
+- Cloud storage: AWS S3 presigned URLs, GCP signed URLs, any HTTP endpoint
+- Filesystem provider for Node/Electron/Tauri apps
+- `AutosaveManager` class + 5 storage providers in `@remyx/core`
+- `useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyx/react`
+- `autosave` prop on `RemyxEditor` (boolean or config object)
 
 ## Enhanced Tables & Spreadsheet Features
 

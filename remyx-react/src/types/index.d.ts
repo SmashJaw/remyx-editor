@@ -96,6 +96,105 @@ export interface SanitizeOptions {
   allowedStyles?: string[]
 }
 
+// ── Autosave ─────────────────────────────────────────────────────
+
+export interface StorageProvider {
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+}
+
+export interface CloudProviderConfig {
+  endpoint: string
+  headers?: Record<string, string>
+  method?: string
+  fetchFn?: typeof fetch
+  buildUrl?: (key: string) => string
+  buildBody?: (key: string, content: string) => string | FormData
+  buildLoadUrl?: (key: string) => string
+  buildDeleteUrl?: (key: string) => string
+}
+
+export interface FileSystemProviderConfig {
+  writeFn: (key: string, data: string) => Promise<void>
+  readFn: (key: string) => Promise<string | null>
+  deleteFn: (key: string) => Promise<void>
+}
+
+export interface AutosaveConfig {
+  enabled?: boolean
+  interval?: number
+  debounce?: number
+  provider?: 'localStorage' | 'sessionStorage' | StorageProvider | CloudProviderConfig | FileSystemProviderConfig
+  key?: string
+  onRecover?: (data: { recoveredContent: string; timestamp: number }) => void
+  showRecoveryBanner?: boolean
+  showSaveStatus?: boolean
+}
+
+export type SaveStatus = 'saved' | 'saving' | 'unsaved' | 'error'
+
+export declare class AutosaveManager {
+  constructor(engine: EditorEngine, options?: AutosaveConfig)
+  init(): void
+  destroy(): void
+  save(): Promise<void>
+  checkRecovery(currentContent: string): Promise<{ recoveredContent: string; timestamp: number } | null>
+  clearRecovery(): Promise<void>
+}
+
+export declare class LocalStorageProvider implements StorageProvider {
+  constructor(options?: { prefix?: string })
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+  saveSync(key: string, content: string, metadata?: Record<string, unknown>): boolean
+}
+
+export declare class SessionStorageProvider implements StorageProvider {
+  constructor(options?: { prefix?: string })
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+  saveSync(key: string, content: string, metadata?: Record<string, unknown>): boolean
+}
+
+export declare class FileSystemProvider implements StorageProvider {
+  constructor(options: FileSystemProviderConfig)
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+}
+
+export declare class CloudProvider implements StorageProvider {
+  constructor(options: CloudProviderConfig)
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+}
+
+export declare class CustomProvider implements StorageProvider {
+  constructor(options: { save: StorageProvider['save']; load: StorageProvider['load']; clear: StorageProvider['clear'] })
+  save(key: string, content: string, metadata?: Record<string, unknown>): Promise<void>
+  load(key: string): Promise<{ content: string; timestamp: number } | null>
+  clear(key: string): Promise<void>
+}
+
+export declare function createStorageProvider(
+  config?: string | StorageProvider | CloudProviderConfig | FileSystemProviderConfig | { prefix?: string },
+): StorageProvider
+
+export declare function useAutosave(
+  engine: EditorEngine | null,
+  config?: AutosaveConfig,
+): {
+  saveStatus: SaveStatus
+  lastSaved: number | null
+  recoveryData: { recoveredContent: string; timestamp: number } | null
+  recoverContent: () => void
+  dismissRecovery: () => void
+}
+
 // ── RemyxEditor Props ─────────────────────────────────────────────
 
 export interface RemyxEditorProps {
@@ -120,6 +219,7 @@ export interface RemyxEditorProps {
   floatingToolbar?: boolean
   contextMenu?: boolean
   commandPalette?: boolean
+  autosave?: boolean | AutosaveConfig
   plugins?: Plugin[]
   uploadHandler?: (file: File) => Promise<string>
   shortcuts?: Record<string, string>
@@ -184,6 +284,7 @@ export interface RemyxConfig {
   floatingToolbar?: boolean
   contextMenu?: boolean
   commandPalette?: boolean
+  autosave?: boolean | AutosaveConfig
   fonts?: string[]
   googleFonts?: string[]
   outputFormat?: 'html' | 'markdown'

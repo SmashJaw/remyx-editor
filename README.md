@@ -18,6 +18,7 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Source mode** — Toggle raw HTML editing
 - **Fullscreen mode** — Distraction-free editing
 - **Command palette** — Searchable overlay with all editor commands (`Mod+Shift+P` or toolbar button), fuzzy search, keyboard navigation
+- **Autosave** — Periodic + debounced saves with crash recovery banner, visual save-status indicator, pluggable storage (localStorage, sessionStorage, filesystem, AWS S3/GCP/cloud HTTP, or custom)
 - **Keyboard shortcuts** — 17+ default shortcuts, customizable via API
 - **Accessibility** — Skip navigation, focus trapping in modals, ARIA roles, keyboard-navigable toolbar
 - **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention
@@ -132,6 +133,27 @@ import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin } from '@remyx/core'
 />
 ```
 
+### Enable autosave
+
+```jsx
+// localStorage (default) — just pass true
+<RemyxEditor value={content} onChange={setContent} autosave />
+
+// Cloud storage (AWS S3, GCP, or any HTTP endpoint)
+<RemyxEditor
+  value={content}
+  onChange={setContent}
+  autosave={{
+    provider: {
+      endpoint: 'https://api.example.com/autosave',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+    key: 'doc-123',
+    interval: 60000,
+  }}
+/>
+```
+
 See the full [@remyx/react README](./remyx-react/README.md) for all props, hooks, error handling, engine access, modals, forms, and more.
 
 ## Quick Start (Core Only)
@@ -192,8 +214,9 @@ See the full [@remyx/core README](./remyx-core/README.md) for the complete engin
 | Plugin system | Yes | Re-exports from core |
 | Utilities | Yes | Re-exports from core |
 | CSS themes | Yes | Additional component styles |
+| Autosave engine | AutosaveManager + 5 storage providers | useAutosave hook, SaveStatus, RecoveryBanner |
 | React components | — | RemyxEditor, Toolbar, StatusBar, Modals |
-| React hooks | — | useRemyxEditor, useEditorEngine, useSelection |
+| React hooks | — | useRemyxEditor, useEditorEngine, useSelection, useAutosave |
 | TypeScript types | — | Full `.d.ts` declarations |
 | Scaffolding CLI | — | `npx create-remyx-app` |
 

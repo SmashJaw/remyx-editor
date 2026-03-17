@@ -47,6 +47,7 @@ Use `@remyx/core` directly if building a wrapper for another framework (Vue, Sve
 - [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Heading Level Offset](#heading-level-offset)
 - [Floating Toolbar & Context Menu](#floating-toolbar--context-menu)
+- [Autosave](#autosave)
 - [Form Integration](#form-integration)
 - [Exports](#exports)
 - [TypeScript](#typescript)
@@ -177,6 +178,7 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 | `floatingToolbar` | `boolean` | `true` | Show toolbar on text selection |
 | `contextMenu` | `boolean` | `true` | Show right-click context menu |
 | `commandPalette` | `boolean` | `true` | Enable command palette (Mod+Shift+P or toolbar button) |
+| `autosave` | `boolean \| AutosaveConfig` | `false` | Enable autosave with optional config (storage provider, interval, key) |
 | `plugins` | `Plugin[]` | — | Custom plugins |
 | `uploadHandler` | `(file: File) => Promise<string>` | — | File upload handler |
 | `shortcuts` | `object` | — | Keyboard shortcut overrides |
@@ -1252,6 +1254,112 @@ To add the command palette button to a custom toolbar:
     ['commandPalette'],
   ]}
 />
+```
+
+## Autosave
+
+Enable autosave with the `autosave` prop. Pass `true` for localStorage defaults, or an object for full control.
+
+### Basic (localStorage)
+
+```jsx
+<RemyxEditor value={content} onChange={setContent} autosave />
+```
+
+This saves to `localStorage` every 30 seconds and 2 seconds after each content change. A save-status indicator appears in the status bar (Saved / Saving... / Unsaved / Save failed), and a recovery banner appears on reload if unsaved content is detected.
+
+### Cloud Storage (AWS S3 / GCP / custom API)
+
+```jsx
+<RemyxEditor
+  value={content}
+  onChange={setContent}
+  autosave={{
+    provider: {
+      endpoint: 'https://api.example.com/autosave',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+    key: 'doc-123',
+    interval: 60000,       // save every 60s
+    debounce: 3000,        // 3s after last edit
+  }}
+/>
+```
+
+For S3 presigned URLs or GCP signed URLs, use `buildUrl`:
+
+```jsx
+autosave={{
+  provider: {
+    endpoint: 'https://my-bucket.s3.amazonaws.com',
+    buildUrl: (key) => getPresignedUrl(key),
+    method: 'PUT',
+  },
+  key: `user-${userId}/draft`,
+}}
+```
+
+### Filesystem (Electron / Tauri / Node)
+
+```jsx
+autosave={{
+  provider: {
+    writeFn: async (key, data) => window.electron.writeFile(`/saves/${key}.json`, data),
+    readFn: async (key) => window.electron.readFile(`/saves/${key}.json`),
+    deleteFn: async (key) => window.electron.deleteFile(`/saves/${key}.json`),
+  },
+  key: 'my-document',
+}}
+```
+
+### Custom Provider
+
+```jsx
+autosave={{
+  provider: {
+    save: async (key, content, metadata) => { /* your save logic */ },
+    load: async (key) => { /* return { content, timestamp } or null */ },
+    clear: async (key) => { /* your delete logic */ },
+  },
+}}
+```
+
+### AutosaveConfig Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Toggle autosave on/off |
+| `interval` | `number` | `30000` | Periodic save interval in ms |
+| `debounce` | `number` | `2000` | Debounce delay after content change in ms |
+| `provider` | `string \| object` | `'localStorage'` | Storage provider config |
+| `key` | `string` | `'rmx-default'` | Storage key for this editor instance |
+| `onRecover` | `(data) => void` | — | Callback when recovery data is found |
+| `showRecoveryBanner` | `boolean` | `true` | Show the recovery banner UI |
+| `showSaveStatus` | `boolean` | `true` | Show save status in the status bar |
+
+### useAutosave Hook
+
+For custom UIs, use the `useAutosave` hook directly:
+
+```jsx
+import { useAutosave } from '@remyx/react';
+
+function MyEditor({ engine }) {
+  const { saveStatus, lastSaved, recoveryData, recoverContent, dismissRecovery } =
+    useAutosave(engine, { enabled: true, key: 'doc-123' });
+
+  return (
+    <div>
+      <span>Status: {saveStatus}</span>
+      {recoveryData && (
+        <div>
+          <button onClick={recoverContent}>Restore</button>
+          <button onClick={dismissRecovery}>Dismiss</button>
+        </div>
+      )}
+    </div>
+  );
+}
 ```
 
 ## Form Integration

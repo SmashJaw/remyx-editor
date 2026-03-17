@@ -28,6 +28,10 @@ export { registerAttachmentCommands } from './commands/attachments.js'
 export { registerImportDocumentCommands } from './commands/importDocument.js'
 export { SLASH_COMMAND_ITEMS, filterSlashItems } from './commands/slashCommands.js'
 
+// Autosave
+export { AutosaveManager } from './core/AutosaveManager.js'
+export { LocalStorageProvider, SessionStorageProvider, FileSystemProvider, CloudProvider, CustomProvider, createStorageProvider } from './autosave/providers.js'
+
 // Plugins
 export { PluginManager } from './plugins/PluginManager.js'
 export { createPlugin } from './plugins/createPlugin.js'

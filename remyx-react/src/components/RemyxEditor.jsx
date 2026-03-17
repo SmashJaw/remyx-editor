@@ -6,6 +6,7 @@ import { useModal } from '../hooks/useModal.js'
 import { useContextMenu } from '../hooks/useContextMenu.js'
 
 import { useResolvedConfig } from '../hooks/useResolvedConfig.js'
+import { useAutosave } from '../hooks/useAutosave.js'
 import { usePortalAttachment } from '../hooks/usePortalAttachment.js'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 import { loadGoogleFonts, DEFAULT_FONTS } from '@remyx/core'
@@ -16,6 +17,7 @@ import { FloatingToolbar } from './EditArea/FloatingToolbar.jsx'
 import { ImageResizeHandles } from './EditArea/ImageResizeHandles.jsx'
 import { TableControls } from './EditArea/TableControls.jsx'
 import { StatusBar, WordCountButton } from './StatusBar/StatusBar.jsx'
+import { RecoveryBanner } from './RecoveryBanner/RecoveryBanner.jsx'
 import { ContextMenu } from './ContextMenu/ContextMenu.jsx'
 import { EditorErrorBoundary } from './ErrorBoundary.jsx'
 
@@ -43,6 +45,7 @@ export default function RemyxEditor(props) {
     statusBar, customTheme, toolbarItemTheme, sanitize, shortcuts,
     baseHeadingLevel, menuBarConfig, effectiveToolbar, onError, errorFallback,
     showCommandPalette,
+    autosaveConfig,
   } = useResolvedConfig(props)
 
   const editAreaRef = useRef(null)
@@ -89,6 +92,7 @@ export default function RemyxEditor(props) {
   const selectionState = useSelection(engine)
   const { modals, openModal, closeModal } = useModal()
   const { contextMenu, hideContextMenu } = useContextMenu(engine, editAreaRef)
+  const { saveStatus, recoveryData, recoverContent, dismissRecovery } = useAutosave(engine, autosaveConfig)
 
   // Track editor rect for positioning overlays (ResizeObserver + rAF throttled)
   const editorRect = useEditorRect(editorRootRef, ready)
@@ -196,7 +200,22 @@ export default function RemyxEditor(props) {
         toolbarItemTheme={toolbarItemTheme}
       />
 
-      {statusBar === 'top' && <StatusBar engine={engine} position="top" />}
+      {autosaveConfig.enabled && autosaveConfig.showRecoveryBanner !== false && (
+        <RecoveryBanner
+          recoveryData={recoveryData}
+          onRecover={recoverContent}
+          onDismiss={dismissRecovery}
+        />
+      )}
+
+      {statusBar === 'top' && (
+        <StatusBar
+          engine={engine}
+          position="top"
+          saveStatus={saveStatus}
+          showSaveStatus={autosaveConfig.enabled && autosaveConfig.showSaveStatus !== false}
+        />
+      )}
 
       <div className="rmx-editor-body" style={{ position: 'relative' }}>
         <EditArea
@@ -244,7 +263,13 @@ export default function RemyxEditor(props) {
         </Suspense>
       </div>
 
-      {statusBar === 'bottom' && <StatusBar engine={engine} />}
+      {statusBar === 'bottom' && (
+        <StatusBar
+          engine={engine}
+          saveStatus={saveStatus}
+          showSaveStatus={autosaveConfig.enabled && autosaveConfig.showSaveStatus !== false}
+        />
+      )}
 
       {showContextMenu && (
         <ContextMenu

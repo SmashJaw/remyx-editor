@@ -12,6 +12,11 @@ export { useEditorEngine } from './hooks/useEditorEngine.js'
 export { RemyxConfigProvider } from './config/RemyxConfigProvider.jsx'
 export { useRemyxConfig } from './hooks/useRemyxConfig.js'
 
+// Autosave
+export { useAutosave } from './hooks/useAutosave.js'
+export { SaveStatus } from './components/SaveStatus/SaveStatus.jsx'
+export { RecoveryBanner } from './components/RecoveryBanner/RecoveryBanner.jsx'
+
 // Error boundary
 export { EditorErrorBoundary } from './components/ErrorBoundary.jsx'
 

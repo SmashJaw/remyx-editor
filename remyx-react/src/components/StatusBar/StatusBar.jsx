@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ICON_MAP } from '../../icons/index.jsx'
+import { SaveStatus } from '../SaveStatus/SaveStatus.jsx'
 
-function StatusBarInner({ engine, position = 'bottom' }) {
+function StatusBarInner({ engine, position = 'bottom', saveStatus, showSaveStatus }) {
   const [counts, setCounts] = useState({ wordCount: 0, charCount: 0 })
 
   useEffect(() => {
@@ -15,6 +16,12 @@ function StatusBarInner({ engine, position = 'bottom' }) {
 
   return (
     <div className={className}>
+      {showSaveStatus && (
+        <>
+          <SaveStatus saveStatus={saveStatus} />
+          <span className="rmx-statusbar-sep" aria-hidden="true" />
+        </>
+      )}
       <span className="rmx-statusbar-item">
         {counts.wordCount} {counts.wordCount === 1 ? 'word' : 'words'}
       </span>

@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.26.0] — 2026-03-16
+
+### Added
+
+- **Autosave** — Pluggable autosave system with debounced (2s) and periodic (30s) saves, content deduplication, crash-recovery banner, and save-status indicator in the status bar. Five built-in storage providers: `LocalStorageProvider` (default), `SessionStorageProvider`, `FileSystemProvider` (Node/Electron/Tauri), `CloudProvider` (AWS S3, GCP, any HTTP endpoint with retry and presigned URL support), and `CustomProvider`. New `AutosaveManager` class and `createStorageProvider()` factory in `@remyx/core`. New `useAutosave` hook, `SaveStatus` component, and `RecoveryBanner` component in `@remyx/react`. New `autosave` prop on `RemyxEditor` (boolean or config object, default `false`). Events: `autosave:saving`, `autosave:saved`, `autosave:error`, `autosave:recovered`. Full TypeScript declarations.
+- **Autosave tests** — 40 new tests across 3 files: `providers.test.js` (25 tests), `AutosaveManager.test.js` (15 tests), `useAutosave.test.jsx` (8 tests).
+
+---
+
 ## [0.25.0] — 2026-03-16
 
 ### Added

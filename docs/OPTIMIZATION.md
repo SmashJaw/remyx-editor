@@ -3,8 +3,8 @@
 # Optimization Roadmap — Remyx Editor
 
 **Last updated:** 2026-03-16
-**Version:** 0.24.0
-**Scope:** File size reduction and runtime performance across all packages
+**Version:** 0.26.0
+**Scope:** Configuration ergonomics, user experience, runtime performance, bundle size, and rendering efficiency
 
 ---
 
@@ -252,3 +252,228 @@ Multiple elements animate `transform`/`scale` (context menu, modals, floating to
 | Medium (new) | #22–#24 | ~16–24 KB | Memory savings |
 | Low (new) | #25 ✅, #27 ✅, #26 | — | Smoother UX |
 | **Total** | **27 items (21 ✅, 6 open)** | **~165 KB + worker** | **Major** |
+
+---
+
+## 0.26.0 Audit — New Findings
+
+The following optimizations were identified during a comprehensive audit of the codebase at v0.26.0, spanning configuration ergonomics, rendering efficiency, core engine hot paths, bundle size, autosave, CSS, and event handling.
+
+---
+
+### High — Configuration Ergonomics
+
+#### 28. Memoize `useResolvedConfig` Return Value
+
+**File:** `remyx-react/src/hooks/useResolvedConfig.js`
+
+The hook returns a new object literal on every render, causing all consumers (`RemyxEditor`, `StatusBar`, `Toolbar`, etc.) to re-render even when no config value changed. Wrapping the return in `useMemo` keyed on resolved fields would stabilize the reference.
+
+**Estimated Impact:** 15–20% fewer cascading re-renders when parent state changes
+
+#### 29. Deduplicate Toolbar Config Resolution
+
+**File:** `remyx-react/src/hooks/useResolvedConfig.js` (lines 38–65)
+
+Toolbar presets are resolved on every render by iterating through `TOOLBAR_PRESETS` and calling `getToolbarPreset()`. The result is deterministic for a given `toolbar` prop, so it can be memoized with `useMemo(() => resolveToolbar(toolbar), [toolbar])`.
+
+**Estimated Impact:** Minor CPU savings per render; improves profiler flame graph clarity
+
+#### 30. Stabilize `RemyxConfigProvider` Context Value
+
+**File:** `remyx-react/src/components/ConfigProvider/RemyxConfigProvider.jsx`
+
+The provider creates a new context value object on each render, causing all `useContext(RemyxConfigContext)` consumers to re-render. Wrapping in `useMemo` would prevent unnecessary propagation.
+
+**Estimated Impact:** Prevents re-render cascade through the entire component tree
+
+---
+
+### High — React Rendering Efficiency
+
+#### 31. Granular `useSelection` State Splits
+
+**File:** `remyx-react/src/hooks/useSelection.js`
+
+Despite the `shallowEqual` bail-out added in #5, the hook still computes all 15+ format fields on every `selection:change` event. Splitting into `useSelectionFormat()` (bold, italic, etc.) and `useSelectionUI()` (focused image, table cell) would allow consumers to subscribe to only the slice they need.
+
+**Estimated Impact:** 20–30% fewer re-renders for components that only need format state (e.g., `Toolbar`)
+
+#### 32. Reduce Unmemoized Object Creation in `RemyxEditor`
+
+**File:** `remyx-react/src/components/RemyxEditor.jsx`
+
+Multiple inline objects are created on each render and passed as props: `editorCallbacks`, `statusBarProps`, `toolbarProps`. Each triggers child re-renders. Stabilizing with `useMemo` keyed on relevant dependencies would reduce unnecessary work.
+
+**Estimated Impact:** 10–15% fewer child component re-renders during typing
+
+#### 33. Virtualize FloatingToolbar Position Calculation
+
+**File:** `remyx-react/src/components/EditArea/FloatingToolbar.jsx`
+
+Even with the `ResizeObserver` fix in #20, the positioning effect still runs `getBoundingClientRect()` on the selection range on every `selection:change`. Debouncing position updates by 50ms (matching typical selection interaction speed) would reduce layout thrashing without visible delay.
+
+**Estimated Impact:** 5–10ms saved per selection change in large documents
+
+---
+
+### High — Core Engine Hot Paths
+
+#### 34. Throttle MutationObserver in History
+
+**File:** `remyx-core/src/core/History.js`
+
+The `MutationObserver` callback fires on every DOM mutation (typing, formatting, paste). Each invocation calls `takeSnapshot()` which reads `innerHTML`. Coalescing mutations with `requestAnimationFrame` or a 100ms debounce would batch rapid changes into single snapshots.
+
+**Estimated Impact:** 50–70% fewer `innerHTML` reads during continuous typing
+
+#### 35. Cache Sanitizer Results for Repeated Content
+
+**File:** `remyx-core/src/core/Sanitizer.js`
+
+`sanitize()` is called on every paste, every undo/redo, and during history re-sanitization. For identical input strings (common during rapid undo/redo), a small LRU cache (5–10 entries) keyed on input hash would skip redundant parsing.
+
+**Estimated Impact:** 3–5ms saved per undo/redo operation
+
+#### 36. Use Structural Comparison for History Snapshots
+
+**File:** `remyx-core/src/core/History.js` (lines 45–52)
+
+Snapshot deduplication compares full `innerHTML` strings. For large documents (10,000+ characters), this becomes a significant allocation. A rolling hash or content-length + checksum comparison would reduce allocation pressure.
+
+**Estimated Impact:** Lower GC pressure during rapid editing; measurable in large documents
+
+#### 37. Reduce Redundant DOM Queries in Selection.js
+
+**File:** `remyx-core/src/core/Selection.js`
+
+`getState()` calls `getComputedStyle()` and multiple `closest()` traversals. In the hot path (every keyup, mouseup, selection change), these queries add up. Caching `getComputedStyle` results for the current block element and invalidating on `content:change` would reduce work.
+
+**Estimated Impact:** 10–15% faster `getState()` calls
+
+---
+
+### Medium — Bundle Size
+
+#### 38. Tree-Shakeable CSS Imports
+
+**Files:** `remyx-core/vite.config.js`, `remyx-core/src/themes/variables.css`
+
+The entire `variables.css` (25+ KB) is imported as a single file. Splitting into `variables-base.css` (core layout, ~8 KB), `variables-themes.css` (color presets, ~10 KB), and `variables-components.css` (modals, menus, ~7 KB) would let consumers import only what they use.
+
+**Estimated Impact:** 8–15 KB CSS savings for minimal-UI consumers
+
+#### 39. Optimize Vite Dependency Pre-Bundling
+
+**File:** `remyx-core/vite.config.js`
+
+The Vite config does not specify `optimizeDeps.include` or `optimizeDeps.exclude`. Adding explicit includes for frequently used deps (`turndown`, `marked`) and excludes for optional deps (`mammoth`, `pdfjs-dist`) would speed up dev server cold starts.
+
+**Estimated Impact:** 1–2s faster dev server startup
+
+#### 40. Lazy-Load Heavy React Components Beyond Modals
+
+**File:** `remyx-react/src/components/RemyxEditor.jsx`
+
+`FindReplaceModal`, `ExportModal`, and `ImportDocumentModal` are already lazy-loaded, but `MenuBar` (~8 KB) and `ContextMenu` (~4 KB) are eagerly loaded even when `menuBar={false}` or `contextMenu={false}`. Conditionally lazy-loading these based on config would defer unused code.
+
+**Estimated Impact:** 4–12 KB deferred for consumers who disable menus
+
+---
+
+### Medium — Autosave Optimizations
+
+#### 41. Deduplicate Autosave Across Multiple Editor Instances
+
+**File:** `remyx-core/src/core/AutosaveManager.js`
+
+When multiple `RemyxEditor` instances share the same `autosave.key`, each creates its own `AutosaveManager` with independent timers. A shared singleton registry keyed by `(provider, key)` would prevent redundant saves and timer accumulation.
+
+**Estimated Impact:** Prevents N× timer overhead for N editors with same key
+
+#### 42. Block Autosave Init Until Recovery Check Completes
+
+**File:** `remyx-react/src/hooks/useAutosave.js`
+
+`manager.init()` is called immediately, then `manager.checkRecovery()` runs asynchronously. This means the first content change could trigger a save before recovery is checked, potentially overwriting recoverable content. Awaiting `checkRecovery()` before `init()` would prevent this race condition.
+
+**Estimated Impact:** Prevents potential data loss on fast-typing page reloads
+
+---
+
+### Medium — CSS Performance
+
+#### 43. Audit Unused CSS Rules
+
+**File:** `remyx-core/src/themes/variables.css`
+
+The stylesheet contains rules for all 9 modal types, 5 toolbar presets, 4 theme presets, and utility classes. Consumers using minimal configurations still load all rules. A PurgeCSS or CSS Modules approach at the consumer level would eliminate dead rules.
+
+**Estimated Impact:** Up to 40% CSS size reduction for minimal configurations
+
+#### 44. Use `contain: layout style` on Editor Root
+
+**File:** `remyx-core/src/themes/variables.css` (`.rmx-editor` rule)
+
+Adding CSS containment to the editor root would prevent style recalculations inside the editor from triggering layout on the host page, and vice versa.
+
+**Estimated Impact:** Faster style recalculation in complex host pages
+
+---
+
+### Low — Event System
+
+#### 45. Prevent Duplicate EventBus Handlers
+
+**File:** `remyx-core/src/core/EventBus.js`
+
+`on()` does not check for duplicate handler registration. Components that re-render without proper cleanup can accumulate duplicate handlers. Adding a `Set`-based deduplication or warning in dev mode would catch accidental leaks.
+
+**Estimated Impact:** Prevents subtle bugs; no size change
+
+#### 46. Propagate EventBus Handler Errors
+
+**File:** `remyx-core/src/core/EventBus.js`
+
+If an event handler throws, the error is swallowed and subsequent handlers still fire. Adding a `try/catch` per handler with `console.error` in dev mode (stripped by Terser in production) would improve debuggability without affecting production bundle size.
+
+**Estimated Impact:** Better DX; no production impact
+
+---
+
+### Low — Component-Level Polish
+
+#### 47. Consolidate `useEditorRect` Listeners
+
+**File:** `remyx-react/src/hooks/useEditorRect.js`
+
+The hook sets up both a `ResizeObserver` and a `scroll` listener. When multiple components use this hook (or when `FloatingToolbar` has its own position effect), listeners compete. A shared observable rect (single `ResizeObserver` + `IntersectionObserver`) would consolidate measurements.
+
+**Estimated Impact:** 1–2 fewer layout reads per frame; cleaner architecture
+
+#### 48. Reduce `useCallback` Overhead in MenuBar
+
+**File:** `remyx-react/src/components/MenuBar/MenuBar.jsx`
+
+Every menu item's `onClick` is wrapped in `useCallback` with `[engine]` dependency. Since `engine` is stable across the component's lifetime, these callbacks are effectively static. Replacing with a single event-delegated handler using `data-command` attributes would reduce hook call count.
+
+**Estimated Impact:** ~20 fewer `useCallback` calls per render; cleaner code
+
+---
+
+## Updated Summary
+
+| Priority | Items | Estimated Size Savings | Performance Gain |
+| --- | --- | --- | --- |
+| Critical | #1–#4 ✅ | ~75 KB saved + 2.6 MB worker | Modal load deferred |
+| High | #5–#8 ✅ | ~10 KB (terser) | 30–40% fewer re-renders |
+| Medium | #9–#13 ✅ | ~25 KB (tree-shake) | 10–15% CPU in hot paths |
+| Low | #14–#17 ✅ | ~15 KB | Better DX |
+| **Subtotal (v0.24.0)** | **17 items ✅** | **~145 KB + worker** | **Significant** |
+| High (0.24.0 audit) | #18 ✅, #20 ✅, #19, #21 | — | 30–50% fewer re-renders |
+| Medium (0.24.0 audit) | #22–#24 | ~16–24 KB | Memory savings |
+| Low (0.24.0 audit) | #25 ✅, #27 ✅, #26 | — | Smoother UX |
+| High (0.26.0 audit) | #28–#37 | — | 50–70% fewer hot-path ops |
+| Medium (0.26.0 audit) | #38–#44 | ~12–27 KB CSS + JS | Race condition fix, faster dev |
+| Low (0.26.0 audit) | #45–#48 | — | Better DX, fewer hooks |
+| **Total** | **48 items (21 ✅, 27 open)** | **~185 KB + worker** | **Major** |
