@@ -137,4 +137,82 @@ describe('useEditorRect', () => {
 
     expect(removeEventListenerSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true)
   })
+
+  it('updates rect when scroll event fires via rAF', () => {
+    const el = document.createElement('div')
+    let callCount = 0
+    el.getBoundingClientRect = jest.fn(() => {
+      callCount++
+      if (callCount <= 1) {
+        return { top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400 }
+      }
+      return { top: 50, left: 0, width: 800, height: 400, right: 800, bottom: 450 }
+    })
+    const ref = { current: el }
+
+    // Make rAF synchronous
+    global.requestAnimationFrame = jest.fn((cb) => { cb(); return 42 })
+    global.cancelAnimationFrame = jest.fn()
+
+    const { result } = renderHook(() => useEditorRect(ref, true))
+
+    expect(result.current.top).toBe(0)
+
+    // Simulate scroll event
+    act(() => {
+      window.dispatchEvent(new Event('scroll'))
+    })
+
+    expect(result.current.top).toBe(50)
+  })
+
+  it('cancels pending rAF on cleanup', () => {
+    const el = document.createElement('div')
+    el.getBoundingClientRect = jest.fn(() => ({
+      top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
+    }))
+    const ref = { current: el }
+
+    // Make rAF return a handle but NOT execute the callback
+    let rafId = 100
+    global.requestAnimationFrame = jest.fn(() => ++rafId)
+    global.cancelAnimationFrame = jest.fn()
+
+    const { unmount } = renderHook(() => useEditorRect(ref, true))
+
+    // Trigger a scroll to schedule a rAF that hasn't executed yet
+    act(() => {
+      window.dispatchEvent(new Event('scroll'))
+    })
+
+    unmount()
+
+    // cancelAnimationFrame should have been called to clean up the pending rAF
+    expect(global.cancelAnimationFrame).toHaveBeenCalled()
+  })
+
+  it('scroll handler cancels previous rAF before scheduling a new one', () => {
+    const el = document.createElement('div')
+    el.getBoundingClientRect = jest.fn(() => ({
+      top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
+    }))
+    const ref = { current: el }
+
+    let rafId = 200
+    global.requestAnimationFrame = jest.fn(() => ++rafId)
+    global.cancelAnimationFrame = jest.fn()
+
+    renderHook(() => useEditorRect(ref, true))
+
+    // Fire two scroll events in quick succession
+    act(() => {
+      window.dispatchEvent(new Event('scroll'))
+    })
+    act(() => {
+      window.dispatchEvent(new Event('scroll'))
+    })
+
+    // cancelAnimationFrame should have been called to cancel the first scheduled rAF
+    expect(global.cancelAnimationFrame).toHaveBeenCalled()
+  })
 })

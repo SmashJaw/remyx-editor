@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { CodeEditor } from './CodeEditor/CodeEditor.jsx'
-import { htmlToMarkdown, markdownToHtml, formatHTML } from '@remyx/core'
+import { htmlToMarkdown, markdownToHtml, formatHTML } from '@remyxjs/core'
 
 export function SourceModal({ open, onClose, engine }) {
   const [source, setSource] = useState('')

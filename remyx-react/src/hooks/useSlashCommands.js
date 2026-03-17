@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyx/core'
+import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyxjs/core'
 
 /**
  * Hook that manages slash command palette state.
  * Listens to engine slash:* events and provides state for the UI component.
  *
- * @param {import('@remyx/core').EditorEngine} engine
+ * @param {import('@remyxjs/core').EditorEngine} engine
  * @param {import('react').RefObject<HTMLElement>} editorRootRef
- * @param {{ items?: import('@remyx/core').SlashCommandItem[], onOpenModal?: Function }} options
+ * @param {{ items?: import('@remyxjs/core').SlashCommandItem[], onOpenModal?: Function }} options
  */
 export function useSlashCommands(engine, editorRootRef, options = {}) {
   const { items: customItems, onOpenModal } = options

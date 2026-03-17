@@ -226,4 +226,121 @@ describe('History', () => {
       expect(history._debounceTimer).toBeNull()
     })
   })
+
+  describe('snapshot clears pending debounce timer', () => {
+    it('should cancel a pending debounce timer when snapshot is called', () => {
+      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      // Set up a pending debounce timer
+      history._debounceTimer = setTimeout(() => {}, 10000)
+      const pendingTimer = history._debounceTimer
+
+      history.snapshot()
+
+      expect(clearSpy).toHaveBeenCalledWith(pendingTimer)
+      expect(history._debounceTimer).toBeNull()
+      clearSpy.mockRestore()
+    })
+
+    it('should not call clearTimeout when no debounce timer is pending', () => {
+      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      history._debounceTimer = null
+
+      history.snapshot()
+
+      // clearTimeout should not have been called with a truthy value
+      expect(clearSpy).not.toHaveBeenCalled()
+      clearSpy.mockRestore()
+    })
+  })
+
+  describe('_debouncedSnapshot', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('should reset timer on repeated calls', () => {
+      const snapshotSpy = jest.spyOn(history, '_takeSnapshot' in history ? '_takeSnapshot' : 'snapshot')
+      // Manually test _debouncedSnapshot behavior
+      history._debouncedSnapshot()
+      const firstTimer = history._debounceTimer
+
+      // Call again before timer fires - should reset
+      history._debouncedSnapshot()
+      const secondTimer = history._debounceTimer
+
+      // Timer IDs should differ (timer was reset)
+      expect(secondTimer).not.toBe(firstTimer)
+    })
+
+    it('should call _takeSnapshot after debounce delay', () => {
+      // Take an initial snapshot so content differs for next one
+      history.snapshot()
+      mockEngine.element.innerHTML = '<p>debounced change</p>'
+
+      history._debouncedSnapshot()
+
+      // Before timer fires, no new snapshot
+      const stackSizeBefore = history._undoStack.length
+
+      jest.advanceTimersByTime(history.debounceMs)
+
+      // After timer fires, snapshot should have been taken
+      expect(history._undoStack.length).toBe(stackSizeBefore + 1)
+    })
+  })
+
+  describe('_disconnectObserver when observer is null', () => {
+    it('should be a no-op when _observer is null', () => {
+      history._observer = null
+      expect(() => history._disconnectObserver()).not.toThrow()
+    })
+  })
+
+  describe('_reconnectObserver when observer is null', () => {
+    it('should be a no-op when _observer is null', () => {
+      history._observer = null
+      expect(() => history._reconnectObserver()).not.toThrow()
+    })
+  })
+
+  describe('redo restores bookmark', () => {
+    it('should restore selection bookmark from redo state if present', () => {
+      const bookmark = { startOffset: 2, endOffset: 8, collapsed: false }
+      mockEngine.selection.save.mockReturnValue(bookmark)
+
+      history.snapshot()
+      mockEngine.element.innerHTML = '<p>second state</p>'
+      history.snapshot()
+
+      // Undo to populate redo stack (redo state will have bookmark)
+      history.undo()
+
+      // Now redo - should restore the bookmark from the redo state
+      mockEngine.selection.restore.mockClear()
+      history.redo()
+
+      expect(mockEngine.selection.restore).toHaveBeenCalled()
+      expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('history:redo')
+    })
+
+    it('should not call restore when redo state has no bookmark', () => {
+      mockEngine.selection.save.mockReturnValue(null)
+
+      history.snapshot()
+      mockEngine.element.innerHTML = '<p>second state</p>'
+      history.snapshot()
+
+      history.undo()
+
+      mockEngine.selection.restore.mockClear()
+      history.redo()
+
+      // bookmark is null, so restore should not be called
+      expect(mockEngine.selection.restore).not.toHaveBeenCalled()
+    })
+  })
 })

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { cleanPastedHTML, looksLikeMarkdown, markdownToHtml } from '@remyx/core'
+import { cleanPastedHTML, looksLikeMarkdown, markdownToHtml } from '@remyxjs/core'
 
 /**
  * Handle paste from the context menu using the full cleaning pipeline.

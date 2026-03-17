@@ -266,14 +266,25 @@ export class Selection {
 
   /**
    * Inserts HTML at the current selection using document.execCommand.
-   * **IMPORTANT:** Callers MUST sanitize html before calling this method.
-   * This method does not sanitize input — passing unsanitized user content
-   * directly will create an XSS vulnerability.
-   * @param {string} html - The pre-sanitized HTML string to insert
+   * Automatically sanitizes input through the editor's Sanitizer if available
+   * to prevent XSS. Falls back to unsanitized insertion only if no sanitizer
+   * is configured (e.g. in unit tests with standalone Selection instances).
+   * @param {string} html - The HTML string to insert
    * @returns {void}
    */
   insertHTML(html) {
-    document.execCommand('insertHTML', false, html)
+    const safeHtml = this._sanitizer ? this._sanitizer.sanitize(html) : html
+    document.execCommand('insertHTML', false, safeHtml)
+  }
+
+  /**
+   * Attaches a Sanitizer instance for automatic HTML sanitization in insertHTML().
+   * Called by EditorEngine during initialization.
+   * @param {import('./Sanitizer.js').Sanitizer} sanitizer
+   * @returns {void}
+   */
+  setSanitizer(sanitizer) {
+    this._sanitizer = sanitizer
   }
 
   /**

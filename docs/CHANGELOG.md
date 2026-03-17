@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Code block syntax highlighting** — Language-specific syntax highlighting for `<pre><code>` blocks using custom lightweight tokenizers (zero external dependencies). Supports 11 languages: JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, and HTML with automatic language detection. New `SyntaxHighlightPlugin` built-in plugin with MutationObserver-based auto-highlighting, debounced to avoid disrupting contenteditable typing. Skips blocks the user is actively editing and re-highlights on blur. Theme-aware token colors via `.rmx-syn-*` CSS classes across all 6 themes. New `setCodeLanguage` and `getCodeLanguage` commands. Language selector dropdown overlay on focused code blocks in `@remyxjs/react`. Markdown round-trip preserves language identifiers (`` ```js ``, `` ```python ``). New exports: `SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` from `@remyxjs/core`.
+
 ### Removed
 
 - **Playwright e2e test suite** — Removed `playwright.config.js`, `e2e/` directory (8 spec files), and `@playwright/test` dependency. The root repo does not serve a production web server; e2e tests will be revisited when needed.
@@ -27,7 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - **Unified theme system** — All 6 themes (`light`, `dark`, `ocean`, `forest`, `sunset`, `rose`) are now first-class CSS class themes set via a single `theme` prop. Previously `ocean`/`forest`/`sunset`/`rose` required the separate `customTheme` prop with inline CSS variable objects; they are now self-contained `.rmx-theme-{name}` stylesheets matching the `dark.css` pattern. Each theme file includes complete variable overrides, content styles (code blocks, blockquotes, tables, find highlights, links, images), code editor colors, and syntax token palettes. The `customTheme` prop remains available for per-instance overrides on top of any theme.
-- **Theme CSS files** — New `ocean.css`, `forest.css`, `sunset.css`, `rose.css` in `@remyx/core/src/themes/`.
+- **Theme CSS files** — New `ocean.css`, `forest.css`, `sunset.css`, `rose.css` in `@remyxjs/core/src/themes/`.
 - **CLI theme selection** — `create-remyx-app` now prompts users to choose a theme (Light, Dark, Ocean, Forest, Sunset, Rose) during project scaffolding. The selected theme is injected into the generated `App.jsx`/`App.tsx`.
 
 ### Changed
@@ -51,7 +55,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Autosave** — Pluggable autosave system with debounced (2s) and periodic (30s) saves, content deduplication, crash-recovery banner, and save-status indicator in the status bar. Five built-in storage providers: `LocalStorageProvider` (default), `SessionStorageProvider`, `FileSystemProvider` (Node/Electron/Tauri), `CloudProvider` (AWS S3, GCP, any HTTP endpoint with retry and presigned URL support), and `CustomProvider`. New `AutosaveManager` class and `createStorageProvider()` factory in `@remyx/core`. New `useAutosave` hook, `SaveStatus` component, and `RecoveryBanner` component in `@remyx/react`. New `autosave` prop on `RemyxEditor` (boolean or config object, default `false`). Events: `autosave:saving`, `autosave:saved`, `autosave:error`, `autosave:recovered`. Full TypeScript declarations.
+- **Autosave** — Pluggable autosave system with debounced (2s) and periodic (30s) saves, content deduplication, crash-recovery banner, and save-status indicator in the status bar. Five built-in storage providers: `LocalStorageProvider` (default), `SessionStorageProvider`, `FileSystemProvider` (Node/Electron/Tauri), `CloudProvider` (AWS S3, GCP, any HTTP endpoint with retry and presigned URL support), and `CustomProvider`. New `AutosaveManager` class and `createStorageProvider()` factory in `@remyxjs/core`. New `useAutosave` hook, `SaveStatus` component, and `RecoveryBanner` component in `@remyxjs/react`. New `autosave` prop on `RemyxEditor` (boolean or config object, default `false`). Events: `autosave:saving`, `autosave:saved`, `autosave:error`, `autosave:recovered`. Full TypeScript declarations.
 - **Autosave tests** — 40 new tests across 3 files: `providers.test.js` (25 tests), `AutosaveManager.test.js` (15 tests), `useAutosave.test.jsx` (8 tests).
 
 ---
@@ -60,7 +64,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Command Palette** — Searchable overlay listing all editor commands, organized by category (Text, Lists, Media, Layout, Advanced). Open via `Mod+Shift+P` keyboard shortcut or the new `commandPalette` toolbar button. Supports fuzzy search across labels, descriptions, and keywords. Includes `SLASH_COMMAND_ITEMS` catalog (19 built-in commands) and `filterSlashItems()` utility exported from `@remyx/core`. New `commandPalette` prop on `RemyxEditor` (default `true`).
+- **Command Palette** — Searchable overlay listing all editor commands, organized by category (Text, Lists, Media, Layout, Advanced). Open via `Mod+Shift+P` keyboard shortcut or the new `commandPalette` toolbar button. Supports fuzzy search across labels, descriptions, and keywords. Includes `SLASH_COMMAND_ITEMS` catalog (19 built-in commands) and `filterSlashItems()` utility exported from `@remyxjs/core`. New `commandPalette` prop on `RemyxEditor` (default `true`).
 - **Comprehensive Jest test suite** — 42 test files with 815 tests covering core engine, commands (16 modules), plugins (4), utilities (5), React hooks (4), React components (2), and config provider (1). Migrated from Vitest to Jest for consistent tooling.
 - **Playwright e2e test suite** — 8 spec files covering editor basics, formatting, toolbar, keyboard shortcuts, themes, accessibility, fullscreen, and modals. *(Removed in a later release — see [Unreleased].)*
 - **Unit test coverage** — Statements 82.85%, Branches 74.11%, Functions 77.41%, Lines 85.21% (up from ~67%).
@@ -70,13 +74,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- **Scaffolding moved to `@remyx/react`** — Project scaffolding CLI relocated from `create-remyx` to `@remyx/react/create/` and renamed to `create-remyx-app` (`npx create-remyx-app`). The `create-remyx` package is now reserved for a future interactive CLI wizard.
+- **Scaffolding moved to `@remyxjs/react`** — Project scaffolding CLI relocated from `create-remyx` to `@remyxjs/react/create/` and renamed to `create-remyx-app` (`npx create-remyx-app`). The `create-remyx` package is now reserved for a future interactive CLI wizard.
 - **`create-remyx` repurposed** — Gutted scaffolding code; package now displays a redirect message. Will become an interactive editor configuration wizard (see ROADMAP.md).
 - **Test runner migrated from Vitest to Jest** — All existing tests converted from `vi.*` to `jest.*` API. Added `jest.config.js` and `babel.config.js` for JSX transform and module resolution.
 - **CONTRIBUTING.md updated** — Testing section now documents Jest workflows, test structure, and writing guidelines.
 - **History test fix** — Corrected undo test assertion that expected wrong state after single undo step.
 - **Root package.json version** — Updated from 0.23.0 to 0.24.0 to match all sub-packages.
-- **`@remyx/react` peerDependencies** — `@remyx/core` constraint updated from `>=0.23.4` to `>=0.24.0`.
+- **`@remyxjs/react` peerDependencies** — `@remyxjs/core` constraint updated from `>=0.23.4` to `>=0.24.0`.
 
 ### Security
 
@@ -84,7 +88,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [@remyx/react 0.24.0] — 2026-03-15
+## [@remyxjs/react 0.24.0] — 2026-03-15
 
 ### Added
 
@@ -104,7 +108,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [@remyx/core 0.24.0] — 2026-03-15
+## [@remyxjs/core 0.24.0] — 2026-03-15
 
 ### Added
 
@@ -135,7 +139,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [@remyx/react 0.23.41] — 2026-03-15
+## [@remyxjs/react 0.23.41] — 2026-03-15
 
 ### Changed
 
@@ -149,7 +153,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [@remyx/core 0.23.16] — 2026-03-15
+## [@remyxjs/core 0.23.16] — 2026-03-15
 
 ### Fixed
 
@@ -193,7 +197,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Multi-package architecture** — Extracted `@remyx/core` (framework-agnostic engine) and `@remyx/react` (React components + hooks) from the monolithic `remyx-editor` package.
+- **Multi-package architecture** — Extracted `@remyxjs/core` (framework-agnostic engine) and `@remyxjs/react` (React components + hooks) from the monolithic `remyx-editor` package.
 - **`create-remyx` CLI** — Scaffolding tool for new projects with JSX and TypeScript templates.
 - **npm workspaces** — Monorepo setup with `packages/*` workspace configuration.
 - **TypeScript declarations** — `.d.ts` files for all React components, hooks, and core exports.
@@ -201,7 +205,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Removed
 
-- **`remyx-editor` package** — Standalone package deleted; consumers use `@remyx/react` directly.
+- **`remyx-editor` package** — Standalone package deleted; consumers use `@remyxjs/react` directly.
 
 ---
 

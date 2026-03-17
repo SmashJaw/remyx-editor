@@ -27,8 +27,8 @@ All times are wall-clock averages over 3 runs.
 
 | Build Target | Modules | Time (avg) |
 |---|---|---|
-| `@remyx/core` | 59 | **1.1s** |
-| `@remyx/react` | 41 | **1.0s** |
+| `@remyxjs/core` | 59 | **1.1s** |
+| `@remyxjs/react` | 41 | **1.0s** |
 | `build:all` (core + react) | 100 | **2.1s** |
 | Demo app (`vite build`) | 519 | **2.8s** |
 
@@ -36,16 +36,16 @@ All times are wall-clock averages over 3 runs.
 
 | Target | Format | Minified | Gzipped |
 |---|---|---|---|
-| `@remyx/core` index | ESM | 75.95 KB | 21.30 KB |
-| `@remyx/core` index | CJS | 77.31 KB | 21.46 KB |
-| `@remyx/core` CSS | — | 26.54 KB | 5.22 KB |
-| `@remyx/react` index | ESM | 49.64 KB | 13.34 KB |
-| `@remyx/react` index | CJS | 48.35 KB | 13.27 KB |
-| `@remyx/react` CSS | — | 2.29 KB | 0.89 KB |
+| `@remyxjs/core` index | ESM | 75.95 KB | 21.30 KB |
+| `@remyxjs/core` index | CJS | 77.31 KB | 21.46 KB |
+| `@remyxjs/core` CSS | — | 26.54 KB | 5.22 KB |
+| `@remyxjs/react` index | ESM | 49.64 KB | 13.34 KB |
+| `@remyxjs/react` index | CJS | 48.35 KB | 13.27 KB |
+| `@remyxjs/react` CSS | — | 2.29 KB | 0.89 KB |
 
 ### Code-Split Chunks (ESM)
 
-#### @remyx/core
+#### @remyxjs/core
 
 | Chunk | Size | Gzipped |
 |---|---|---|
@@ -57,7 +57,7 @@ All times are wall-clock averages over 3 runs.
 | `convertMarkdown` | 0.17 KB | 0.17 KB |
 | `convertHtml` | 0.14 KB | 0.15 KB |
 
-#### @remyx/react
+#### @remyxjs/react
 
 | Chunk | Size | Gzipped |
 |---|---|---|
@@ -78,8 +78,8 @@ All times are wall-clock averages over 3 runs.
 
 | Package | Dist Size | JS (min) | JS (gzip) | CSS (gzip) |
 |---|---|---|---|---|
-| `@remyx/core` | 812 KB | 75.95 KB | 21.30 KB | 5.22 KB |
-| `@remyx/react` | 692 KB | 49.64 KB | 13.34 KB | 0.89 KB |
+| `@remyxjs/core` | 812 KB | 75.95 KB | 21.30 KB | 5.22 KB |
+| `@remyxjs/react` | 692 KB | 49.64 KB | 13.34 KB | 0.89 KB |
 | **Library total** | **1.5 MB** | **125.59 KB** | **34.64 KB** | **6.11 KB** |
 
 ### Demo App Bundle

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { ICON_MAP, ChevronRightIcon } from '../../icons/index.jsx'
-import { TOOLTIP_MAP, SHORTCUT_MAP, MODAL_COMMANDS, getShortcutLabel, getCommandActiveState } from '@remyx/core'
+import { TOOLTIP_MAP, SHORTCUT_MAP, MODAL_COMMANDS, getShortcutLabel, getCommandActiveState } from '@remyxjs/core'
 
 /**
  * Navigate focus between sibling menu items within a menu/submenu.

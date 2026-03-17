@@ -3,8 +3,8 @@ import { renderHook } from '@testing-library/react'
 import { useResolvedConfig, DEFAULT_EDITOR_HEIGHT } from '../hooks/useResolvedConfig.js'
 import { RemyxConfigProvider } from '../config/RemyxConfigProvider.jsx'
 
-// Mock @remyx/core defaults
-jest.mock('@remyx/core', () => ({
+// Mock @remyxjs/core defaults
+jest.mock('@remyxjs/core', () => ({
   DEFAULT_TOOLBAR: [['bold', 'italic', 'underline'], ['link', 'image']],
   DEFAULT_FONTS: ['Arial', 'Verdana'],
   DEFAULT_MENU_BAR: [

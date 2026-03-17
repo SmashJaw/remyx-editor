@@ -79,9 +79,29 @@ async function main() {
 
   close()
 
+  // ── Validate project name ──────────────────────────────────
+
+  // Prevent path traversal: reject names containing ../, absolute paths, or OS-reserved chars
+  if (
+    /\.\.[\\/]/.test(projectName) ||              // directory traversal
+    /^[/\\]/.test(projectName) ||                 // absolute path
+    /^[A-Za-z]:/.test(projectName) ||             // Windows drive letter
+    /[\x00-\x1f<>:"|?*]/.test(projectName)        // null bytes & OS-reserved chars
+  ) {
+    console.error(red(`\n  Error: Invalid project name "${projectName}" — must not contain path traversal or special characters.\n`))
+    exit(1)
+  }
+
   // ── Scaffold ────────────────────────────────────────────────
 
   const targetDir = resolve(cwd(), projectName)
+
+  // Ensure resolved path stays within the working directory
+  const cwdResolved = resolve(cwd())
+  if (!targetDir.startsWith(cwdResolved)) {
+    console.error(red(`\n  Error: Project directory would be created outside the current working directory.\n`))
+    exit(1)
+  }
 
   console.log()
   console.log(`  ${bold('Scaffolding')} ${cyan(projectName)} ...`)
@@ -113,7 +133,7 @@ async function main() {
   console.log()
 
   if (useTypeScript) {
-    console.log(dim(`  TypeScript types included via @remyx/react (ships .d.ts declarations)`))
+    console.log(dim(`  TypeScript types included via @remyxjs/react (ships .d.ts declarations)`))
   } else {
     console.log(dim(`  Tip: switch to TypeScript later by renaming .jsx -> .tsx and adding tsconfig.json`))
   }
@@ -135,8 +155,8 @@ function buildPackageJson(name, useTypeScript, includeDocs) {
       preview: 'vite preview',
     },
     dependencies: {
-      '@remyx/core': '^0.27.0',
-      '@remyx/react': '^0.27.0',
+      '@remyxjs/core': '^0.27.0',
+      '@remyxjs/react': '^0.27.0',
       react: '^19.2.0',
       'react-dom': '^19.2.0',
     },
@@ -153,7 +173,7 @@ function buildPackageJson(name, useTypeScript, includeDocs) {
   }
 
   if (includeDocs) {
-    // These are peer/optional deps of @remyx/core for document import
+    // These are peer/optional deps of @remyxjs/core for document import
     pkg.dependencies['pdfjs-dist'] = '^5.5.207'
     pkg.dependencies['mammoth'] = '^1.11.0'
   }

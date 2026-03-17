@@ -22,7 +22,7 @@ import {
   AutolinkPlugin,
   htmlToMarkdown,
   markdownToHtml,
-} from '@remyx/core'
+} from '@remyxjs/core'
 
 /** All built-in command registration functions, invoked in order during engine init */
 const COMMAND_REGISTRARS = [

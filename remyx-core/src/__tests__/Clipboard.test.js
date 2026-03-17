@@ -353,4 +353,109 @@ describe('Clipboard', () => {
       errorSpy.mockRestore()
     })
   })
+
+  describe('_handlePaste with importable document files', () => {
+    function createPasteEventWithFiles(files) {
+      const event = new Event('paste', { bubbles: true, cancelable: true })
+      event.clipboardData = {
+        getData: jest.fn(() => ''),
+        files,
+      }
+      return event
+    }
+
+    it('should convert importable document files and insert sanitized HTML', async () => {
+      const { convertDocument } = require('../utils/documentConverter/index.js')
+      isImportableFile.mockReturnValue(true)
+      convertDocument.mockResolvedValue('<p>converted doc</p>')
+      clipboard.init()
+
+      const docFile = new File(['data'], 'report.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+      const event = createPasteEventWithFiles([docFile])
+      element.dispatchEvent(event)
+
+      // Let the promise chain resolve
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(convertDocument).toHaveBeenCalledWith(docFile)
+      expect(mockEngine.sanitizer.sanitize).toHaveBeenCalledWith('<p>converted doc</p>')
+      expect(mockEngine.selection.insertHTML).toHaveBeenCalledWith('<p>converted doc</p>')
+      expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('content:change')
+    })
+
+    it('should warn when document conversion fails', async () => {
+      const { convertDocument } = require('../utils/documentConverter/index.js')
+      isImportableFile.mockReturnValue(true)
+      convertDocument.mockRejectedValue(new Error('conversion error'))
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      clipboard.init()
+
+      const docFile = new File(['data'], 'bad.pdf', { type: 'application/pdf' })
+      const event = createPasteEventWithFiles([docFile])
+      element.dispatchEvent(event)
+
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(warnSpy).toHaveBeenCalledWith('Document import failed on paste:', 'conversion error')
+      warnSpy.mockRestore()
+    })
+  })
+
+  describe('_handlePaste with non-image file attachments', () => {
+    function createPasteEventWithFiles(files) {
+      const event = new Event('paste', { bubbles: true, cancelable: true })
+      event.clipboardData = {
+        getData: jest.fn(() => ''),
+        files,
+      }
+      return event
+    }
+
+    it('should upload non-image files as attachments when uploadHandler is present', async () => {
+      isImportableFile.mockReturnValue(false)
+      mockEngine.options.uploadHandler = jest.fn().mockResolvedValue('https://example.com/file.zip')
+      clipboard.init()
+
+      const zipFile = new File(['data'], 'archive.zip', { type: 'application/zip' })
+      Object.defineProperty(zipFile, 'size', { value: 1024 })
+      const event = createPasteEventWithFiles([zipFile])
+      element.dispatchEvent(event)
+
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(mockEngine.options.uploadHandler).toHaveBeenCalledWith(zipFile)
+      expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertAttachment', {
+        url: 'https://example.com/file.zip',
+        filename: 'archive.zip',
+        filesize: 1024,
+      })
+    })
+
+    it('should emit upload:error when non-image file upload fails', async () => {
+      isImportableFile.mockReturnValue(false)
+      const uploadError = new Error('upload failed')
+      mockEngine.options.uploadHandler = jest.fn().mockRejectedValue(uploadError)
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      clipboard.init()
+
+      const txtFile = new File(['data'], 'notes.txt', { type: 'text/plain' })
+      const event = createPasteEventWithFiles([txtFile])
+      element.dispatchEvent(event)
+
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(errorSpy).toHaveBeenCalledWith('File upload failed for "notes.txt":', uploadError)
+      expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('upload:error', {
+        file: txtFile,
+        error: uploadError,
+      })
+      errorSpy.mockRestore()
+    })
+  })
 })

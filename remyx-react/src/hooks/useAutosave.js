@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { AutosaveManager } from '@remyx/core'
+import { AutosaveManager } from '@remyxjs/core'
 
 /**
  * React hook for autosave integration with the editor engine.
@@ -7,7 +7,7 @@ import { AutosaveManager } from '@remyx/core'
  * Manages AutosaveManager lifecycle, tracks save status, and handles
  * crash recovery detection with restore/dismiss actions.
  *
- * @param {import('@remyx/core').EditorEngine|null} engine
+ * @param {import('@remyxjs/core').EditorEngine|null} engine
  * @param {Object} [config] - Autosave configuration
  * @param {boolean} [config.enabled] - Whether autosave is active
  * @param {number}  [config.interval] - Periodic save interval in ms

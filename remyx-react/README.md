@@ -1,17 +1,17 @@
 ![Remyx Editor](../docs/images/Remyx-Logo.svg)
 
-# @remyx/react
+# @remyxjs/react
 
-A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remyx/core`](../remyx-core/) engine. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
+A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remyxjs/core`](../remyx-core/) engine. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
 
 ## Packages
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyx/core`](../remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyx/react`](./) | 0.27.0 | React components, hooks, and TypeScript declarations |
+| [`@remyxjs/core`](../remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./) | 0.27.0 | React components, hooks, and TypeScript declarations |
 
-Use `@remyx/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
+Use `@remyxjs/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
 
 ## Table of Contents
 
@@ -51,28 +51,28 @@ Use `@remyx/core` directly if building a wrapper for another framework (Vue, Sve
 - [Form Integration](#form-integration)
 - [Exports](#exports)
 - [TypeScript](#typescript)
-- [Using `@remyx/core` Directly](#using-remyxcore-directly)
+- [Using `@remyxjs/core` Directly](#using-remyxcore-directly)
 
 ## Installation
 
 ```bash
-npm install @remyx/core @remyx/react
+npm install @remyxjs/core @remyxjs/react
 ```
 
 Import both stylesheets in your app entry point:
 
 ```js
-import '@remyx/core/style.css';   // theme variables, light/dark themes
-import '@remyx/react/style.css';  // component styles (toolbar, modals, etc.)
+import '@remyxjs/core/style.css';   // theme variables, light/dark themes
+import '@remyxjs/react/style.css';  // component styles (toolbar, modals, etc.)
 ```
 
 ## Quick Start
 
 ```jsx
 import { useState } from 'react';
-import { RemyxEditor } from '@remyx/react';
-import '@remyx/core/style.css';
-import '@remyx/react/style.css';
+import { RemyxEditor } from '@remyxjs/react';
+import '@remyxjs/core/style.css';
+import '@remyxjs/react/style.css';
 
 function App() {
   const [content, setContent] = useState('');
@@ -144,6 +144,7 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 - **Theming** — light/dark mode, 4 built-in presets (Ocean, Forest, Sunset, Rose), full CSS variable customization
 - **File uploads** — images and attachments via drag-and-drop, paste, or toolbar with pluggable upload handlers (S3, R2, GCS, custom)
 - **Fonts** — custom font lists, Google Fonts auto-loading, and helper functions
+- **Code block syntax highlighting** — 11 languages with auto-detection, theme-aware colors, and language selector dropdown
 - **Plugins** — `createPlugin()` API with hooks for commands, toolbar items, status bar items, and context menus
 - **Config file** — centralized `defineConfig()` with named editor configurations and provider-based sharing
 - **Multi-instance** — unlimited editors per page with full isolation (state, events, DOM, modals)
@@ -197,7 +198,7 @@ Define shared defaults and named editor configurations in a centralized config f
 **`remyx.config.js`**
 
 ```js
-import { defineConfig } from '@remyx/react';
+import { defineConfig } from '@remyxjs/react';
 
 export default defineConfig({
   theme: 'dark',
@@ -223,7 +224,7 @@ export default defineConfig({
 **Usage**
 
 ```jsx
-import { RemyxEditor, RemyxConfigProvider } from '@remyx/react';
+import { RemyxEditor, RemyxConfigProvider } from '@remyxjs/react';
 import config from './remyx.config.js';
 
 function App() {
@@ -284,7 +285,7 @@ Each inner array is a visual group separated by a divider.
 ### Toolbar Presets
 
 ```jsx
-import { TOOLBAR_PRESETS } from '@remyx/react';
+import { TOOLBAR_PRESETS } from '@remyxjs/react';
 
 <RemyxEditor toolbar={TOOLBAR_PRESETS.full} />      // all items (default)
 <RemyxEditor toolbar={TOOLBAR_PRESETS.standard} />   // no source/markdown/embed
@@ -297,7 +298,7 @@ import { TOOLBAR_PRESETS } from '@remyx/react';
 #### `removeToolbarItems(config, itemsToRemove)`
 
 ```jsx
-import { DEFAULT_TOOLBAR, removeToolbarItems } from '@remyx/react';
+import { DEFAULT_TOOLBAR, removeToolbarItems } from '@remyxjs/react';
 
 const toolbar = removeToolbarItems(DEFAULT_TOOLBAR, ['image', 'table', 'embedMedia', 'export']);
 ```
@@ -305,7 +306,7 @@ const toolbar = removeToolbarItems(DEFAULT_TOOLBAR, ['image', 'table', 'embedMed
 #### `addToolbarItems(config, items, options?)`
 
 ```jsx
-import { TOOLBAR_PRESETS, addToolbarItems } from '@remyx/react';
+import { TOOLBAR_PRESETS, addToolbarItems } from '@remyxjs/react';
 
 addToolbarItems(TOOLBAR_PRESETS.minimal, ['fullscreen'])              // append as new group
 addToolbarItems(TOOLBAR_PRESETS.minimal, 'fullscreen', { group: -1 }) // add to last group
@@ -318,7 +319,7 @@ addToolbarItems(TOOLBAR_PRESETS.minimal, 'strikethrough', { before: 'underline' 
 Build a toolbar from a flat list — items are auto-grouped by category:
 
 ```jsx
-import { createToolbar } from '@remyx/react';
+import { createToolbar } from '@remyxjs/react';
 
 const toolbar = createToolbar([
   'bold', 'italic', 'underline', 'headings',
@@ -430,7 +431,7 @@ export default defineConfig({
 When a menu bar is active and no explicit `toolbar` prop is passed, toolbar items already in the menu bar are automatically removed. To keep the full toolbar alongside a menu bar:
 
 ```jsx
-import { DEFAULT_TOOLBAR } from '@remyx/react';
+import { DEFAULT_TOOLBAR } from '@remyxjs/react';
 <RemyxEditor menuBar={true} toolbar={DEFAULT_TOOLBAR} />
 ```
 
@@ -509,7 +510,7 @@ Google Fonts are auto-loaded via CDN and merged into the font dropdown.
 ### Font Helper Functions
 
 ```jsx
-import { DEFAULT_FONTS, removeFonts, addFonts, loadGoogleFonts } from '@remyx/react';
+import { DEFAULT_FONTS, removeFonts, addFonts, loadGoogleFonts } from '@remyxjs/react';
 
 // Remove fonts
 const fonts = removeFonts(DEFAULT_FONTS, ['Comic Sans MS', 'Impact']);
@@ -544,7 +545,7 @@ The status bar displays word and character counts.
 Override CSS variables using `createTheme()` or raw variable names. Custom themes layer on top of the base theme — only specify what you want to change.
 
 ```jsx
-import { createTheme } from '@remyx/react';
+import { createTheme } from '@remyxjs/react';
 
 const brandTheme = createTheme({
   bg: '#1a1a2e',
@@ -583,7 +584,7 @@ All 6 built-in themes are available via the `theme` prop:
 Override individual variables on top of any theme with `customTheme`:
 
 ```jsx
-import { createTheme } from '@remyx/react';
+import { createTheme } from '@remyxjs/react';
 
 <RemyxEditor theme="ocean" customTheme={createTheme({ primary: '#ff6b6b' })} />
 ```
@@ -630,7 +631,7 @@ import { createTheme } from '@remyx/react';
 Style individual toolbar buttons independently using `toolbarItemTheme`.
 
 ```jsx
-import { createToolbarItemTheme } from '@remyx/react';
+import { createToolbarItemTheme } from '@remyxjs/react';
 
 const itemTheme = createToolbarItemTheme({
   bold:      { color: '#e11d48', activeColor: '#be123c', activeBackground: '#ffe4e6', borderRadius: '50%' },
@@ -687,7 +688,7 @@ The editor cleans and normalizes pasted content automatically.
 All paste paths (keyboard, drag-and-drop, context menu) share the same pipeline: HTML goes through `cleanPastedHTML()` then `Sanitizer.sanitize()`. Plain text is checked by `looksLikeMarkdown()` and converted if detected.
 
 ```js
-import { cleanPastedHTML, looksLikeMarkdown } from '@remyx/react';
+import { cleanPastedHTML, looksLikeMarkdown } from '@remyxjs/react';
 
 const clean = cleanPastedHTML(dirtyHtml);
 const isMarkdown = looksLikeMarkdown(text);
@@ -751,7 +752,7 @@ The handler is called consistently across all upload surfaces:
 Conversion utilities for standalone use:
 
 ```js
-import { htmlToMarkdown, markdownToHtml } from '@remyx/react';
+import { htmlToMarkdown, markdownToHtml } from '@remyxjs/react';
 
 const md = htmlToMarkdown('<h1>Hello</h1><p>World</p>');
 const html = markdownToHtml('# Hello\n\nWorld');
@@ -789,7 +790,7 @@ const divRef = useRef(null);
 For lower-level control:
 
 ```jsx
-import { useRemyxEditor } from '@remyx/react';
+import { useRemyxEditor } from '@remyxjs/react';
 
 function MyEditor() {
   const targetRef = useRef(null);
@@ -811,7 +812,7 @@ Returns `engine` (EditorEngine), `containerRef`, `editableRef`, and `ready` (boo
 The lowest-level hook — manages just the engine lifecycle:
 
 ```jsx
-import { useEditorEngine } from '@remyx/react';
+import { useEditorEngine } from '@remyxjs/react';
 
 function CustomEditor() {
   const editorRef = useRef(null);
@@ -828,16 +829,25 @@ function CustomEditor() {
 
 ### Built-in Plugins
 
-Three plugins are active by default:
+Four built-in plugins are available:
 
 - **WordCountPlugin** — word/character counts in the status bar
 - **PlaceholderPlugin** — placeholder text when empty
 - **AutolinkPlugin** — auto-converts typed URLs to links
+- **SyntaxHighlightPlugin** — automatic syntax highlighting for code blocks with language detection, theme-aware colors, and `setCodeLanguage`/`getCodeLanguage` commands. When active, a language selector dropdown appears on focused code blocks.
+
+```jsx
+import { SyntaxHighlightPlugin } from '@remyxjs/react';
+
+<RemyxEditor
+  plugins={[SyntaxHighlightPlugin()]}
+/>
+```
 
 ### Custom Plugins
 
 ```js
-import { createPlugin } from '@remyx/react';
+import { createPlugin } from '@remyxjs/react';
 
 const MyPlugin = createPlugin({
   name: 'my-plugin',
@@ -1034,7 +1044,7 @@ function App() {
 ### Programmatic Export
 
 ```jsx
-import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyx/react';
+import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyxjs/react';
 
 function ExportButtons({ content }) {
   return (
@@ -1058,7 +1068,7 @@ PDF export opens the browser print dialog. Word and Markdown exports trigger fil
 ### Programmatic Import
 
 ```jsx
-import { convertDocument, isImportableFile } from '@remyx/react';
+import { convertDocument, isImportableFile } from '@remyxjs/react';
 
 async function handleFileSelect(file, engine) {
   if (!isImportableFile(file)) {
@@ -1352,7 +1362,7 @@ autosave={{
 For custom UIs, use the `useAutosave` hook directly:
 
 ```jsx
-import { useAutosave } from '@remyx/react';
+import { useAutosave } from '@remyxjs/react';
 
 function MyEditor({ engine }) {
   const { saveStatus, lastSaved, recoveryData, recoverContent, dismissRecovery } =
@@ -1456,46 +1466,49 @@ function ValidatedEditor() {
 
 ## Exports
 
-`@remyx/react` re-exports everything from `@remyx/core` for convenience. You only need one import source:
+`@remyxjs/react` re-exports everything from `@remyxjs/core` for convenience. You only need one import source:
 
 ```js
 // React components & hooks
-import { RemyxEditor, useRemyxEditor, useEditorEngine } from '@remyx/react';
-import { RemyxConfigProvider, useRemyxConfig } from '@remyx/react';
+import { RemyxEditor, useRemyxEditor, useEditorEngine } from '@remyxjs/react';
+import { RemyxConfigProvider, useRemyxConfig } from '@remyxjs/react';
 
 // Toolbar
-import { TOOLBAR_PRESETS, DEFAULT_TOOLBAR, removeToolbarItems, addToolbarItems, createToolbar } from '@remyx/react';
+import { TOOLBAR_PRESETS, DEFAULT_TOOLBAR, removeToolbarItems, addToolbarItems, createToolbar } from '@remyxjs/react';
 
 // Defaults
-import { DEFAULT_FONTS, DEFAULT_FONT_SIZES, DEFAULT_COLORS, DEFAULT_KEYBINDINGS, DEFAULT_MENU_BAR } from '@remyx/react';
+import { DEFAULT_FONTS, DEFAULT_FONT_SIZES, DEFAULT_COLORS, DEFAULT_KEYBINDINGS, DEFAULT_MENU_BAR } from '@remyxjs/react';
 
 // Fonts
-import { removeFonts, addFonts, loadGoogleFonts } from '@remyx/react';
+import { removeFonts, addFonts, loadGoogleFonts } from '@remyxjs/react';
 
 // Theming
-import { createTheme, THEME_VARIABLES, THEME_PRESETS } from '@remyx/react';
-import { createToolbarItemTheme, resolveToolbarItemStyle, TOOLBAR_ITEM_STYLE_KEYS } from '@remyx/react';
+import { createTheme, THEME_VARIABLES, THEME_PRESETS } from '@remyxjs/react';
+import { createToolbarItemTheme, resolveToolbarItemStyle, TOOLBAR_ITEM_STYLE_KEYS } from '@remyxjs/react';
 
 // Markdown & paste
-import { htmlToMarkdown, markdownToHtml, cleanPastedHTML, looksLikeMarkdown } from '@remyx/react';
+import { htmlToMarkdown, markdownToHtml, cleanPastedHTML, looksLikeMarkdown } from '@remyxjs/react';
 
 // Document conversion
-import { convertDocument, isImportableFile, getSupportedExtensions, getSupportedFormatNames } from '@remyx/react';
+import { convertDocument, isImportableFile, getSupportedExtensions, getSupportedFormatNames } from '@remyxjs/react';
 
 // Export
-import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyx/react';
+import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyxjs/react';
 
 // Plugins
-import { createPlugin, WordCountPlugin, AutolinkPlugin, PlaceholderPlugin } from '@remyx/react';
+import { createPlugin, WordCountPlugin, AutolinkPlugin, PlaceholderPlugin, SyntaxHighlightPlugin } from '@remyxjs/react';
+
+// Syntax highlighting utilities
+import { SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize } from '@remyxjs/react';
 
 // Command palette
-import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyx/react';
+import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyxjs/react';
 
 // Config
-import { defineConfig } from '@remyx/react';
+import { defineConfig } from '@remyxjs/react';
 
 // Core engine (advanced)
-import { EditorEngine, EventBus, CommandRegistry, Selection, History } from '@remyx/react';
+import { EditorEngine, EventBus, CommandRegistry, Selection, History } from '@remyxjs/react';
 ```
 
 ## TypeScript
@@ -1509,7 +1522,7 @@ import type {
   Plugin,
   UseRemyxEditorReturn,
   UseEditorEngineReturn,
-} from '@remyx/react';
+} from '@remyxjs/react';
 ```
 
 ### RemyxEditorProps
@@ -1520,24 +1533,24 @@ Full type definition for all `<RemyxEditor>` props including `value`, `onChange`
 
 The core engine type with methods like `getHTML()`, `setHTML()`, `executeCommand()`, `on()`, `off()`, and `destroy()`.
 
-## Using `@remyx/core` Directly
+## Using `@remyxjs/core` Directly
 
 For non-React integrations (Vue, Svelte, Angular, vanilla JS, or Node.js), use the core package directly:
 
 ```bash
-npm install @remyx/core
+npm install @remyxjs/core
 ```
 
 ```js
-import { EditorEngine, EventBus } from '@remyx/core';
-import '@remyx/core/style.css';
+import { EditorEngine, EventBus } from '@remyxjs/core';
+import '@remyxjs/core/style.css';
 
 // Create an editor on any DOM element
 const element = document.querySelector('#editor');
 const engine = new EditorEngine(element, { outputFormat: 'html' });
 
 // Register commands
-import { registerFormattingCommands, registerListCommands } from '@remyx/core';
+import { registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 registerFormattingCommands(engine);
 registerListCommands(engine);
 
@@ -1553,12 +1566,12 @@ engine.on('content:change', () => {
 engine.destroy();
 ```
 
-`@remyx/core` exports 80+ named symbols — the full engine, all 16 command register functions, plugin system, utilities (markdown, paste cleaning, export, fonts, themes, toolbar config), constants, and `defineConfig()`. See the [core package README](../remyx-core/README.md) for the full API.
+`@remyxjs/core` exports 80+ named symbols — the full engine, all 16 command register functions, plugin system, utilities (markdown, paste cleaning, export, fonts, themes, toolbar config), constants, and `defineConfig()`. See the [core package README](../remyx-core/README.md) for the full API.
 
 ## Architecture
 
 ```
-@remyx/react
+@remyxjs/react
   components/
     RemyxEditor.jsx       Main editor component
     Toolbar/              Toolbar buttons, dropdowns, color pickers
@@ -1585,7 +1598,7 @@ engine.destroy();
 
 | Package | Version |
 | --- | --- |
-| `@remyx/core` | >= 0.27.0 |
+| `@remyxjs/core` | >= 0.27.0 |
 | `react` | >= 18.0.0 |
 | `react-dom` | >= 18.0.0 |
 

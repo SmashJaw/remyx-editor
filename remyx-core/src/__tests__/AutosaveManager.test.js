@@ -236,5 +236,204 @@ describe('AutosaveManager', () => {
       // Only the final save in destroy() should have been called
       expect(provider.save).toHaveBeenCalledTimes(1)
     })
+
+    it('clears pending debounce timer', async () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider, debounce: 5000 })
+      manager.init()
+
+      // Trigger a debounced save (sets _debounceTimer)
+      engine.eventBus.emit('content:change')
+      expect(manager._debounceTimer).not.toBeNull()
+
+      manager.destroy()
+
+      // Debounce timer should be cleared
+      expect(manager._debounceTimer).toBeNull()
+
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    it('removes beforeunload handler', async () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider })
+      const removeSpy = jest.spyOn(window, 'removeEventListener')
+
+      manager.init()
+      expect(manager._beforeUnloadHandler).not.toBeNull()
+
+      const handler = manager._beforeUnloadHandler
+      manager.destroy()
+
+      expect(removeSpy).toHaveBeenCalledWith('beforeunload', handler)
+      expect(manager._beforeUnloadHandler).toBeNull()
+
+      removeSpy.mockRestore()
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+  })
+
+  describe('init() beforeunload handler', () => {
+    it('sets up a beforeunload handler that calls _attemptSyncSave', () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider })
+      const addSpy = jest.spyOn(window, 'addEventListener')
+
+      manager.init()
+
+      expect(addSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function))
+      expect(manager._beforeUnloadHandler).toBeInstanceOf(Function)
+
+      // Calling the handler should trigger _attemptSyncSave
+      const syncSpy = jest.spyOn(manager, '_attemptSyncSave')
+      manager._beforeUnloadHandler()
+      expect(syncSpy).toHaveBeenCalledTimes(1)
+
+      addSpy.mockRestore()
+      syncSpy.mockRestore()
+    })
+  })
+
+  describe('checkRecovery() error handling', () => {
+    it('returns null when provider.load throws', async () => {
+      const provider = createMemoryProvider()
+      provider.load.mockRejectedValueOnce(new Error('Storage corrupted'))
+      manager = new AutosaveManager(engine, { provider })
+
+      const result = await manager.checkRecovery('<p>Current</p>')
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('_scheduleDebouncedSave()', () => {
+    it('clears existing debounce timer before setting a new one', () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider, debounce: 5000 })
+      manager.init()
+
+      // Trigger first content change to set a debounce timer
+      engine.eventBus.emit('content:change')
+      const firstTimer = manager._debounceTimer
+
+      // Trigger second content change — should clear the first timer
+      engine.eventBus.emit('content:change')
+      const secondTimer = manager._debounceTimer
+
+      expect(firstTimer).not.toBeNull()
+      expect(secondTimer).not.toBeNull()
+      // Timers should be different (first was cleared, new one set)
+      expect(secondTimer).not.toBe(firstTimer)
+    })
+  })
+
+  describe('_attemptSyncSave()', () => {
+    it('uses provider.saveSync if available', () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider })
+      // Add saveSync directly on the resolved provider (after createStorageProvider wraps it)
+      manager.provider.saveSync = jest.fn()
+      // _lastSavedContent must differ from current to trigger save
+      manager._lastSavedContent = 'something different'
+
+      manager._attemptSyncSave()
+
+      expect(manager.provider.saveSync).toHaveBeenCalledWith('rmx-default', '<p>Hello</p>')
+    })
+
+    it('uses navigator.sendBeacon if provider has endpoint but no saveSync', () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider })
+      // Set endpoint on the resolved provider (after createStorageProvider wraps it)
+      manager.provider.endpoint = 'https://api.example.com/autosave'
+      // _lastSavedContent must differ from current to trigger save
+      manager._lastSavedContent = 'something different'
+
+      const originalSendBeacon = navigator.sendBeacon
+      navigator.sendBeacon = jest.fn(() => true)
+
+      manager._attemptSyncSave()
+
+      expect(navigator.sendBeacon).toHaveBeenCalledTimes(1)
+      expect(navigator.sendBeacon).toHaveBeenCalledWith(
+        'https://api.example.com/autosave',
+        expect.any(String),
+      )
+      const body = JSON.parse(navigator.sendBeacon.mock.calls[0][1])
+      expect(body.key).toBe('rmx-default')
+      expect(body.content).toBe('<p>Hello</p>')
+
+      navigator.sendBeacon = originalSendBeacon
+    })
+
+    it('returns early if content is unchanged', () => {
+      const provider = createMemoryProvider()
+      provider.saveSync = jest.fn()
+      manager = new AutosaveManager(engine, { provider })
+
+      // Set _lastSavedContent to match what getHTML returns
+      manager._lastSavedContent = '<p>Hello</p>'
+
+      manager._attemptSyncSave()
+
+      expect(provider.saveSync).not.toHaveBeenCalled()
+    })
+
+    it('returns early if destroyed', () => {
+      const provider = createMemoryProvider()
+      provider.saveSync = jest.fn()
+      manager = new AutosaveManager(engine, { provider })
+      manager._destroyed = true
+
+      manager._attemptSyncSave()
+
+      expect(provider.saveSync).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('save() queuing behavior', () => {
+    it('queues a pending save if already saving, then executes it', async () => {
+      let resolveSave
+      const provider = createMemoryProvider()
+      provider.save.mockImplementationOnce(() => new Promise(r => { resolveSave = r }))
+      manager = new AutosaveManager(engine, { provider })
+
+      // Start first save
+      const p1 = manager.save()
+      expect(manager._isSaving).toBe(true)
+
+      // Change content for the second save
+      engine.getHTML.mockReturnValue('<p>Updated</p>')
+
+      // This should set _pendingSave = true
+      manager.save()
+      expect(manager._pendingSave).toBe(true)
+
+      // Complete the first save
+      resolveSave()
+      await p1
+      // Let the queued save execute
+      await Promise.resolve()
+      await Promise.resolve()
+
+      // The pending save should have fired
+      expect(provider.save).toHaveBeenCalledTimes(2)
+      expect(provider.save).toHaveBeenLastCalledWith('rmx-default', '<p>Updated</p>', undefined)
+    })
+
+    it('skips save() if content unchanged', async () => {
+      const provider = createMemoryProvider()
+      manager = new AutosaveManager(engine, { provider })
+
+      // First save
+      await manager.save()
+      expect(provider.save).toHaveBeenCalledTimes(1)
+
+      // Second save with same content should be skipped
+      provider.save.mockClear()
+      await manager.save()
+      expect(provider.save).not.toHaveBeenCalled()
+    })
   })
 })

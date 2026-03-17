@@ -262,6 +262,144 @@ describe('registerTableCommands', () => {
     expect(commands.insertTable.meta).toEqual({ icon: 'table', tooltip: 'Insert Table' })
   })
 
+  it('should replace table with paragraph when deleting last column', () => {
+    const table = document.createElement('table')
+    const tbody = document.createElement('tbody')
+    for (let r = 0; r < 2; r++) {
+      const tr = document.createElement('tr')
+      const td = document.createElement('td')
+      td.innerHTML = '<br>'
+      tr.appendChild(td)
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    mockEngine.element.appendChild(table)
+
+    const td = table.querySelector('td')
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.deleteCol.execute(mockEngine)
+    expect(mockEngine.element.querySelector('table')).toBeNull()
+    expect(mockEngine.element.querySelector('p')).not.toBeNull()
+  })
+
+  it('should split cell with rowspan > 1 and add cells to subsequent rows', () => {
+    // Create a 3x2 table
+    const table = document.createElement('table')
+    const tbody = document.createElement('tbody')
+    for (let r = 0; r < 3; r++) {
+      const tr = document.createElement('tr')
+      for (let c = 0; c < 2; c++) {
+        const td = document.createElement('td')
+        td.innerHTML = '<br>'
+        tr.appendChild(td)
+      }
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    mockEngine.element.appendChild(table)
+
+    // Set the first cell to span 3 rows
+    const td = tbody.rows[0].cells[0]
+    td.rowSpan = 3
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      return null
+    })
+
+    commands.splitCell.execute(mockEngine)
+
+    // rowSpan should be reset to 1
+    expect(td.rowSpan).toBe(1)
+    // Each subsequent row (row 1 and row 2) should have gained 1 new cell
+    expect(tbody.rows[1].cells.length).toBe(3)
+    expect(tbody.rows[2].cells.length).toBe(3)
+  })
+
+  it('should split cell with both colspan and rowspan', () => {
+    // Create a 3x3 table
+    const table = document.createElement('table')
+    const tbody = document.createElement('tbody')
+    for (let r = 0; r < 3; r++) {
+      const tr = document.createElement('tr')
+      for (let c = 0; c < 3; c++) {
+        const td = document.createElement('td')
+        td.innerHTML = '<br>'
+        tr.appendChild(td)
+      }
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    mockEngine.element.appendChild(table)
+
+    // Set first cell to span 2 cols and 2 rows
+    const td = tbody.rows[0].cells[0]
+    td.colSpan = 2
+    td.rowSpan = 2
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      return null
+    })
+
+    commands.splitCell.execute(mockEngine)
+
+    expect(td.colSpan).toBe(1)
+    expect(td.rowSpan).toBe(1)
+    // Row 0 should have gained 1 cell from colspan split (3 original + 1 = 4)
+    expect(tbody.rows[0].cells.length).toBe(4)
+    // Row 1 should have gained 2 cells from rowspan split (colspan=2 worth of cells)
+    expect(tbody.rows[1].cells.length).toBe(5)
+  })
+
+  it('should merge cells where some are empty', () => {
+    const table = createTestTable()
+    const cells = Array.from(table.querySelectorAll('td'))
+    const cell1 = cells[0]
+    const cell2 = cells[1]
+    cell1.textContent = 'Hello'
+    cell2.textContent = '' // empty cell
+
+    commands.mergeCells.execute(mockEngine, { cells: [cell1, cell2] })
+    // Empty cell content should not be appended
+    expect(cell1.innerHTML).toBe('Hello')
+    expect(cell1.colSpan).toBe(2)
+  })
+
+  it('should split cell that has rowspan but only one column', () => {
+    // Create a 2x1 table
+    const table = document.createElement('table')
+    const tbody = document.createElement('tbody')
+    for (let r = 0; r < 2; r++) {
+      const tr = document.createElement('tr')
+      const td = document.createElement('td')
+      td.innerHTML = '<br>'
+      tr.appendChild(td)
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    mockEngine.element.appendChild(table)
+
+    const td = tbody.rows[0].cells[0]
+    td.rowSpan = 2
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      return null
+    })
+
+    commands.splitCell.execute(mockEngine)
+    expect(td.rowSpan).toBe(1)
+    // Second row should have gained a new cell
+    expect(tbody.rows[1].cells.length).toBe(2)
+  })
+
   // Helper function
   function createTestTable() {
     const table = document.createElement('table')

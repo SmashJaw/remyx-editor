@@ -77,7 +77,7 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 37 | CSS style assignments without validation | Medium | ✅ | core/react | `fontControls.js`, `images.js` |
 | 38 | Unvalidated attachment URLs | Medium | ✅ | core | `attachments.js` |
 | 39 | Async file upload race condition | Medium | 🔲 | core | `Clipboard.js`, `DragDrop.js` |
-| 40 | `Selection.insertHTML()` unsanitized | Medium | ✅ Documented | core | `Selection.js` |
+| 40 | `Selection.insertHTML()` unsanitized | Medium | ✅ | core | `Selection.js` |
 | 41 | innerHTML restoration in React hooks | Medium | ✅ | react | `usePortalAttachment.js`, `useRemyxEditor.js` |
 | 42 | Unsafe `Object.assign` on DOM styles | Low | ✅ | react | `useRemyxEditor.js` |
 | 43 | Unvalidated URL inputs in modal forms | Low | ✅ | react | `ImageModal.jsx`, `LinkModal.jsx`, etc. |
@@ -85,13 +85,13 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 45 | Weak randomness for element IDs | Info | ✅ Documented | core | `dom.js` |
 | 46 | Pin third-party dependency versions | Medium | 🔲 | core | `package.json` |
 | 47 | Source mode sanitization notification | Low | 🔲 | react | — |
-| 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | High | 🔲 | core | `AutolinkPlugin.js` |
-| 146 | LinkModal protocol blacklist incomplete (XSS bypass) | High | 🔲 | react | `LinkModal.jsx` |
-| 147 | ImageModal allows `data:image/svg+xml` XSS | Medium | 🔲 | react | `ImageModal.jsx` |
-| 148 | `Selection.insertHTML()` has no caller guardrail | Medium | 🔲 | core | `Selection.js` |
-| 149 | CLI project name allows path traversal | Medium | 🔲 | cli | `create/index.js` |
+| 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | High | ✅ | core | `AutolinkPlugin.js` |
+| 146 | LinkModal protocol blacklist incomplete (XSS bypass) | High | ✅ | react | `LinkModal.jsx` |
+| 147 | ImageModal allows `data:image/svg+xml` XSS | Medium | ✅ | react | `ImageModal.jsx` |
+| 148 | `Selection.insertHTML()` has no caller guardrail | Medium | ✅ | core | `Selection.js` |
+| 149 | CLI project name allows path traversal | Medium | ✅ | cli | `create/index.js` |
 
-**27 resolved, 8 open.**
+**32 resolved, 3 open.**
 
 ---
 
@@ -140,7 +140,7 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 86 | React hooks violations — ref access patterns | High | ✅ | react | Documented intentional patterns |
 | 87 | Dead code removal | Medium | ✅ | all | 5 files cleaned |
 | 88 | React Refresh compatibility | Medium | ✅ | react | Moved `useRemyxConfig` to own file |
-| 89 | Version mismatch — `@remyx/core` devDep | Low | ✅ | react | Updated to 0.24.0 |
+| 89 | Version mismatch — `@remyxjs/core` devDep | Low | ✅ | react | Updated to 0.24.0 |
 | 90 | Missing React hook test coverage | Low | 🔲 | react | Needs `@testing-library/react-hooks` |
 | 91 | Missing React component test coverage | Low | 🔲 | react | Needs full rendering setup |
 | 150 | Inconsistent modal error handling UX | Medium | 🔲 | react | All modal components |
@@ -226,10 +226,10 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | Category | Total | Done | Open |
 |----------|-------|------|------|
 | Bugs | 21 | 21 | 0 |
-| Security | 36 | 27 | 8 |
+| Security | 36 | 32 | 3 |
 | Cleanup | 52 | 42 | 10 |
 | Optimizations | 56 | 21 | 35 |
-| **Total** | **165** | **111** | **53** |
+| **Total** | **165** | **116** | **48** |
 
 ---
 
@@ -238,8 +238,6 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 ### High
 | # | Title | Category |
 |---|-------|----------|
-| 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | SEC |
-| 146 | LinkModal protocol blacklist incomplete (XSS bypass) | SEC |
 | 110 | Replace `selectionState` prop drilling with Context | OPT |
 | 112 | WeakMap DOM caching in `useSelection` | OPT |
 | 119 | Memoize `useResolvedConfig` return value | OPT |
@@ -258,9 +256,6 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 |---|-------|----------|
 | 39 | Async file upload race condition | SEC |
 | 46 | Pin third-party dependency versions | SEC |
-| 147 | ImageModal allows `data:image/svg+xml` XSS | SEC |
-| 148 | `Selection.insertHTML()` has no caller guardrail | SEC |
-| 149 | CLI project name allows path traversal | SEC |
 | 150 | Inconsistent modal error handling UX | CLN |
 | 113 | Granular sub-exports for tree-shaking | OPT |
 | 114 | Split icon bundle into lazy chunks | OPT |

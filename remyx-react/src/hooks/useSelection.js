@@ -25,6 +25,7 @@ const DEFAULT_UI = {
   selectionRect: null,
   focusedImage: null,
   focusedTable: null,
+  focusedCodeBlock: null,
 }
 
 const FORMAT_KEYS = Object.keys(DEFAULT_FORMAT)
@@ -71,9 +72,10 @@ export function useSelection(engine) {
       }
     }
 
-    // DOM queries for focused image/table
+    // DOM queries for focused image/table/codeblock
     let focusedImage = null
     let focusedTable = null
+    let focusedCodeBlock = null
     if (sel && sel.focusNode) {
       const node = sel.focusNode.nodeType === Node.TEXT_NODE ? sel.focusNode.parentElement : sel.focusNode
       if (node) {
@@ -82,15 +84,21 @@ export function useSelection(engine) {
 
         const table = node.closest?.('table')
         if (table) focusedTable = table
+
+        const pre = node.closest?.('pre')
+        if (pre) focusedCodeBlock = pre
       }
     }
 
     // Use cached references if the actual DOM element hasn't changed
-    if (focusedImage === cachedFocusRef.current.image && focusedTable === cachedFocusRef.current.table) {
+    if (focusedImage === cachedFocusRef.current.image &&
+        focusedTable === cachedFocusRef.current.table &&
+        focusedCodeBlock === cachedFocusRef.current.codeBlock) {
       focusedImage = cachedFocusRef.current.image
       focusedTable = cachedFocusRef.current.table
+      focusedCodeBlock = cachedFocusRef.current.codeBlock
     } else {
-      cachedFocusRef.current = { image: focusedImage, table: focusedTable }
+      cachedFocusRef.current = { image: focusedImage, table: focusedTable, codeBlock: focusedCodeBlock }
     }
 
     // Update UI state — bail out if nothing changed
@@ -98,10 +106,11 @@ export function useSelection(engine) {
       if (prev.hasSelection === hasSelection &&
           prev.focusedImage === focusedImage &&
           prev.focusedTable === focusedTable &&
+          prev.focusedCodeBlock === focusedCodeBlock &&
           !hasSelection) {
         return prev
       }
-      return { hasSelection, selectionRect, focusedImage, focusedTable }
+      return { hasSelection, selectionRect, focusedImage, focusedTable, focusedCodeBlock }
     })
   }, [])
 
@@ -116,7 +125,7 @@ export function useSelection(engine) {
   useEffect(() => {
     if (!engine) return
     const clearCache = () => {
-      cachedFocusRef.current = { image: null, table: null }
+      cachedFocusRef.current = { image: null, table: null, codeBlock: null }
     }
     const unsub = engine.eventBus.on('content:change', clearCache)
     return unsub

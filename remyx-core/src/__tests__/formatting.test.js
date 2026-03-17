@@ -130,4 +130,53 @@ describe('registerFormattingCommands', () => {
   it('should have correct meta for removeFormat', () => {
     expect(commands.removeFormat.meta).toEqual({ icon: 'removeFormat', tooltip: 'Remove Formatting' })
   })
+
+  it('should call document.execCommand for underline execute', () => {
+    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    commands.underline.execute()
+    expect(spy).toHaveBeenCalledWith('underline', false, null)
+    spy.mockRestore()
+  })
+
+  it('should check queryCommandState for underline isActive', () => {
+    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    expect(commands.underline.isActive()).toBe(true)
+    expect(spy).toHaveBeenCalledWith('underline')
+    spy.mockRestore()
+  })
+
+  it('should call document.execCommand for subscript execute', () => {
+    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    commands.subscript.execute()
+    expect(spy).toHaveBeenCalledWith('subscript', false, null)
+    spy.mockRestore()
+  })
+
+  it('should check queryCommandState for subscript isActive', () => {
+    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    expect(commands.subscript.isActive()).toBe(true)
+    expect(spy).toHaveBeenCalledWith('subscript')
+    spy.mockRestore()
+  })
+
+  it('should call document.execCommand for superscript execute', () => {
+    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    commands.superscript.execute()
+    expect(spy).toHaveBeenCalledWith('superscript', false, null)
+    spy.mockRestore()
+  })
+
+  it('should check queryCommandState for superscript isActive', () => {
+    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(false)
+    expect(commands.superscript.isActive()).toBe(false)
+    expect(spy).toHaveBeenCalledWith('superscript')
+    spy.mockRestore()
+  })
+
+  it('should check queryCommandState for strikethrough isActive', () => {
+    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    expect(commands.strikethrough.isActive()).toBe(true)
+    expect(spy).toHaveBeenCalledWith('strikeThrough')
+    spy.mockRestore()
+  })
 })

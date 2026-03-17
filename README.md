@@ -21,6 +21,7 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Autosave** — Periodic + debounced saves with crash recovery banner, visual save-status indicator, pluggable storage (localStorage, sessionStorage, filesystem, AWS S3/GCP/cloud HTTP, or custom)
 - **Keyboard shortcuts** — 17+ default shortcuts, customizable via API
 - **Accessibility** — Skip navigation, focus trapping in modals, ARIA roles, keyboard-navigable toolbar
+- **Code block syntax highlighting** — 11 languages (JS/TS, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, HTML) with auto-detection, theme-aware token colors, and language selector dropdown
 - **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention
 - **Tree-shakeable** — Import only the commands and utilities you need
 
@@ -28,15 +29,15 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyx/core`](./remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyx/react`](./remyx-react/) | 0.27.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
+| [`@remyxjs/core`](./remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./remyx-react/) | 0.27.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
 | [`create-remyx`](./create-remyx/) | 0.27.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 
 ### New Project (Recommended)
 
-The fastest way to start is with `create-remyx-app` (shipped with `@remyx/react`), which scaffolds a complete project:
+The fastest way to start is with `create-remyx-app` (shipped with `@remyxjs/react`), which scaffolds a complete project:
 
 ```bash
 npx create-remyx-app my-editor
@@ -52,17 +53,17 @@ You'll be prompted to pick:
 | Use case | Install |
 | --- | --- |
 | New project (interactive setup) | `npx create-remyx-app` |
-| React project | `npm install @remyx/core @remyx/react` |
-| Vue / Svelte / Angular / Vanilla JS | `npm install @remyx/core` (build your own wrapper) |
-| Server-side HTML processing | `npm install @remyx/core` |
+| React project | `npm install @remyxjs/core @remyxjs/react` |
+| Vue / Svelte / Angular / Vanilla JS | `npm install @remyxjs/core` (build your own wrapper) |
+| Server-side HTML processing | `npm install @remyxjs/core` |
 
 ## Quick Start (React)
 
 ```jsx
 import { useState } from 'react';
-import { RemyxEditor } from '@remyx/react';
-import '@remyx/core/style.css';
-import '@remyx/react/style.css';
+import { RemyxEditor } from '@remyxjs/react';
+import '@remyxjs/core/style.css';
+import '@remyxjs/react/style.css';
 
 function App() {
   const [content, setContent] = useState('');
@@ -124,12 +125,12 @@ Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
 ### Add plugins
 
 ```jsx
-import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin } from '@remyx/core';
+import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin, SyntaxHighlightPlugin } from '@remyxjs/core';
 
 <RemyxEditor
   value={content}
   onChange={setContent}
-  plugins={[WordCountPlugin, AutolinkPlugin, PlaceholderPlugin('Write something...')]}
+  plugins={[WordCountPlugin, AutolinkPlugin, PlaceholderPlugin('Write something...'), SyntaxHighlightPlugin()]}
 />
 ```
 
@@ -154,7 +155,7 @@ import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin } from '@remyx/core'
 />
 ```
 
-See the full [@remyx/react README](./remyx-react/README.md) for all props, hooks, error handling, engine access, modals, forms, and more.
+See the full [@remyxjs/react README](./remyx-react/README.md) for all props, hooks, error handling, engine access, modals, forms, and more.
 
 ## Quick Start (Core Only)
 
@@ -166,8 +167,8 @@ import {
   registerListCommands,
   registerLinkCommands,
   registerBlockCommands,
-} from '@remyx/core';
-import '@remyx/core/style.css';
+} from '@remyxjs/core';
+import '@remyxjs/core/style.css';
 
 const engine = new EditorEngine(document.querySelector('#editor'), {
   outputFormat: 'html',
@@ -194,20 +195,20 @@ engine.executeCommand('heading', 2);
 engine.destroy();
 ```
 
-See the full [@remyx/core README](./remyx-core/README.md) for the complete engine API, all 40+ commands, plugin system, selection API, sanitizer, theming, toolbar config, utilities, and framework wrapper guide.
+See the full [@remyxjs/core README](./remyx-core/README.md) for the complete engine API, all 40+ commands, plugin system, selection API, sanitizer, theming, toolbar config, utilities, and framework wrapper guide.
 
 ## Architecture
 
 ```
-@remyx/core ←── @remyx/react
-            ←── (future: @remyx/vue, @remyx/svelte, @remyx/angular, @remyx/vanilla)
+@remyxjs/core ←── @remyxjs/react
+            ←── (future: @remyxjs/vue, @remyxjs/svelte, @remyxjs/angular, @remyxjs/vanilla)
 ```
 
-`@remyx/core` contains the entire editor engine with zero framework dependencies. Framework packages like `@remyx/react` provide components and hooks that wrap the core engine.
+`@remyxjs/core` contains the entire editor engine with zero framework dependencies. Framework packages like `@remyxjs/react` provide components and hooks that wrap the core engine.
 
 ### What's in each package
 
-| | `@remyx/core` | `@remyx/react` |
+| | `@remyxjs/core` | `@remyxjs/react` |
 | --- | --- | --- |
 | Editor engine | Yes | Re-exports from core |
 | Commands (40+) | Yes | Re-exports from core |
@@ -225,8 +226,8 @@ See the full [@remyx/core README](./remyx-core/README.md) for the complete engin
 ```
 packages/
   create-remyx/   → create-remyx        Reserved for future CLI wizard
-  remyx-core/     → @remyx/core         80+ exports, 0 framework deps
-  remyx-react/    → @remyx/react        React components + hooks + TS types + scaffolding CLI
+  remyx-core/     → @remyxjs/core         80+ exports, 0 framework deps
+  remyx-react/    → @remyxjs/react        React components + hooks + TS types + scaffolding CLI
   docs/           Documentation, changelogs, roadmap, benchmarks
 ```
 
@@ -234,8 +235,8 @@ packages/
 
 | Package | JS (gzipped) | CSS (gzipped) |
 | --- | --- | --- |
-| `@remyx/core` | ~21 KB | ~5 KB |
-| `@remyx/react` | ~14 KB | ~2 KB |
+| `@remyxjs/core` | ~21 KB | ~5 KB |
+| `@remyxjs/react` | ~14 KB | ~2 KB |
 | **Combined** | **~35 KB** | **~7 KB** |
 
 Heavy dependencies (`mammoth` for DOCX, `pdfjs-dist` for PDF) are optional peer dependencies and use dynamic imports — they're only loaded when a file of that type is imported.
@@ -253,7 +254,7 @@ npm run build:all
 npm run build:core
 npm run build:react
 
-# Run tests (868 unit tests)
+# Run tests (1251 unit tests)
 npm test
 
 # Run tests in watch mode
@@ -281,8 +282,8 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 
 | Document | Description |
 | --- | --- |
-| [@remyx/react README](./remyx-react/README.md) | Full API — props, hooks, theming, plugins, toolbar, menu bar, error handling, engine access, forms |
-| [@remyx/core README](./remyx-core/README.md) | Full API — engine, commands, plugins, selection, history, sanitizer, theming, toolbar config, utilities |
+| [@remyxjs/react README](./remyx-react/README.md) | Full API — props, hooks, theming, plugins, toolbar, menu bar, error handling, engine access, forms |
+| [@remyxjs/core README](./remyx-core/README.md) | Full API — engine, commands, plugins, selection, history, sanitizer, theming, toolbar config, utilities |
 | [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, architecture, adding commands/plugins, PR process |
 | [CHANGELOG.md](./docs/CHANGELOG.md) | Version history and release notes |
 | [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard |

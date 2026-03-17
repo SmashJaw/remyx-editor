@@ -209,13 +209,18 @@ describe('PluginManager', () => {
   })
 
   describe('restricted API', () => {
-    it('should provide read-only options copy', () => {
-      let receivedApi = null
+    let receivedApi
+
+    beforeEach(() => {
+      receivedApi = null
       manager.register({
         name: 'test',
         init(api) { receivedApi = api },
       })
       manager.initAll()
+    })
+
+    it('should provide read-only options copy', () => {
       const opts = receivedApi.options
       opts.theme = 'dark'
       // Should not affect engine options
@@ -223,15 +228,73 @@ describe('PluginManager', () => {
     })
 
     it('should expose getSelection and getRange', () => {
-      let receivedApi = null
-      manager.register({
-        name: 'test',
-        init(api) { receivedApi = api },
-      })
-      manager.initAll()
       expect(typeof receivedApi.getSelection).toBe('function')
       expect(typeof receivedApi.getRange).toBe('function')
       expect(typeof receivedApi.getActiveFormats).toBe('function')
+    })
+
+    it('executeCommand delegates to engine.commands.execute', () => {
+      receivedApi.executeCommand('bold', 'arg1')
+      expect(mockEngine.commands.execute).toHaveBeenCalledWith('bold', 'arg1')
+    })
+
+    it('on delegates to engine.eventBus.on', () => {
+      const handler = jest.fn()
+      receivedApi.on('change', handler)
+      expect(mockEngine.eventBus.on).toHaveBeenCalledWith('change', handler)
+    })
+
+    it('off delegates to engine.eventBus.off', () => {
+      const handler = jest.fn()
+      receivedApi.off('change', handler)
+      expect(mockEngine.eventBus.off).toHaveBeenCalledWith('change', handler)
+    })
+
+    it('getSelection delegates to engine.selection.getSelection', () => {
+      receivedApi.getSelection()
+      expect(mockEngine.selection.getSelection).toHaveBeenCalled()
+    })
+
+    it('getRange delegates to engine.selection.getRange', () => {
+      receivedApi.getRange()
+      expect(mockEngine.selection.getRange).toHaveBeenCalled()
+    })
+
+    it('getActiveFormats delegates to engine.selection.getActiveFormats', () => {
+      receivedApi.getActiveFormats()
+      expect(mockEngine.selection.getActiveFormats).toHaveBeenCalled()
+    })
+
+    it('getHTML delegates to engine.getHTML', () => {
+      receivedApi.getHTML()
+      expect(mockEngine.getHTML).toHaveBeenCalled()
+    })
+
+    it('getText delegates to engine.getText', () => {
+      receivedApi.getText()
+      expect(mockEngine.getText).toHaveBeenCalled()
+    })
+
+    it('isEmpty delegates to engine.isEmpty', () => {
+      receivedApi.isEmpty()
+      expect(mockEngine.isEmpty).toHaveBeenCalled()
+    })
+  })
+
+  describe('initAll error handling', () => {
+    it('emits plugin:error when init throws', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const error = new Error('init failed')
+      manager.register({
+        name: 'bad-plugin',
+        init() { throw error },
+      })
+      manager.initAll()
+      expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('plugin:error', {
+        name: 'bad-plugin',
+        error,
+      })
+      consoleSpy.mockRestore()
     })
   })
 })

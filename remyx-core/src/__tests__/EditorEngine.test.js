@@ -56,6 +56,10 @@ describe('EditorEngine', () => {
       expect(engine.isSourceMode).toBe(false)
       expect(engine.isMarkdownMode).toBe(false)
     })
+
+    it('should wire the sanitizer into selection after construction', () => {
+      expect(engine.selection._sanitizer).toBe(engine.sanitizer)
+    })
   })
 
   describe('init', () => {
@@ -280,6 +284,119 @@ describe('EditorEngine', () => {
       element.innerHTML = '<br>'
       element.dispatchEvent(new Event('input'))
       expect(element.innerHTML).toBe('<p><br></p>')
+    })
+  })
+
+  describe('init error handling', () => {
+    it('should emit editor:error and re-throw when a subsystem init throws', () => {
+      const errorHandler = jest.fn()
+      engine.on('editor:error', errorHandler)
+
+      const initError = new Error('keyboard init failed')
+      jest.spyOn(engine.keyboard, 'init').mockImplementation(() => {
+        throw initError
+      })
+
+      expect(() => engine.init()).toThrow('keyboard init failed')
+      expect(errorHandler).toHaveBeenCalledWith({
+        phase: 'init',
+        error: initError,
+      })
+    })
+  })
+
+  describe('_handleSelectionChange', () => {
+    it('should not emit selection:change when selection is not within editor', () => {
+      engine.init()
+      const handler = jest.fn()
+      engine.on('selection:change', handler)
+
+      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(false)
+
+      document.dispatchEvent(new Event('selectionchange'))
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should not emit selection:change when getRange returns null', () => {
+      engine.init()
+      const handler = jest.fn()
+      engine.on('selection:change', handler)
+
+      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
+      jest.spyOn(engine.selection, 'getRange').mockReturnValue(null)
+
+      document.dispatchEvent(new Event('selectionchange'))
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should emit selection:change with active formats when selection is valid', () => {
+      engine.init()
+      const handler = jest.fn()
+      engine.on('selection:change', handler)
+
+      const fakeFormats = { bold: true, italic: false }
+      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
+      jest.spyOn(engine.selection, 'getRange').mockReturnValue({})
+      jest.spyOn(engine.selection, 'getActiveFormats').mockReturnValue(fakeFormats)
+
+      document.dispatchEvent(new Event('selectionchange'))
+      expect(handler).toHaveBeenCalledWith(fakeFormats)
+    })
+  })
+
+  describe('_handleClick', () => {
+    it('should toggle checkbox and emit content:change for task checkbox click', () => {
+      engine.init()
+      const handler = jest.fn()
+      engine.on('content:change', handler)
+
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      checkbox.classList.add('rmx-task-checkbox')
+      checkbox.checked = false
+      element.appendChild(checkbox)
+
+      // Simulate click event with the checkbox as target
+      const clickEvent = new MouseEvent('click', { bubbles: true })
+      Object.defineProperty(clickEvent, 'target', { value: checkbox })
+      element.dispatchEvent(clickEvent)
+
+      expect(checkbox.checked).toBe(true)
+      expect(handler).toHaveBeenCalled()
+    })
+
+    it('should not toggle a non-task checkbox', () => {
+      engine.init()
+      const handler = jest.fn()
+      engine.on('content:change', handler)
+
+      const checkbox = document.createElement('input')
+      checkbox.type = 'checkbox'
+      checkbox.checked = false
+      element.appendChild(checkbox)
+
+      const clickEvent = new MouseEvent('click', { bubbles: true })
+      Object.defineProperty(clickEvent, 'target', { value: checkbox })
+      element.dispatchEvent(clickEvent)
+
+      // Should not have been toggled by _handleClick
+      expect(checkbox.checked).toBe(false)
+      expect(handler).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('destroy idempotency', () => {
+    it('should not throw when destroy is called twice after init', () => {
+      engine.init()
+      engine.destroy()
+      expect(engine._isDestroyed).toBe(true)
+      expect(() => engine.destroy()).not.toThrow()
+      expect(engine._isDestroyed).toBe(true)
+    })
+
+    it('should not throw when destroy is called without init', () => {
+      expect(() => engine.destroy()).not.toThrow()
+      expect(engine._isDestroyed).toBe(true)
     })
   })
 })

@@ -34,7 +34,7 @@
     }
   },
   "release": {
-    "projects": ["@remyx/core", "@remyx/react", "create-remyx"],
+    "projects": ["@remyxjs/core", "@remyxjs/react", "create-remyx"],
     "projectsRelationship": "independent",
     "version": {
       "conventionalCommits": true,

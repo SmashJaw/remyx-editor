@@ -1,5 +1,5 @@
 // Re-export everything from core for convenience
-export * from '@remyx/core'
+export * from '@remyxjs/core'
 
 // React component
 export { default as RemyxEditor } from './components/RemyxEditor.jsx'
@@ -11,6 +11,9 @@ export { useEditorEngine } from './hooks/useEditorEngine.js'
 // React config provider
 export { RemyxConfigProvider } from './config/RemyxConfigProvider.jsx'
 export { useRemyxConfig } from './hooks/useRemyxConfig.js'
+
+// Drag and drop
+export { useDragDrop } from './hooks/useDragDrop.js'
 
 // Autosave
 export { useAutosave } from './hooks/useAutosave.js'

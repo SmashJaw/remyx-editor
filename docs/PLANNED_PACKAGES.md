@@ -11,24 +11,24 @@
 
 ```
 packages/
-  remyx-core/          → @remyx/core         ✅ Shipped  (framework-agnostic engine)
-  remyx-react/         → @remyx/react        ✅ Shipped  (React components + hooks + TS declarations)
-  remyx-vue/           → @remyx/vue          Planned    (Vue 3 composables + components)
-  remyx-angular/       → @remyx/angular      Planned    (Angular module + components)
-  remyx-svelte/        → @remyx/svelte       Planned    (Svelte components + actions)
-  remyx-vanilla/       → @remyx/vanilla      Planned    (Vanilla JS / Web Component)
-  remyx-ssr/           → @remyx/ssr          Planned    (Node.js server-side utilities)
+  remyx-core/          → @remyxjs/core         ✅ Shipped  (framework-agnostic engine)
+  remyx-react/         → @remyxjs/react        ✅ Shipped  (React components + hooks + TS declarations)
+  remyx-vue/           → @remyxjs/vue          Planned    (Vue 3 composables + components)
+  remyx-angular/       → @remyxjs/angular      Planned    (Angular module + components)
+  remyx-svelte/        → @remyxjs/svelte       Planned    (Svelte components + actions)
+  remyx-vanilla/       → @remyxjs/vanilla      Planned    (Vanilla JS / Web Component)
+  remyx-ssr/           → @remyxjs/ssr          Planned    (Node.js server-side utilities)
   create-remyx/        → create-remyx        Planned    (advanced CLI wizard)
 
-CMS integrations (depend on @remyx/vanilla):
+CMS integrations (depend on @remyxjs/vanilla):
   remyx-wp/            → remyx-wp            Planned    (WordPress Gutenberg block)
   remyx-drupal/        → remyx_drupal        Planned    (Drupal 10/11 module)
   remyx-moodle/        → atto_remyx          Planned    (Moodle 4.x Atto plugin)
   remyx-joomla/        → plg_editors_remyx   Planned    (Joomla 5 editor plugin)
   remyx-craft/         → craft-remyx         Planned    (Craft CMS Redactor replacement)
-  remyx-strapi/        → @remyx/strapi       Planned    (Strapi 5 custom field)
+  remyx-strapi/        → @remyxjs/strapi       Planned    (Strapi 5 custom field)
   remyx-ghost/         → ghost-remyx         Planned    (Ghost Koenig replacement)
-  remyx-shopify/       → @remyx/shopify      Planned    (Shopify theme/app extensions)
+  remyx-shopify/       → @remyxjs/shopify      Planned    (Shopify theme/app extensions)
 ```
 
 ---
@@ -36,29 +36,29 @@ CMS integrations (depend on @remyx/vanilla):
 ## Package Dependency Graph
 
 ```
-@remyx/core ←── @remyx/react      ✅ Shipped
-            ←── @remyx/vue
-            ←── @remyx/angular
-            ←── @remyx/svelte
-            ←── @remyx/vanilla ←── remyx-wp
+@remyxjs/core ←── @remyxjs/react      ✅ Shipped
+            ←── @remyxjs/vue
+            ←── @remyxjs/angular
+            ←── @remyxjs/svelte
+            ←── @remyxjs/vanilla ←── remyx-wp
             │                  ←── remyx_drupal
             │                  ←── atto_remyx
             │                  ←── plg_editors_remyx
             │                  ←── craft-remyx
-            │                  ←── @remyx/strapi
+            │                  ←── @remyxjs/strapi
             │                  ←── ghost-remyx
-            │                  ←── @remyx/shopify
-            ←── @remyx/ssr
+            │                  ←── @remyxjs/shopify
+            ←── @remyxjs/ssr
 ```
 
-Every framework package depends on `@remyx/core` as a peer dependency.
-CMS integrations depend on `@remyx/vanilla` (Web Component) for framework-agnostic drop-in.
+Every framework package depends on `@remyxjs/core` as a peer dependency.
+CMS integrations depend on `@remyxjs/vanilla` (Web Component) for framework-agnostic drop-in.
 
 ---
 
 ## Step-by-Step Implementation
 
-### ~~Step 1: Extract `@remyx/core`~~ ✅ Complete
+### ~~Step 1: Extract `@remyxjs/core`~~ ✅ Complete
 
 **Goal:** ~~Move all framework-agnostic code into `packages/remyx-core/`. This is the foundation — all other steps depend on it.~~
 
@@ -138,7 +138,7 @@ packages/remyx-core/
 
 ```json
 {
-  "name": "@remyx/core",
+  "name": "@remyxjs/core",
   "version": "0.23.4",
   "type": "module",
   "main": "./dist/remyx-core.cjs",
@@ -255,9 +255,9 @@ export { defineConfig } from './config/defineConfig.js'
 
 ---
 
-### ~~Step 2: Refactor `@remyx/react` (with TypeScript Declarations)~~ ✅ Complete
+### ~~Step 2: Refactor `@remyxjs/react` (with TypeScript Declarations)~~ ✅ Complete
 
-**Goal:** ~~Convert existing `packages/remyx-editor/` into `packages/remyx-react/` that imports from `@remyx/core`. Ships JSX source with `.d.ts` type declarations so both JS and TS consumers get full support from a single package.~~
+**Goal:** ~~Convert existing `packages/remyx-editor/` into `packages/remyx-react/` that imports from `@remyxjs/core`. Ships JSX source with `.d.ts` type declarations so both JS and TS consumers get full support from a single package.~~
 
 **Level of effort:** ~~Medium-Large (2-3 sessions)~~ Done in 1 session
 
@@ -319,7 +319,7 @@ packages/remyx-react/
 
 ```json
 {
-  "name": "@remyx/react",
+  "name": "@remyxjs/react",
   "version": "0.23.4",
   "type": "module",
   "main": "./dist/remyx-react.cjs",
@@ -335,12 +335,12 @@ packages/remyx-react/
   },
   "files": ["dist"],
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4",
+    "@remyxjs/core": ">=0.23.4",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@remyx/core": "workspace:*",
+    "@remyxjs/core": "workspace:*",
     "@vitejs/plugin-react": "^5.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -353,7 +353,7 @@ packages/remyx-react/
 
 #### ~~2c. Update all imports~~ ✅
 
-Every file in `packages/remyx-react/src/` that currently imports from relative paths like `../../core/EditorEngine.js` must be updated to import from `@remyx/core`:
+Every file in `packages/remyx-react/src/` that currently imports from relative paths like `../../core/EditorEngine.js` must be updated to import from `@remyxjs/core`:
 
 ```js
 // Before
@@ -362,14 +362,14 @@ import { DEFAULT_TOOLBAR } from '../../constants/defaults.js'
 import { cleanPastedHTML } from '../../utils/pasteClean.js'
 
 // After
-import { EditorEngine, DEFAULT_TOOLBAR, cleanPastedHTML } from '@remyx/core'
+import { EditorEngine, DEFAULT_TOOLBAR, cleanPastedHTML } from '@remyxjs/core'
 ```
 
 #### ~~2d. `packages/remyx-react/src/index.js`~~ ✅
 
 ```js
 // Re-export everything from core for convenience
-export * from '@remyx/core'
+export * from '@remyxjs/core'
 
 // React-specific exports
 export { default as RemyxEditor } from './components/RemyxEditor.jsx'
@@ -379,11 +379,11 @@ export { RemyxConfigProvider } from './config/RemyxConfigProvider.jsx'
 
 #### ~~2e. Component-specific CSS~~ ✅
 
-If any CSS is component-specific (toolbar layout, modal styles, etc.), it stays in `@remyx/react`. The final `style.css` should import core's CSS:
+If any CSS is component-specific (toolbar layout, modal styles, etc.), it stays in `@remyxjs/react`. The final `style.css` should import core's CSS:
 
 ```css
 /* packages/remyx-react/src/styles/index.css */
-@import '@remyx/core/style.css';
+@import '@remyxjs/core/style.css';
 
 /* React component-specific styles */
 .rmx-toolbar { ... }
@@ -411,7 +411,7 @@ packages/remyx-react/
 **Key type definitions (`src/types/index.d.ts`):**
 
 ```ts
-import type { EditorEngine } from '@remyx/core'
+import type { EditorEngine } from '@remyxjs/core'
 
 export interface RemyxEditorProps {
   config?: string
@@ -484,14 +484,14 @@ export default defineConfig({
       fileName: (format) => `remyx-react.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@remyx/core'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@remyxjs/core'],
     },
     cssCodeSplit: false,
   },
 })
 ```
 
-**Prerequisites:** `@remyx/core` also needs `.d.ts` declarations. Use JSDoc `@type` annotations on the core source files + `tsc --declaration --emitDeclarationOnly` to generate them without converting core to TypeScript. Add this to Step 1's build:
+**Prerequisites:** `@remyxjs/core` also needs `.d.ts` declarations. Use JSDoc `@type` annotations on the core source files + `tsc --declaration --emitDeclarationOnly` to generate them without converting core to TypeScript. Add this to Step 1's build:
 
 ```json
 // packages/remyx-core/package.json scripts
@@ -503,8 +503,8 @@ export default defineConfig({
 #### ~~2g. Verification~~ ✅
 
 - ~~Run `cd packages/remyx-react && npm run build`~~ → builds in 114ms
-- ~~Confirm all exports resolve~~ → 36 modules transformed, `@remyx/core` external
-- ~~Confirm `@remyx/core` is external (not bundled)~~ → 91.20 KB ES + 62.44 KB CJS (vs core's 91.93 KB)
+- ~~Confirm all exports resolve~~ → 36 modules transformed, `@remyxjs/core` external
+- ~~Confirm `@remyxjs/core` is external (not bundled)~~ → 91.20 KB ES + 62.44 KB CJS (vs core's 91.93 KB)
 - ~~Confirm `dist/types/index.d.ts` exists and exports `RemyxEditorProps`~~ → hand-written `.d.ts` in `src/types/`
 - ~~Run the dev app and verify all features work~~ → dev build passes (488 modules)
 
@@ -512,20 +512,20 @@ export default defineConfig({
 
 ### ~~Step 3: Remove `remyx-editor` Standalone Package~~ ✅ Complete
 
-**Original goal:** Convert `remyx-editor` into a thin meta-package that re-exports `@remyx/core` + `@remyx/react`.
+**Original goal:** Convert `remyx-editor` into a thin meta-package that re-exports `@remyxjs/core` + `@remyxjs/react`.
 
-**Actual outcome:** The `remyx-editor` package was removed entirely instead of being converted into a meta-package. The demo app now imports directly from `@remyx/react`, which re-exports everything from `@remyx/core`. This eliminates ~119 duplicate files and ~75 KB of redundant bundle size.
+**Actual outcome:** The `remyx-editor` package was removed entirely instead of being converted into a meta-package. The demo app now imports directly from `@remyxjs/react`, which re-exports everything from `@remyxjs/core`. This eliminates ~119 duplicate files and ~75 KB of redundant bundle size.
 
-Consumers should use `@remyx/react` directly:
+Consumers should use `@remyxjs/react` directly:
 ```js
-import { RemyxEditor } from '@remyx/react'
-import '@remyx/core/style.css'
-import '@remyx/react/style.css'
+import { RemyxEditor } from '@remyxjs/react'
+import '@remyxjs/core/style.css'
+import '@remyxjs/react/style.css'
 ```
 
 ---
 
-### Step 4: Vue 3 Package (`@remyx/vue`)
+### Step 4: Vue 3 Package (`@remyxjs/vue`)
 
 **Goal:** Vue 3 wrapper using Composition API composables and single-file components.
 
@@ -583,7 +583,7 @@ packages/remyx-vue/
 
 ```json
 {
-  "name": "@remyx/vue",
+  "name": "@remyxjs/vue",
   "version": "0.23.4",
   "type": "module",
   "main": "./dist/remyx-vue.cjs",
@@ -597,7 +597,7 @@ packages/remyx-vue/
   },
   "files": ["dist"],
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4",
+    "@remyxjs/core": ">=0.23.4",
     "vue": ">=3.3.0"
   }
 }
@@ -617,7 +617,7 @@ packages/remyx-vue/
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import { EditorEngine } from '@remyx/core'
+import { EditorEngine } from '@remyxjs/core'
 
 const props = defineProps({
   modelValue: String,
@@ -665,7 +665,7 @@ watch(() => props.modelValue, (val) => {
 
 ---
 
-### Step 5: Angular Package (`@remyx/angular`)
+### Step 5: Angular Package (`@remyxjs/angular`)
 
 **Goal:** Angular library with components, directives, and services.
 
@@ -717,10 +717,10 @@ Angular libraries use `ng-packagr` for building. This is different from the Vite
 
 ```json
 {
-  "name": "@remyx/angular",
+  "name": "@remyxjs/angular",
   "version": "0.23.4",
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4",
+    "@remyxjs/core": ">=0.23.4",
     "@angular/core": ">=16.0.0",
     "@angular/common": ">=16.0.0"
   }
@@ -729,7 +729,7 @@ Angular libraries use `ng-packagr` for building. This is different from the Vite
 
 ---
 
-### Step 6: Svelte Package (`@remyx/svelte`)
+### Step 6: Svelte Package (`@remyxjs/svelte`)
 
 **Goal:** Svelte 5 components using runes (`$state`, `$effect`, `$props`).
 
@@ -774,14 +774,14 @@ packages/remyx-svelte/
 
 ```json
 {
-  "name": "@remyx/svelte",
+  "name": "@remyxjs/svelte",
   "version": "0.23.4",
   "type": "module",
   "svelte": "./dist/index.js",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4",
+    "@remyxjs/core": ">=0.23.4",
     "svelte": ">=5.0.0"
   }
 }
@@ -789,7 +789,7 @@ packages/remyx-svelte/
 
 ---
 
-### Step 7: Vanilla JS / Web Component (`@remyx/vanilla`)
+### Step 7: Vanilla JS / Web Component (`@remyxjs/vanilla`)
 
 **Goal:** Framework-free wrapper using native Web Components (`<remyx-editor>` custom element).
 
@@ -823,7 +823,7 @@ packages/remyx-vanilla/
 **Icons:** React uses JSX components for icons. Vanilla uses raw SVG strings:
 
 ```js
-// @remyx/core or @remyx/vanilla icons
+// @remyxjs/core or @remyxjs/vanilla icons
 export const ICONS = {
   bold: '<svg viewBox="0 0 24 24">...</svg>',
   italic: '<svg viewBox="0 0 24 24">...</svg>',
@@ -831,7 +831,7 @@ export const ICONS = {
 }
 ```
 
-This requires extracting SVG path data from `icons/index.jsx` and converting to a framework-agnostic format. Consider putting the icon data (paths, viewBox) in `@remyx/core` and letting each framework package render them natively.
+This requires extracting SVG path data from `icons/index.jsx` and converting to a framework-agnostic format. Consider putting the icon data (paths, viewBox) in `@remyxjs/core` and letting each framework package render them natively.
 
 **Web Component API:**
 
@@ -854,20 +854,20 @@ This requires extracting SVG path data from `icons/index.jsx` and converting to 
 
 ```json
 {
-  "name": "@remyx/vanilla",
+  "name": "@remyxjs/vanilla",
   "version": "0.23.4",
   "type": "module",
   "main": "./dist/remyx-vanilla.js",
   "module": "./dist/remyx-vanilla.js",
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4"
+    "@remyxjs/core": ">=0.23.4"
   }
 }
 ```
 
 ---
 
-### Step 8: Node.js SSR Package (`@remyx/ssr`)
+### Step 8: Node.js SSR Package (`@remyxjs/ssr`)
 
 **Goal:** Server-side utilities for sanitization, markdown conversion, and HTML rendering without a browser.
 
@@ -890,9 +890,9 @@ packages/remyx-ssr/
 The core `Sanitizer` uses `DOMParser` which is a browser API. For Node.js, we need a polyfill:
 
 ```js
-// @remyx/ssr/src/sanitize.js
+// @remyxjs/ssr/src/sanitize.js
 import { JSDOM } from 'jsdom'
-import { Sanitizer as CoreSanitizer } from '@remyx/core'
+import { Sanitizer as CoreSanitizer } from '@remyxjs/core'
 
 // Polyfill DOMParser for Node.js
 const { window } = new JSDOM('')
@@ -908,7 +908,7 @@ export class ServerSanitizer extends CoreSanitizer {
 
 ```json
 {
-  "name": "@remyx/ssr",
+  "name": "@remyxjs/ssr",
   "version": "0.23.4",
   "type": "module",
   "main": "./dist/remyx-ssr.js",
@@ -917,7 +917,7 @@ export class ServerSanitizer extends CoreSanitizer {
     "jsdom": "^24.0.0"
   },
   "peerDependencies": {
-    "@remyx/core": ">=0.23.4"
+    "@remyxjs/core": ">=0.23.4"
   }
 }
 ```
@@ -959,8 +959,8 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@remyx/core': path.resolve(__dirname, 'packages/remyx-core/src/index.js'),
-      '@remyx/react': path.resolve(__dirname, 'packages/remyx-react/src/index.js'),
+      '@remyxjs/core': path.resolve(__dirname, 'packages/remyx-core/src/index.js'),
+      '@remyxjs/react': path.resolve(__dirname, 'packages/remyx-react/src/index.js'),
       'remyx-editor': path.resolve(__dirname, 'packages/remyx-react/src/index.js'),
     },
   },
@@ -971,7 +971,7 @@ export default defineConfig({
 
 ### Step 10: create-remyx CLI (`create-remyx`)
 
-**Goal:** Repurpose the `create-remyx` package as an interactive CLI wizard that scaffolds fully configured custom WYSIWYG editors. Unlike the original simple scaffolder (now in `@remyx/react` as `create-remyx-app`), this CLI guides users through feature selection and generates a project with all chosen options pre-wired.
+**Goal:** Repurpose the `create-remyx` package as an interactive CLI wizard that scaffolds fully configured custom WYSIWYG editors. Unlike the original simple scaffolder (now in `@remyxjs/react` as `create-remyx-app`), this CLI guides users through feature selection and generates a project with all chosen options pre-wired.
 
 **Level of effort:** Medium-Large (2-3 sessions)
 
@@ -1022,7 +1022,7 @@ packages/create-remyx/
 The CLI generates a `remyx.config.js` that pre-configures the editor based on selections:
 
 ```js
-import { defineConfig } from '@remyx/core'
+import { defineConfig } from '@remyxjs/core'
 
 export default defineConfig({
   outputFormat: 'html',
@@ -1071,22 +1071,22 @@ export default defineConfig({
 ## Execution Order & Dependencies
 
 ```
-Step 1  → @remyx/core             ✅ DONE — 49 files, 80 exports, builds clean
-Step 2  → @remyx/react + TS defs  ✅ DONE — 36 modules, 91 KB ES + 62 KB CJS, all imports via @remyx/core
-Step 3  → remyx-editor removed    ✅ DONE — deleted entirely, consumers use @remyx/react directly
+Step 1  → @remyxjs/core             ✅ DONE — 49 files, 80 exports, builds clean
+Step 2  → @remyxjs/react + TS defs  ✅ DONE — 36 modules, 91 KB ES + 62 KB CJS, all imports via @remyxjs/core
+Step 3  → remyx-editor removed    ✅ DONE — deleted entirely, consumers use @remyxjs/react directly
 ─── Above this line = shipped ───
-Step 4  → @remyx/vue              (depends on Step 1, parallel with 5-8)
-Step 5  → @remyx/angular          (depends on Step 1, parallel with 4,6-8)
-Step 6  → @remyx/svelte           (depends on Step 1, parallel with 4-5,7-8)
-Step 7  → @remyx/vanilla          (depends on Step 1, parallel with 4-6,8) ← CMS packages depend on this
-Step 8  → @remyx/ssr              (depends on Step 1, parallel with 4-7)
+Step 4  → @remyxjs/vue              (depends on Step 1, parallel with 5-8)
+Step 5  → @remyxjs/angular          (depends on Step 1, parallel with 4,6-8)
+Step 6  → @remyxjs/svelte           (depends on Step 1, parallel with 4-5,7-8)
+Step 7  → @remyxjs/vanilla          (depends on Step 1, parallel with 4-6,8) ← CMS packages depend on this
+Step 8  → @remyxjs/ssr              (depends on Step 1, parallel with 4-7)
 Step 9  → Root monorepo update    (after Step 3, incrementally with 4-8)
 Step 10 → create-remyx CLI        (after Steps 4-7, needs framework templates)
 Step 11 → CMS integrations        (after Step 7, all parallel with each other)
 ```
 
 Steps 4-8 are fully independent and can be done in any order or in parallel.
-Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete first.
+Step 11 (CMS integrations) requires Step 7 (`@remyxjs/vanilla`) to be complete first.
 
 ---
 
@@ -1094,14 +1094,14 @@ Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete fir
 
 | Step | Package | Effort | Sessions | Priority |
 | --- | --- | --- | --- | --- |
-| ~~1~~ | ~~`@remyx/core`~~ | ~~Large~~ | ~~2-3~~ | ✅ Done |
-| ~~2~~ | ~~`@remyx/react` (with TS declarations)~~ | ~~Medium-Large~~ | ~~2-3~~ | ✅ Done |
+| ~~1~~ | ~~`@remyxjs/core`~~ | ~~Large~~ | ~~2-3~~ | ✅ Done |
+| ~~2~~ | ~~`@remyxjs/react` (with TS declarations)~~ | ~~Medium-Large~~ | ~~2-3~~ | ✅ Done |
 | ~~3~~ | ~~`remyx-editor` (removed)~~ | ~~Small~~ | ~~<1~~ | ✅ Done |
-| 4 | `@remyx/vue` | Large | 3-4 | P1 — High demand |
-| 5 | `@remyx/angular` | Large | 3-4 | P2 — Enterprise |
-| 6 | `@remyx/svelte` | Medium-Large | 2-3 | P2 — Growing ecosystem |
-| 7 | `@remyx/vanilla` | Large | 3-4 | P0 — CMS packages depend on this |
-| 8 | `@remyx/ssr` | Small-Medium | 1-2 | P2 — Niche |
+| 4 | `@remyxjs/vue` | Large | 3-4 | P1 — High demand |
+| 5 | `@remyxjs/angular` | Large | 3-4 | P2 — Enterprise |
+| 6 | `@remyxjs/svelte` | Medium-Large | 2-3 | P2 — Growing ecosystem |
+| 7 | `@remyxjs/vanilla` | Large | 3-4 | P0 — CMS packages depend on this |
+| 8 | `@remyxjs/ssr` | Small-Medium | 1-2 | P2 — Niche |
 | 9 | Root config | Small | 1 | P0 — Required |
 | 10 | `create-remyx` CLI | Medium-Large | 2-3 | P1 — DX onboarding |
 | 11a | `remyx-wp` (WordPress) | Medium | 2-3 | P1 — Largest CMS market share |
@@ -1109,9 +1109,9 @@ Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete fir
 | 11c | `atto_remyx` (Moodle) | Small-Medium | 1-2 | P2 — Education sector |
 | 11d | `plg_editors_remyx` (Joomla) | Small-Medium | 1-2 | P2 — Open source CMS |
 | 11e | `craft-remyx` (Craft CMS) | Small | 1 | P3 — Niche |
-| 11f | `@remyx/strapi` (Strapi) | Small | 1 | P2 — Headless CMS |
+| 11f | `@remyxjs/strapi` (Strapi) | Small | 1 | P2 — Headless CMS |
 | 11g | `ghost-remyx` (Ghost) | Small-Medium | 1-2 | P2 — Publishing platform |
-| 11h | `@remyx/shopify` (Shopify) | Small-Medium | 1-2 | P2 — E-commerce |
+| 11h | `@remyxjs/shopify` (Shopify) | Small-Medium | 1-2 | P2 — E-commerce |
 
 **Total estimated effort:** 27-42 sessions
 
@@ -1123,10 +1123,10 @@ Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete fir
 
 The React package uses JSX components for icons. Other frameworks need their own icon rendering. Two approaches:
 
-**Option A (recommended):** Extract icon SVG path data into `@remyx/core` as plain objects:
+**Option A (recommended):** Extract icon SVG path data into `@remyxjs/core` as plain objects:
 
 ```js
-// @remyx/core/src/icons.js
+// @remyxjs/core/src/icons.js
 export const ICON_PATHS = {
   bold: { d: 'M6 4h8a4 4 0 0 1 4 4...', viewBox: '0 0 24 24', fill: true },
   italic: { d: 'M19 4h-9...', viewBox: '0 0 24 24' },
@@ -1140,7 +1140,7 @@ Each framework package renders icons natively (React JSX, Vue template, Svelte `
 
 ### CSS
 
-- `@remyx/core/style.css` — theme variables, light/dark themes, content area styles
+- `@remyxjs/core/style.css` — theme variables, light/dark themes, content area styles
 - Each framework package ships component-specific CSS (toolbar layout, modals, etc.)
 - The CSS class names (`.rmx-*`) are shared across all frameworks
 
@@ -1157,7 +1157,7 @@ Each package should have:
 
 All CMS integrations share a common approach:
 
-1. **Depend on `@remyx/vanilla`** — the `<remyx-editor>` Web Component provides a framework-agnostic drop-in
+1. **Depend on `@remyxjs/vanilla`** — the `<remyx-editor>` Web Component provides a framework-agnostic drop-in
 2. **CMS-specific wrapper** — each integration provides the glue code for the CMS's editor API (registering as an editor, saving content, loading content, toolbar integration)
 3. **Theme inheritance** — CMS integrations pick up the Remyx theme system; admins can select a theme in the CMS config
 4. **Configuration** — each CMS integration exposes Remyx configuration through the CMS's native settings/admin UI
@@ -1187,4 +1187,4 @@ Each step is designed to be executable in 1-3 sessions. To continue work:
 4. Verify the step passes its verification criteria before moving to the next
 
 Steps 1-3 must be done in order. Steps 4-8 can be done in any order after Step 3 is complete.
-Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete first.
+Step 11 (CMS integrations) requires Step 7 (`@remyxjs/vanilla`) to be complete first.

@@ -1,9 +1,9 @@
 import type { CSSProperties, RefObject, ReactNode } from 'react'
 
 // Re-export core types
-export * from '@remyx/core'
+export * from '@remyxjs/core'
 
-// ── Editor Engine (from @remyx/core) ──────────────────────────────
+// ── Editor Engine (from @remyxjs/core) ──────────────────────────────
 
 export interface EditorEngine {
   element: HTMLElement

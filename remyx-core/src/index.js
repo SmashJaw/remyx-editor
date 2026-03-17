@@ -38,6 +38,7 @@ export { createPlugin } from './plugins/createPlugin.js'
 export { WordCountPlugin } from './plugins/builtins/WordCountPlugin.js'
 export { AutolinkPlugin } from './plugins/builtins/AutolinkPlugin.js'
 export { PlaceholderPlugin } from './plugins/builtins/PlaceholderPlugin.js'
+export { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize } from './plugins/builtins/syntaxHighlight/index.js'
 
 // Utilities
 export { htmlToMarkdown, markdownToHtml } from './utils/markdownConverter.js'

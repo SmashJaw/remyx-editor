@@ -1,10 +1,10 @@
 ![Remyx Editor](../docs/images/Remyx-Logo.svg)
 
-# @remyx/core
+# @remyxjs/core
 
 Framework-agnostic core engine for the Remyx Editor. Provides the editor engine, commands, plugin system, utilities, and CSS themes — with zero framework dependencies.
 
-Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyx/react`](../remyx-react/), which includes this package plus React components and hooks.
+Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyxjs/react`](../remyx-react/), which includes this package plus React components and hooks.
 
 ## Table of Contents
 
@@ -36,6 +36,7 @@ Use this package to build Remyx Editor integrations for any framework (Vue, Svel
   - [Creating Plugins](#creating-plugins)
   - [Plugin API (Restricted)](#plugin-api-restricted)
   - [Built-in Plugins](#built-in-plugins)
+  - [Syntax Highlighting](#syntax-highlighting)
 - [Autosave](#autosave)
   - [Storage Providers](#storage-providers)
   - [AutosaveManager API](#autosavemanager-api)
@@ -72,13 +73,13 @@ Use this package to build Remyx Editor integrations for any framework (Vue, Svel
 ## Installation
 
 ```bash
-npm install @remyx/core
+npm install @remyxjs/core
 ```
 
 ## Quick Start
 
 ```js
-import { EditorEngine } from '@remyx/core';
+import { EditorEngine } from '@remyxjs/core';
 import {
   registerFormattingCommands,
   registerHeadingCommands,
@@ -87,8 +88,8 @@ import {
   registerImageCommands,
   registerTableCommands,
   registerBlockCommands,
-} from '@remyx/core';
-import '@remyx/core/style.css';
+} from '@remyxjs/core';
+import '@remyxjs/core/style.css';
 
 const element = document.querySelector('#editor');
 const engine = new EditorEngine(element, { outputFormat: 'html' });
@@ -121,11 +122,11 @@ engine.destroy();
 ## Architecture
 
 ```
-@remyx/core
+@remyxjs/core
   core/           EditorEngine, EventBus, CommandRegistry, Selection,
                   History, KeyboardManager, Sanitizer, Clipboard, DragDrop
   commands/       16 register functions (formatting, headings, lists, etc.)
-  plugins/        PluginManager, createPlugin, 3 built-in plugins
+  plugins/        PluginManager, createPlugin, 4 built-in plugins
   utils/          markdown, paste cleaning, export, fonts, themes, toolbar, DOM
   constants/      defaults, keybindings, schema, commands
   config/         defineConfig
@@ -199,6 +200,8 @@ const engine = new EditorEngine(element, {
 | `history:redo` | — | Redo performed |
 | `plugin:registered` | `{ name }` | Plugin was registered |
 | `plugin:error` | `{ name, error }` | Plugin init/destroy error |
+| `codeblock:created` | `{ element, language }` | Code block was created |
+| `codeblock:language-change` | `{ language, element }` | Code block language was changed |
 | `wordcount:update` | `{ wordCount, charCount }` | Word/char count changed |
 | `autosave:saving` | — | Autosave started |
 | `autosave:saved` | `{ timestamp }` | Autosave succeeded |
@@ -379,6 +382,7 @@ registerBlockCommands(engine);
 
 engine.executeCommand('blockquote');    // Toggle blockquote (Mod+Shift+9)
 engine.executeCommand('codeBlock');     // Toggle code block (Mod+Shift+C)
+engine.executeCommand('codeBlock', { language: 'javascript' }); // Code block with language
 engine.executeCommand('horizontalRule'); // Insert <hr>
 ```
 
@@ -500,10 +504,10 @@ engine.executeCommand('importDocument');
 
 ### Command Palette
 
-The command palette provides a searchable overlay listing all available editor commands. It is a React-layer feature (see `@remyx/react`), but the command catalog and filter logic live in `@remyx/core`:
+The command palette provides a searchable overlay listing all available editor commands. It is a React-layer feature (see `@remyxjs/react`), but the command catalog and filter logic live in `@remyxjs/core`:
 
 ```js
-import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyx/core';
+import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyxjs/core';
 
 // Default catalog of ~19 command items across 5 categories:
 // Text, Lists, Media, Layout, Advanced
@@ -532,7 +536,7 @@ import {
   CloudProvider,
   CustomProvider,
   createStorageProvider,
-} from '@remyx/core';
+} from '@remyxjs/core';
 ```
 
 | Provider | Use Case | Config Shorthand |
@@ -577,7 +581,7 @@ const s3Provider = new CloudProvider({
 ### AutosaveManager API
 
 ```js
-import { AutosaveManager } from '@remyx/core';
+import { AutosaveManager } from '@remyxjs/core';
 
 const manager = new AutosaveManager(engine, {
   provider: 'localStorage',  // or any provider config
@@ -623,7 +627,7 @@ engine.eventBus.on('autosave:recovered', ({ recoveredContent, timestamp }) => {
 ### Creating Plugins
 
 ```js
-import { createPlugin } from '@remyx/core';
+import { createPlugin } from '@remyxjs/core';
 
 const HighlightPlugin = createPlugin({
   name: 'highlight',
@@ -725,7 +729,7 @@ Plugins without `requiresFullAccess` receive a sandboxed API:
 **WordCountPlugin** — Emits `wordcount:update` with `{ wordCount, charCount }` on every content change.
 
 ```js
-import { WordCountPlugin } from '@remyx/core';
+import { WordCountPlugin } from '@remyxjs/core';
 engine.plugins.register(WordCountPlugin);
 engine.on('wordcount:update', ({ wordCount, charCount }) => {
   document.querySelector('#count').textContent = `${wordCount} words`;
@@ -735,16 +739,47 @@ engine.on('wordcount:update', ({ wordCount, charCount }) => {
 **AutolinkPlugin** — Automatically converts typed URLs into clickable links when the user presses Space or Enter.
 
 ```js
-import { AutolinkPlugin } from '@remyx/core';
+import { AutolinkPlugin } from '@remyxjs/core';
 engine.plugins.register(AutolinkPlugin);
 ```
 
 **PlaceholderPlugin** — Shows placeholder text when the editor is empty.
 
 ```js
-import { PlaceholderPlugin } from '@remyx/core';
+import { PlaceholderPlugin } from '@remyxjs/core';
 engine.plugins.register(PlaceholderPlugin('Start writing...'));
 ```
+
+**SyntaxHighlightPlugin** — Automatic syntax highlighting for `<pre><code>` blocks. Detects language from `data-language` attribute or auto-detects from content. Highlights using `.rmx-syn-*` CSS classes that adapt to all built-in themes. Provides `setCodeLanguage` and `getCodeLanguage` commands.
+
+```js
+import { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, detectLanguage, tokenize } from '@remyxjs/core';
+
+// Register the plugin
+engine.plugins.register(SyntaxHighlightPlugin());
+
+// Set language on the focused code block
+engine.executeCommand('setCodeLanguage', { language: 'python' });
+
+// Get language of the focused code block
+const lang = engine.executeCommand('getCodeLanguage'); // 'python' or null
+
+// Available languages (for building UI dropdowns)
+console.log(SUPPORTED_LANGUAGES);
+// [{ id: 'javascript', label: 'JavaScript' }, { id: 'python', label: 'Python' }, ...]
+
+// Auto-detect language from code content
+const detected = detectLanguage('def hello():\n    print("hi")');
+// 'python'
+
+// Tokenize code programmatically
+const tokens = tokenize('const x = 42', 'javascript');
+// [{ type: 'keyword', value: 'const' }, { type: 'plain', value: ' x ' }, ...]
+```
+
+**Supported languages:** JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash/Shell, Rust, Go, Java, HTML/XML. Language aliases are supported (e.g., `js`, `ts`, `tsx`, `py`, `sh`, `rs`, `golang`).
+
+**Token types:** `comment`, `keyword`, `string`, `number`, `function`, `operator`, `punctuation`, `builtin`, `property`, `regex`, `decorator`, `type`, `tag`, `attr-name`, `attr-value`, `entity`.
 
 ## Selection API
 
@@ -907,7 +942,7 @@ new EditorEngine(element, {
 ### Markdown Conversion
 
 ```js
-import { htmlToMarkdown, markdownToHtml } from '@remyx/core';
+import { htmlToMarkdown, markdownToHtml } from '@remyxjs/core';
 
 const md = htmlToMarkdown('<h1>Hello</h1><p>World</p>');
 // # Hello\n\nWorld
@@ -916,12 +951,12 @@ const html = markdownToHtml('# Hello\n\nWorld');
 // <h1>Hello</h1><p>World</p>
 ```
 
-Supports GitHub Flavored Markdown (GFM): headings, bold, italic, links, images, lists, task lists, tables, code blocks, blockquotes, and horizontal rules.
+Supports GitHub Flavored Markdown (GFM): headings, bold, italic, links, images, lists, task lists, tables, code blocks (with language identifiers preserved), blockquotes, and horizontal rules.
 
 ### Document Conversion
 
 ```js
-import { convertDocument, isImportableFile, getSupportedExtensions } from '@remyx/core';
+import { convertDocument, isImportableFile, getSupportedExtensions } from '@remyxjs/core';
 
 // Check if a file can be imported
 if (isImportableFile(file)) {
@@ -941,7 +976,7 @@ PDF and DOCX converters use dynamic imports — the heavy libraries are only loa
 ### Export
 
 ```js
-import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyx/core';
+import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyxjs/core';
 
 // Export as Markdown file download
 exportAsMarkdown(engine.getHTML(), 'my-document');
@@ -956,7 +991,7 @@ exportAsDocx(engine.getHTML(), 'my-document');
 ### Paste Cleaning
 
 ```js
-import { cleanPastedHTML, looksLikeMarkdown } from '@remyx/core';
+import { cleanPastedHTML, looksLikeMarkdown } from '@remyxjs/core';
 
 // Remove source-specific markup (Word, Google Docs, LibreOffice, Apple Pages)
 const cleaned = cleanPastedHTML(rawHTML);
@@ -972,7 +1007,7 @@ The paste cleaner auto-detects the source application and applies format-specifi
 ### Font Management
 
 ```js
-import { loadGoogleFonts, addFonts, removeFonts } from '@remyx/core';
+import { loadGoogleFonts, addFonts, removeFonts } from '@remyxjs/core';
 
 // Load Google Fonts (injects <link> into <head>)
 loadGoogleFonts(['Roboto', 'Open Sans', 'Merriweather']);
@@ -989,7 +1024,7 @@ const trimmed = removeFonts(updated, ['Times New Roman']);
 ### DOM Utilities
 
 ```js
-import { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from '@remyx/core';
+import { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from '@remyxjs/core';
 
 closestBlock(node, editorElement);        // Nearest block ancestor
 closestTag(node, 'a', editorElement);     // Nearest <a> ancestor
@@ -1002,7 +1037,7 @@ isBlockEmpty(paragraphElement);           // true if no meaningful content
 ### HTML Formatting
 
 ```js
-import { formatHTML } from '@remyx/core';
+import { formatHTML } from '@remyxjs/core';
 
 const pretty = formatHTML('<div><p>Hello</p><p>World</p></div>');
 // <div>
@@ -1014,7 +1049,7 @@ const pretty = formatHTML('<div><p>Hello</p><p>World</p></div>');
 ### Platform Detection
 
 ```js
-import { isMac, getModKey } from '@remyx/core';
+import { isMac, getModKey } from '@remyxjs/core';
 
 isMac();      // true on macOS
 getModKey();  // 'Cmd' on Mac, 'Ctrl' on Windows/Linux
@@ -1048,7 +1083,7 @@ See `packages/remyx-core/src/themes/variables.css` for the full list of 40+ vari
 
 ### Built-in Themes
 
-Six built-in themes are available via CSS classes (applied automatically by `@remyx/react`'s `theme` prop, or manually via `.rmx-theme-{name}`):
+Six built-in themes are available via CSS classes (applied automatically by `@remyxjs/react`'s `theme` prop, or manually via `.rmx-theme-{name}`):
 
 | Theme | Class | Description |
 | --- | --- | --- |
@@ -1068,7 +1103,7 @@ document.querySelector('.rmx-editor').classList.add('rmx-theme-ocean');
 The `THEME_PRESETS` export is still available for programmatic overrides via `customTheme`:
 
 ```js
-import { THEME_PRESETS, createTheme } from '@remyx/core';
+import { THEME_PRESETS, createTheme } from '@remyxjs/core';
 // Override a single variable on top of ocean
 const modified = { ...THEME_PRESETS.ocean, ...createTheme({ primary: '#ff6b6b' }) };
 ```
@@ -1076,7 +1111,7 @@ const modified = { ...THEME_PRESETS.ocean, ...createTheme({ primary: '#ff6b6b' }
 ### Custom Themes
 
 ```js
-import { createTheme } from '@remyx/core';
+import { createTheme } from '@remyxjs/core';
 
 // Use camelCase keys (automatically mapped to --rmx-* CSS vars)
 const theme = createTheme({
@@ -1109,7 +1144,7 @@ const theme = createTheme({
 ### Toolbar Presets
 
 ```js
-import { TOOLBAR_PRESETS } from '@remyx/core';
+import { TOOLBAR_PRESETS } from '@remyxjs/core';
 
 // Available presets:
 TOOLBAR_PRESETS.full;      // All available items
@@ -1131,7 +1166,7 @@ Each preset is an array of arrays, where each inner array is a toolbar group (re
 ### Custom Toolbars
 
 ```js
-import { removeToolbarItems, addToolbarItems, createToolbar, TOOLBAR_PRESETS } from '@remyx/core';
+import { removeToolbarItems, addToolbarItems, createToolbar, TOOLBAR_PRESETS } from '@remyxjs/core';
 
 // Start from a preset and customize
 let toolbar = TOOLBAR_PRESETS.standard;
@@ -1160,7 +1195,7 @@ const myToolbar = createToolbar([
 Style individual toolbar items differently:
 
 ```js
-import { createToolbarItemTheme, resolveToolbarItemStyle } from '@remyx/core';
+import { createToolbarItemTheme, resolveToolbarItemStyle } from '@remyxjs/core';
 
 const itemTheme = createToolbarItemTheme({
   bold: {
@@ -1181,7 +1216,7 @@ const itemTheme = createToolbarItemTheme({
 Create reusable, named editor configurations:
 
 ```js
-import { defineConfig } from '@remyx/core';
+import { defineConfig } from '@remyxjs/core';
 
 const config = defineConfig({
   // Shared defaults for all editors
@@ -1237,21 +1272,21 @@ import {
   // Command palette
   SLASH_COMMAND_ITEMS,  // Default catalog of command palette items
   filterSlashItems,     // (items, query) => filtered items
-} from '@remyx/core';
+} from '@remyxjs/core';
 ```
 
 ## Tree-Shaking
 
-`@remyx/core` is designed for tree-shaking. Import only what you need for the smallest possible bundle:
+`@remyxjs/core` is designed for tree-shaking. Import only what you need for the smallest possible bundle:
 
 ```js
 // Minimal — only the engine and the commands you use
-import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyx/core';
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 ```
 
 ```js
 // Full — pulls in everything (larger bundle)
-import * as Remyx from '@remyx/core';
+import * as Remyx from '@remyxjs/core';
 ```
 
 **Optional heavy dependencies:** `mammoth` (DOCX import) and `pdfjs-dist` (PDF import) are optional peer dependencies. Only install them if you need document import:
@@ -1268,7 +1303,7 @@ npm install mammoth pdfjs-dist
 Import the stylesheet for editor theming (light/dark modes, CSS custom properties):
 
 ```js
-import '@remyx/core/style.css';
+import '@remyxjs/core/style.css';
 ```
 
 All styles use the `.rmx-` prefix and `--rmx-*` CSS custom properties. The stylesheet includes:
@@ -1281,23 +1316,23 @@ All styles use the `.rmx-` prefix and `--rmx-*` CSS custom properties. The style
 - **sunset.css** — Warm orange/amber palette
 - **rose.css** — Soft pink palette
 
-Each theme is a self-contained `.rmx-theme-{name}` class with complete variable overrides, content styles, code editor colors, and syntax token palettes. Apply a theme by adding the class to the editor wrapper or using `@remyx/react`'s `theme` prop.
+Each theme is a self-contained `.rmx-theme-{name}` class with complete variable overrides, content styles, code editor colors, and syntax token palettes. Apply a theme by adding the class to the editor wrapper or using `@remyxjs/react`'s `theme` prop.
 
 ## Building Framework Wrappers
 
 When creating a wrapper for a new framework, your package should:
 
-1. Depend on `@remyx/core` as a peer dependency
+1. Depend on `@remyxjs/core` as a peer dependency
 2. Import `EditorEngine` and register the commands you need
 3. Create framework-native components for the toolbar, menu bar, modals, and status bar
-4. Use `@remyx/core/style.css` for base theming and add component-specific CSS
-5. Re-export `@remyx/core` for convenience so consumers don't need both packages
+4. Use `@remyxjs/core/style.css` for base theming and add component-specific CSS
+5. Re-export `@remyxjs/core` for convenience so consumers don't need both packages
 
 **Minimal Vue example:**
 
 ```js
 // useRemyxEditor.js
-import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyx/core';
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 export function useRemyxEditor(elementRef, options = {}) {
@@ -1318,7 +1353,7 @@ export function useRemyxEditor(elementRef, options = {}) {
 }
 ```
 
-See [`@remyx/react`](../remyx-react/) as the full reference implementation.
+See [`@remyxjs/react`](../remyx-react/) as the full reference implementation.
 
 ## License
 

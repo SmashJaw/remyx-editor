@@ -1,5 +1,5 @@
 {
-  "name": "@remyx/react",
+  "name": "@remyxjs/react",
   "version": "0.27.0",
   "description": "React components and hooks for the Remyx rich-text editor",
   "keywords": ["wysiwyg", "editor", "rich-text", "react", "contenteditable", "react-editor", "text-editor"],
@@ -30,14 +30,18 @@
     "create-remyx-app": "./create/index.js"
   },
   "files": ["dist", "create"],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "peerDependencies": {
-    "@remyx/core": ">=0.27.0",
+    "@remyxjs/core": ">=0.27.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "devDependencies": {
-    "@remyx/core": "0.27.0",
+    "@remyxjs/core": "0.27.0",
     "@vitejs/plugin-react": "5.1.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",

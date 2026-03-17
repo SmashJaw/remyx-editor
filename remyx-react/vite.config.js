@@ -19,7 +19,7 @@ export default defineConfig(async () => {
         fileName: 'remyx-react',
       },
       rollupOptions: {
-        external: ['react', 'react-dom', 'react/jsx-runtime', '@remyx/core'],
+        external: ['react', 'react-dom', 'react/jsx-runtime', '@remyxjs/core'],
       },
       sourcemap: true,
       minify: 'terser',

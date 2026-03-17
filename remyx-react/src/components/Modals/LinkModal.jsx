@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
-const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+// Allowlist-based protocol validation — safer than a blacklist because new
+// dangerous protocols (e.g. mhtml:, ms-*:) are blocked by default.
+const SAFE_PROTOCOL = /^\s*(https?|mailto|tel|ftp|ftps):\/?\/?/i
+const RELATIVE_URL = /^\s*(\/|#|\?|\.)/
 
 export function LinkModal({ open, onClose, engine, data }) {
   const [href, setHref] = useState('')
@@ -19,7 +22,9 @@ export function LinkModal({ open, onClose, engine, data }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!href.trim()) return
-    if (DANGEROUS_PROTOCOL.test(href)) return
+    // Block any protocol not in the allowlist (blocks javascript:, vbscript:, data:, mhtml:, etc.)
+    const trimmedHref = href.trim()
+    if (!SAFE_PROTOCOL.test(trimmedHref) && !RELATIVE_URL.test(trimmedHref)) return
 
     if (data?.href) {
       engine.executeCommand('editLink', { href, text, target })

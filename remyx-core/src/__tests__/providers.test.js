@@ -64,6 +64,22 @@ describe('LocalStorageProvider', () => {
     await expect(provider.save('doc-1', 'content')).rejects.toThrow('LocalStorage save failed')
     Storage.prototype.setItem = orig
   })
+
+  it('load returns null when localStorage.getItem throws', async () => {
+    const orig = Storage.prototype.getItem
+    Storage.prototype.getItem = () => { throw new Error('Access denied') }
+    const result = await provider.load('doc-1')
+    expect(result).toBeNull()
+    Storage.prototype.getItem = orig
+  })
+
+  it('saveSync returns false on error', () => {
+    const orig = Storage.prototype.setItem
+    Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError') }
+    const ok = provider.saveSync('doc-1', 'content')
+    expect(ok).toBe(false)
+    Storage.prototype.setItem = orig
+  })
 })
 
 // ── SessionStorageProvider ───────────────────────────────────────
@@ -86,6 +102,41 @@ describe('SessionStorageProvider', () => {
     await provider.save('doc-1', '<p>Test</p>')
     await provider.clear('doc-1')
     expect(await provider.load('doc-1')).toBeNull()
+  })
+
+  it('throws on save error (quota exceeded)', async () => {
+    const orig = Storage.prototype.setItem
+    Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError') }
+    await expect(provider.save('doc-1', 'content')).rejects.toThrow('SessionStorage save failed')
+    Storage.prototype.setItem = orig
+  })
+
+  it('returns null for missing key on load', async () => {
+    const result = await provider.load('nonexistent')
+    expect(result).toBeNull()
+  })
+
+  it('returns null when sessionStorage.getItem throws on load', async () => {
+    const orig = Storage.prototype.getItem
+    Storage.prototype.getItem = () => { throw new Error('Access denied') }
+    const result = await provider.load('doc-1')
+    expect(result).toBeNull()
+    Storage.prototype.getItem = orig
+  })
+
+  it('saveSync stores content synchronously and returns true', () => {
+    const ok = provider.saveSync('doc-1', '<p>Sync</p>')
+    expect(ok).toBe(true)
+    const raw = sessionStorage.getItem('rmx-autosave:doc-1')
+    expect(JSON.parse(raw).content).toBe('<p>Sync</p>')
+  })
+
+  it('saveSync returns false on error', () => {
+    const orig = Storage.prototype.setItem
+    Storage.prototype.setItem = () => { throw new DOMException('QuotaExceededError') }
+    const ok = provider.saveSync('doc-1', 'content')
+    expect(ok).toBe(false)
+    Storage.prototype.setItem = orig
   })
 })
 
@@ -187,6 +238,70 @@ describe('CloudProvider', () => {
   it('throws without endpoint or buildUrl', () => {
     expect(() => new CloudProvider({ fetchFn: jest.fn() })).toThrow('endpoint or buildUrl')
   })
+
+  it('_loadUrl appends with & when endpoint already has query params', () => {
+    const mockFetch = jest.fn().mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ content: '<p>Test</p>', timestamp: 1, version: 1 }),
+    })
+    const provider = new CloudProvider({
+      endpoint: 'https://api.example.com/autosave?token=abc',
+      fetchFn: mockFetch,
+    })
+
+    // Access internal _loadUrl to verify separator logic
+    const url = provider._loadUrl('doc-1')
+    expect(url).toBe('https://api.example.com/autosave?token=abc&key=doc-1')
+  })
+
+  it('load returns null on non-404 error status', async () => {
+    const mockFetch = jest.fn().mockResolvedValue({ ok: false, status: 500 })
+    const provider = new CloudProvider({
+      endpoint: 'https://api.example.com/autosave',
+      fetchFn: mockFetch,
+    })
+
+    const result = await provider.load('doc-1')
+    // The non-404 error throws, which is caught, returning null
+    expect(result).toBeNull()
+  })
+
+  it('load returns null on fetch network error', async () => {
+    const mockFetch = jest.fn().mockRejectedValue(new Error('Network failure'))
+    const provider = new CloudProvider({
+      endpoint: 'https://api.example.com/autosave',
+      fetchFn: mockFetch,
+    })
+
+    const result = await provider.load('doc-1')
+    expect(result).toBeNull()
+  })
+
+  it('clear catches errors silently', async () => {
+    const mockFetch = jest.fn().mockRejectedValue(new Error('Network failure'))
+    const provider = new CloudProvider({
+      endpoint: 'https://api.example.com/autosave',
+      fetchFn: mockFetch,
+    })
+
+    // Should not throw
+    await expect(provider.clear('doc-1')).resolves.toBeUndefined()
+  })
+
+  it('_deleteUrl falls back to _loadUrl when no buildDeleteUrl is provided', () => {
+    const mockFetch = jest.fn()
+    const provider = new CloudProvider({
+      endpoint: 'https://api.example.com/autosave',
+      fetchFn: mockFetch,
+      // No buildDeleteUrl, no buildUrl — so buildDeleteUrl defaults to buildUrl which is undefined
+    })
+
+    // When buildDeleteUrl is falsy (derived from buildUrl which is undefined),
+    // _deleteUrl falls back to _loadUrl
+    const deleteUrl = provider._deleteUrl('doc-1')
+    const loadUrl = provider._loadUrl('doc-1')
+    expect(deleteUrl).toBe(loadUrl)
+  })
 })
 
 // ── CustomProvider ──────────────────────────────────────────────
@@ -256,5 +371,34 @@ describe('createStorageProvider', () => {
 
   it('throws for unknown config', () => {
     expect(() => createStorageProvider(42)).toThrow('Unknown storage provider')
+  })
+
+  it('throws for unknown string config', () => {
+    expect(() => createStorageProvider('indexedDB')).toThrow('Unknown storage provider')
+  })
+
+  it('resolves FileSystemProvider from config with writeFn/readFn/deleteFn', () => {
+    const p = createStorageProvider({
+      writeFn: jest.fn(),
+      readFn: jest.fn(),
+      deleteFn: jest.fn(),
+    })
+    expect(p).toBeInstanceOf(FileSystemProvider)
+  })
+
+  it('resolves LocalStorageProvider with custom prefix', () => {
+    const p = createStorageProvider({ prefix: 'custom-app' })
+    expect(p).toBeInstanceOf(LocalStorageProvider)
+    expect(p.prefix).toBe('custom-app')
+  })
+
+  it('passes through an already-instantiated SessionStorageProvider', () => {
+    const existing = new SessionStorageProvider()
+    const result = createStorageProvider(existing)
+    expect(result).toBe(existing)
+  })
+
+  it('throws for unresolvable object config', () => {
+    expect(() => createStorageProvider({ foo: 'bar' })).toThrow('Unable to resolve storage provider')
   })
 })

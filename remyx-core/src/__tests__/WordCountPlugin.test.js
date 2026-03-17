@@ -173,6 +173,58 @@ describe('WordCountPlugin', () => {
       expect(clearSpy).toHaveBeenCalled()
       clearSpy.mockRestore()
     })
+
+    it('should disconnect MutationObserver and set it to null on destroy', () => {
+      const disconnectSpy = jest.fn()
+      const originalMutationObserver = global.MutationObserver
+      global.MutationObserver = jest.fn(() => ({
+        observe: jest.fn(),
+        disconnect: disconnectSpy,
+      }))
+
+      const freshPlugin = WordCountPlugin()
+      const engine = createMockEngine('test')
+      freshPlugin.init(engine)
+
+      freshPlugin.destroy()
+
+      expect(disconnectSpy).toHaveBeenCalled()
+
+      // Calling destroy again should not throw (observer is null after first destroy)
+      expect(() => freshPlugin.destroy()).not.toThrow()
+
+      global.MutationObserver = originalMutationObserver
+    })
+
+    it('should clear a pending debounce timer on destroy', () => {
+      const originalMutationObserver = global.MutationObserver
+      let mutationCallback
+      global.MutationObserver = jest.fn((cb) => {
+        mutationCallback = cb
+        return {
+          observe: jest.fn(),
+          disconnect: jest.fn(),
+        }
+      })
+
+      const freshPlugin = WordCountPlugin()
+      const engine = createMockEngine('test')
+      freshPlugin.init(engine)
+
+      // Trigger a mutation to schedule a debounced update
+      mutationCallback([])
+
+      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      freshPlugin.destroy()
+
+      expect(clearSpy).toHaveBeenCalled()
+
+      // Advance timers — the debounced update should NOT fire since we destroyed
+      jest.advanceTimersByTime(100)
+
+      clearSpy.mockRestore()
+      global.MutationObserver = originalMutationObserver
+    })
   })
 })
 

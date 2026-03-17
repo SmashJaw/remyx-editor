@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
-import { convertDocument, getSupportedExtensions, getSupportedFormatNames } from '@remyx/core'
+import { convertDocument, getSupportedExtensions, getSupportedFormatNames } from '@remyxjs/core'
 
 export function ImportDocumentModal({ open, onClose, engine }) {
   const [file, setFile] = useState(null)

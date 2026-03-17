@@ -3,7 +3,7 @@ import { ToolbarButton } from './ToolbarButton.jsx'
 import { ToolbarDropdown } from './ToolbarDropdown.jsx'
 import { ToolbarColorPicker } from './ToolbarColorPicker.jsx'
 import { ToolbarSeparator } from './ToolbarSeparator.jsx'
-import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_FONT_SIZES, HEADING_OPTIONS, BUTTON_COMMANDS, TOOLTIP_MAP, getShortcutLabel, getCommandActiveState } from '@remyx/core'
+import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_FONT_SIZES, HEADING_OPTIONS, BUTTON_COMMANDS, TOOLTIP_MAP, getShortcutLabel, getCommandActiveState } from '@remyxjs/core'
 
 // Heading dropdown font size formula: base size minus level * step
 const HEADING_BASE_FONT_SIZE = 22

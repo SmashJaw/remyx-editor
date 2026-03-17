@@ -3,7 +3,7 @@
 # Remyx Editor Roadmap
 
 **Current Version:** 0.27.0
-**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker
+**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.
 
@@ -11,9 +11,9 @@ A living document outlining planned features, improvements, and long-term direct
 
 ## ~~Multi-Package Architecture~~ ✅ Shipped (v0.23.4)
 
-- ~~Extract framework-agnostic core into `@remyx/core`~~ — 49 files, 80 exports, zero framework deps
-- ~~Create `@remyx/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
-- ~~Standalone `remyx-editor` package~~ — removed; consumers use `@remyx/react` directly
+- ~~Extract framework-agnostic core into `@remyxjs/core`~~ — 49 files, 80 exports, zero framework deps
+- ~~Create `@remyxjs/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
+- ~~Standalone `remyx-editor` package~~ — removed; consumers use `@remyxjs/react` directly
 - ~~npm workspaces monorepo setup~~
 - See [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) for the full restructure plan
 
@@ -26,8 +26,8 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~Visual save-status indicator (Saved / Saving... / Unsaved)~~
 - Cloud storage: AWS S3 presigned URLs, GCP signed URLs, any HTTP endpoint
 - Filesystem provider for Node/Electron/Tauri apps
-- `AutosaveManager` class + 5 storage providers in `@remyx/core`
-- `useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyx/react`
+- `AutosaveManager` class + 5 storage providers in `@remyxjs/core`
+- `useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyxjs/react`
 - `autosave` prop on `RemyxEditor` (boolean or config object)
 
 ## ~~Unified Theme System~~ ✅ Shipped (v0.27.0)
@@ -50,16 +50,18 @@ A living document outlining planned features, improvements, and long-term direct
 - Copy/paste between Remyx tables and external spreadsheets (Excel, Google Sheets)
 - Freeze header row on scroll for large tables
 
-## Code Block Syntax Highlighting
+## ~~Code Block Syntax Highlighting~~ ✅ Shipped (v0.28.0)
 
-- Language-specific syntax highlighting inside fenced code blocks using a lightweight library (Prism, Shiki, or Highlight.js)
-- Language selector dropdown on code blocks — pick from common languages (JavaScript, Python, TypeScript, HTML, CSS, SQL, Bash, JSON, etc.)
-- Auto-detect language from content when no language is specified
-- Theme-aware highlighting — colors adapt to light/dark editor themes and custom theme presets
+- ~~Language-specific syntax highlighting inside fenced code blocks~~ — implemented with custom lightweight tokenizers (zero external dependencies, no Prism/Shiki/Highlight.js)
+- ~~Language selector dropdown on code blocks~~ — pick from 11 languages (JavaScript, TypeScript, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, HTML)
+- ~~Auto-detect language from content when no language is specified~~ — heuristic-based detection via `detectLanguage()`
+- ~~Theme-aware highlighting~~ — `.rmx-syn-*` token colors in all 6 themes (light, dark, ocean, forest, sunset, rose)
+- ~~Markdown round-trip: preserve language identifiers (` ```js `, ` ```python `) in markdown output~~
+- ~~MutationObserver-based auto-highlighting with debouncing, skips actively-edited blocks~~
+- ~~`setCodeLanguage` and `getCodeLanguage` commands~~
+- ~~`SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` exports~~
 - Line numbers toggle per code block
 - Copy-to-clipboard button on code blocks
-- Markdown round-trip: preserve language identifiers (` ```js `, ` ```python `) in markdown output
-- Lazy-loaded highlighting engine — syntax library only loaded when a code block is present
 - Extensible language registry — consumers can add custom language grammars via plugin or prop
 - Inline code spans with optional mini-highlighting for single-line snippets
 
@@ -135,14 +137,14 @@ A living document outlining planned features, improvements, and long-term direct
 ## Nx Monorepo Integration
 
 - Migrate from npm workspaces to [Nx](https://nx.dev/) for monorepo orchestration
-- **Task pipeline**: define `build`, `test`, and `lint` target dependencies so `@remyx/react` automatically builds `@remyx/core` first
+- **Task pipeline**: define `build`, `test`, and `lint` target dependencies so `@remyxjs/react` automatically builds `@remyxjs/core` first
 - **Computation caching**: Nx caches build and test outputs locally — rebuilds only what changed
 - **Remote caching**: enable Nx Cloud for shared CI/local cache across the team (optional, free tier available)
 - **Affected commands**: `nx affected:build` and `nx affected:test` run only against packages touched by a PR, dramatically speeding up CI
 - **Project graph**: `nx graph` visualizes package dependencies (`core` → `react` → `editor`) for onboarding and debugging
-- **Generators**: scaffold new framework wrappers (`@remyx/vue`, `@remyx/svelte`, `@remyx/angular`) with consistent structure via Nx generators
+- **Generators**: scaffold new framework wrappers (`@remyxjs/vue`, `@remyxjs/svelte`, `@remyxjs/angular`) with consistent structure via Nx generators
 - **Release management**: `nx release` for coordinated versioning, changelog generation, and npm publishing across all packages
-- **Enforce module boundaries**: lint rules preventing `@remyx/core` from importing `react` or `@remyx/react` from importing framework-specific code it shouldn't
+- **Enforce module boundaries**: lint rules preventing `@remyxjs/core` from importing `react` or `@remyxjs/react` from importing framework-specific code it shouldn't
 - **Parallel execution**: Nx runs independent targets in parallel with configurable concurrency, utilizing all CPU cores
 - **Migration path**: incremental adoption — add `nx.json` and per-package `project.json` files without changing existing `package.json` scripts or Vite configs
 
@@ -193,7 +195,7 @@ Quick project scaffolding via `npx create-remyx-app`:
 - ~~Language: JavaScript (JSX) or TypeScript (TSX)~~
 - ~~Theme selection: Light, Dark, Ocean, Forest, Sunset, Rose~~ (v0.27.0)
 - ~~Optional PDF/DOCX import (mammoth + pdfjs-dist)~~
-- ~~Vite-based project with `@remyx/core` + `@remyx/react`~~
+- ~~Vite-based project with `@remyxjs/core` + `@remyxjs/react`~~
 - ~~Post-scaffold instructions: install, dev, build~~
 
 ### `create-remyx` — Planned (advanced wizard)
@@ -222,26 +224,26 @@ Full-featured interactive wizard via `npx create-remyx`:
 
 | Framework | Status | Package |
 | --- | --- | --- |
-| **React** | ✅ Available | `@remyx/react` |
-| **Core (framework-agnostic)** | ✅ Available | `@remyx/core` |
-| **Vue 3** | Planned | `@remyx/vue` |
-| **Angular** | Planned | `@remyx/angular` |
-| **Svelte 5** | Planned | `@remyx/svelte` |
-| **Vanilla JS / Web Component** | Planned | `@remyx/vanilla` |
-| **Node.js (SSR)** | Planned | `@remyx/ssr` |
+| **React** | ✅ Available | `@remyxjs/react` |
+| **Core (framework-agnostic)** | ✅ Available | `@remyxjs/core` |
+| **Vue 3** | Planned | `@remyxjs/vue` |
+| **Angular** | Planned | `@remyxjs/angular` |
+| **Svelte 5** | Planned | `@remyxjs/svelte` |
+| **Vanilla JS / Web Component** | Planned | `@remyxjs/vanilla` |
+| **Node.js (SSR)** | Planned | `@remyxjs/ssr` |
 | **WordPress** | Planned | `remyx-wp` — Gutenberg block + Classic Editor replacement |
 | **Drupal** | Planned | `remyx_drupal` — CKEditor replacement module for Drupal 10/11 |
 | **Moodle** | Planned | `atto_remyx` — Atto editor plugin for Moodle 4.x |
 | **Joomla** | Planned | `plg_editors_remyx` — editor plugin for Joomla 5 |
 | **Craft CMS** | Planned | `craft-remyx` — Redactor field replacement plugin |
-| **Strapi** | Planned | `@remyx/strapi` — custom field plugin for Strapi 5 |
+| **Strapi** | Planned | `@remyxjs/strapi` — custom field plugin for Strapi 5 |
 | **Ghost** | Planned | `ghost-remyx` — Koenig editor replacement |
-| **Shopify** | Planned | `@remyx/shopify` — Liquid-compatible rich text for theme/app extensions |
+| **Shopify** | Planned | `@remyxjs/shopify` — Liquid-compatible rich text for theme/app extensions |
 
 - Shared core engine across all framework wrappers
 - Framework-specific bindings for reactivity, lifecycle, and two-way data binding
 - Web Component wrapper (`<remyx-editor>`) for framework-agnostic embedding
-- CMS integrations use `@remyx/vanilla` (Web Component) for framework-agnostic drop-in
+- CMS integrations use `@remyxjs/vanilla` (Web Component) for framework-agnostic drop-in
 
 ## ~~Slash Commands &~~ Command Palette — **Shipped in v0.25.0**
 
@@ -252,7 +254,7 @@ Full-featured interactive wizard via `npx create-remyx`:
 - Fuzzy search across labels, descriptions, and keywords
 - Keyboard navigation (Arrow keys, Enter to execute, Escape to close)
 - `commandPalette` prop to enable/disable (default `true`)
-- `SLASH_COMMAND_ITEMS` and `filterSlashItems()` exported from `@remyx/core` for custom integrations
+- `SLASH_COMMAND_ITEMS` and `filterSlashItems()` exported from `@remyxjs/core` for custom integrations
 
 ### Future enhancements
 
@@ -402,7 +404,7 @@ Full-featured interactive wizard via `npx create-remyx`:
 
 ## Quality Improvements
 
-- ~~Comprehensive unit test suite (Jest) for engine, commands, sanitizer, and converters~~ — 857 tests across 45 files
+- ~~Comprehensive unit test suite (Jest) for engine, commands, sanitizer, and converters~~ — 1251 tests across 49 files
 - ~~End-to-end tests (Playwright)~~ — Removed; the repo does not serve a production web server. Will revisit when a hosted demo is available.
 - Visual regression tests for theme and layout stability
 - ~~Accessibility: WAI-ARIA menu pattern, focus trapping, skip navigation, `baseHeadingLevel`~~

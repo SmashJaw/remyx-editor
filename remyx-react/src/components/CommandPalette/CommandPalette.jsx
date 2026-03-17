@@ -6,7 +6,7 @@ import {
   SHORTCUT_MAP,
   MODAL_COMMANDS,
   getShortcutLabel,
-} from '@remyx/core'
+} from '@remyxjs/core'
 
 /**
  * Build command items from engine's registered commands + slash items.

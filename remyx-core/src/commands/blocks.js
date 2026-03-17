@@ -21,7 +21,7 @@ export function registerBlockCommands(engine) {
   })
 
   engine.commands.register('codeBlock', {
-    execute(eng) {
+    execute(eng, { language } = {}) {
       const existing = eng.selection.getClosestElement('pre')
       if (existing) {
         // Toggle off: unwrap pre/code
@@ -41,6 +41,10 @@ export function registerBlockCommands(engine) {
         const pre = document.createElement('pre')
         const code = document.createElement('code')
         code.textContent = text
+        if (language) {
+          code.setAttribute('data-language', language)
+          pre.setAttribute('data-language', language)
+        }
         pre.appendChild(code)
 
         if (!range.collapsed) {
@@ -59,6 +63,9 @@ export function registerBlockCommands(engine) {
         newRange.selectNodeContents(code)
         newRange.collapse(false)
         eng.selection.setRange(newRange)
+
+        // Emit event so the syntax highlight plugin can pick it up
+        eng.eventBus.emit('codeblock:created', { element: pre, language })
       }
     },
     isActive(eng) {

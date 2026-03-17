@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { DEFAULT_COLORS } from '@remyx/core'
+import { DEFAULT_COLORS } from '@remyxjs/core'
 import { ICON_MAP } from '../../icons/index.jsx'
 
 export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ command, tooltip, currentColor, onColorSelect, itemStyle }) {

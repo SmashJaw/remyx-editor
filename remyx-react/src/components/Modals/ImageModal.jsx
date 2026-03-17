@@ -1,7 +1,11 @@
 import { useState, useRef } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
-const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
+// Allowlist-based URL validation for image sources.
+// Allows http(s), relative URLs, and safe data URIs (raster images only — SVG blocked
+// because data:image/svg+xml can contain embedded <script> and event handlers).
+const SAFE_IMAGE_URL = /^\s*(https?:\/\/|\/|\.)/i
+const SAFE_DATA_IMAGE = /^\s*data:image\/(png|jpe?g|gif|webp|avif|bmp|ico)(;base64)?,/i
 
 export function ImageModal({ open, onClose, engine }) {
   const [tab, setTab] = useState('url')
@@ -14,7 +18,9 @@ export function ImageModal({ open, onClose, engine }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!src.trim()) return
-    if (DANGEROUS_PROTOCOL.test(src)) return
+    const trimmedSrc = src.trim()
+    // Block anything not matching the allowlist (blocks javascript:, vbscript:, data:image/svg+xml, etc.)
+    if (!SAFE_IMAGE_URL.test(trimmedSrc) && !SAFE_DATA_IMAGE.test(trimmedSrc)) return
     engine.executeCommand('insertImage', {
       src,
       alt,
@@ -93,7 +99,7 @@ export function ImageModal({ open, onClose, engine }) {
         <div className="rmx-form-group" style={{ color: 'var(--rmx-error, #dc2626)' }}>
           {error}
         </div>
-      )}}
+      )}
 
       <form onSubmit={handleSubmit} className="rmx-modal-form">
         {tab === 'url' && (

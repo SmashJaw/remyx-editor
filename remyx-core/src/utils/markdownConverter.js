@@ -40,6 +40,23 @@ function getTurndown() {
       },
     })
 
+    // Preserve language identifier on fenced code blocks (data-language attribute)
+    turndownInstance.addRule('fencedCodeBlockWithLanguage', {
+      filter(node) {
+        return (
+          node.nodeName === 'PRE' &&
+          node.firstChild &&
+          node.firstChild.nodeName === 'CODE'
+        )
+      },
+      replacement(content, node) {
+        const code = node.firstChild
+        const language = code.getAttribute('data-language') || ''
+        const text = code.textContent
+        return `\n\n\`\`\`${language}\n${text}\n\`\`\`\n\n`
+      },
+    })
+
     // Preserve underline as <u> tag in markdown (non-standard but useful)
     turndownInstance.addRule('underline', {
       filter: ['u'],
@@ -78,6 +95,13 @@ function ensureMarkedConfigured() {
       const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''
       return `<img src="${href}" alt="${text || ''}"${titleAttr} />`
     }
+    // Preserve language identifiers on fenced code blocks as data-language attributes
+    renderer.code = ({ text, lang }) => {
+      const langAttr = lang ? ` data-language="${lang.replace(/"/g, '&quot;')}"` : ''
+      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return `<pre${langAttr}><code${langAttr}>${escaped}</code></pre>\n`
+    }
+
     marked.use({ renderer })
 
     markedConfigured = true

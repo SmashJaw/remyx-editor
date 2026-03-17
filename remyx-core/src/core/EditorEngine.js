@@ -39,6 +39,7 @@ export class EditorEngine {
     this.commands = new CommandRegistry(this)
     this.history = new History(this, options.history)
     this.sanitizer = new Sanitizer(options.sanitize)
+    this.selection.setSanitizer(this.sanitizer)
     this.clipboard = new Clipboard(this)
     this.dragDrop = new DragDrop(this)
     this.plugins = new PluginManager(this)

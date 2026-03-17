@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRemyxConfig } from './useRemyxConfig.js'
-import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_MENU_BAR } from '@remyx/core'
+import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_MENU_BAR } from '@remyxjs/core'
 import { collectMenuBarCommands } from '../components/MenuBar/MenuBar.jsx'
 
 /** Default editor content area height in pixels */

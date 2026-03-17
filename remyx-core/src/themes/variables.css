@@ -520,6 +520,133 @@
   outline-offset: -2px;
 }
 
+/* ====== Drag & Drop ====== */
+
+/* Drop indicator line — shows where content will land */
+.rmx-drop-indicator {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--rmx-primary);
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 50;
+  transition: top 0.08s ease;
+}
+
+.rmx-drop-indicator::before,
+.rmx-drop-indicator::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  background: var(--rmx-primary);
+  border-radius: 50%;
+}
+
+.rmx-drop-indicator::before {
+  left: -4px;
+}
+
+.rmx-drop-indicator::after {
+  right: -4px;
+}
+
+/* Block being dragged — dimmed source */
+.rmx-content .rmx-block-dragging {
+  opacity: 0.3;
+  transition: opacity 0.15s ease;
+}
+
+/* Ghost preview shown during drag */
+.rmx-drag-ghost {
+  background: var(--rmx-bg, #ffffff);
+  border: 1px solid var(--rmx-primary);
+  border-radius: var(--rmx-radius-sm, 6px);
+  box-shadow: var(--rmx-shadow-md);
+  padding: 8px 14px;
+  max-width: 400px;
+  max-height: 80px;
+  overflow: hidden;
+  opacity: 0.92;
+  font-size: var(--rmx-content-font-size, 16px);
+  line-height: var(--rmx-content-line-height, 1.7);
+}
+
+/* Drop zone overlay — full editor overlay for external drags */
+.rmx-drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 2px dashed var(--rmx-primary);
+  border-radius: var(--rmx-radius-sm, 6px);
+  z-index: 40;
+  pointer-events: none;
+  animation: rmx-fade-in 0.15s ease;
+}
+
+.rmx-drop-zone-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--rmx-primary);
+  opacity: 0.7;
+}
+
+.rmx-drop-zone-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--rmx-primary);
+  opacity: 0.8;
+}
+
+.rmx-drop-zone-hint {
+  font-size: 12px;
+  color: var(--rmx-text-secondary);
+  opacity: 0.7;
+}
+
+/* Block drag handle — grip icon on hover */
+.rmx-block-drag-handle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  cursor: grab;
+  color: var(--rmx-text-secondary);
+  opacity: 0;
+  border-radius: 4px;
+  transition: opacity var(--rmx-transition-fast), background var(--rmx-transition-fast), color var(--rmx-transition-fast);
+  z-index: 30;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rmx-block-drag-handle:hover {
+  opacity: 1 !important;
+  background: var(--rmx-toolbar-button-hover);
+  color: var(--rmx-text);
+}
+
+.rmx-block-drag-handle:active {
+  cursor: grabbing;
+  background: var(--rmx-toolbar-button-active);
+  color: var(--rmx-toolbar-icon-active);
+}
+
+/* Show handle when hovering near it */
+.rmx-block-drag-handle.rmx-visible {
+  opacity: 0.5;
+}
+
 /* ====== Content Styles ====== */
 .rmx-content p {
   margin: 0 0 0.75em 0;
@@ -589,6 +716,46 @@
   padding: 0;
   border-radius: 0;
 }
+
+/* ── Code Block Syntax Highlighting ── */
+.rmx-content pre[data-language] {
+  position: relative;
+}
+
+.rmx-content pre .rmx-code-lang-label {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rmx-text-secondary, #94a3b8);
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Programming language syntax tokens (light theme defaults) */
+.rmx-syn-comment { color: #6a737d; font-style: italic; }
+.rmx-syn-keyword { color: #d73a49; font-weight: 600; }
+.rmx-syn-string { color: #032f62; }
+.rmx-syn-number { color: #005cc5; }
+.rmx-syn-function { color: #6f42c1; }
+.rmx-syn-operator { color: #d73a49; }
+.rmx-syn-punctuation { color: #24292e; }
+.rmx-syn-builtin { color: #005cc5; }
+.rmx-syn-property { color: #005cc5; }
+.rmx-syn-regex { color: #032f62; }
+.rmx-syn-decorator { color: #e36209; }
+.rmx-syn-type { color: #22863a; }
+.rmx-syn-selector { color: #22863a; }
+.rmx-syn-atrule { color: #d73a49; }
+.rmx-syn-variable { color: #e36209; }
+.rmx-syn-tag { color: #22863a; }
+.rmx-syn-attr-name { color: #6f42c1; }
+.rmx-syn-attr-value { color: #032f62; }
+.rmx-syn-entity { color: #005cc5; }
+.rmx-syn-doctype { color: #6a737d; }
 
 .rmx-content hr {
   border: none;
@@ -773,6 +940,97 @@
 
 .rmx-table-control-btn.rmx-danger:hover {
   background: var(--rmx-danger-light);
+}
+
+/* ====== Code Block Controls ====== */
+.rmx-codeblock-controls {
+  font-family: var(--rmx-font-family);
+}
+
+.rmx-codeblock-lang-btn {
+  padding: 2px 8px;
+  font-size: 11px;
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius-inner);
+  cursor: pointer;
+  color: var(--rmx-text-secondary);
+  box-shadow: var(--rmx-shadow-sm);
+  opacity: 0.7;
+  transition: opacity var(--rmx-transition-fast), background var(--rmx-transition-fast);
+}
+
+.rmx-codeblock-lang-btn:hover {
+  opacity: 1;
+  background: var(--rmx-toolbar-button-hover);
+  color: var(--rmx-text);
+}
+
+.rmx-codeblock-lang-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  width: 180px;
+  max-height: 240px;
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius);
+  box-shadow: var(--rmx-shadow-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.rmx-codeblock-lang-search {
+  padding: 6px 8px;
+  border: none;
+  border-bottom: 1px solid var(--rmx-border);
+  background: transparent;
+  color: var(--rmx-text);
+  font-size: 12px;
+  outline: none;
+}
+
+.rmx-codeblock-lang-search::placeholder {
+  color: var(--rmx-text-secondary);
+}
+
+.rmx-codeblock-lang-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.rmx-codeblock-lang-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 4px 10px;
+  font-size: 12px;
+  border: none;
+  background: none;
+  color: var(--rmx-text);
+  cursor: pointer;
+}
+
+.rmx-codeblock-lang-option:hover {
+  background: var(--rmx-toolbar-button-hover);
+}
+
+.rmx-codeblock-lang-option.rmx-active {
+  background: var(--rmx-primary);
+  color: #fff;
+}
+
+.rmx-codeblock-lang-empty {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--rmx-text-secondary);
+  text-align: center;
 }
 
 /* ====== Status Bar ====== */

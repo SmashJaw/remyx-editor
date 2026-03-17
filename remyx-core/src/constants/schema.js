@@ -9,7 +9,7 @@ export const ALLOWED_TAGS = {
   table: ['class'], thead: [], tbody: [], tr: [],
   th: ['colspan', 'rowspan', 'class', 'style'], td: ['colspan', 'rowspan', 'class', 'style'],
   blockquote: ['class'],
-  pre: ['class'], code: ['class'],
+  pre: ['class', 'data-language'], code: ['class', 'data-language'],
   hr: [],
   br: [],
   div: ['class', 'style', 'data-embed-url'],

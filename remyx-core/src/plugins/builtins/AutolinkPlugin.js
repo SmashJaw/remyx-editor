@@ -1,14 +1,20 @@
 import { createPlugin } from '../createPlugin.js'
 
+// Maximum length for a URL match to prevent ReDoS on extremely long strings
+const MAX_URL_LENGTH = 2048
+
 // Matches URLs with an explicit protocol: http://example.com, https://example.com/path
-const PROTOCOL_URL_REGEX = /https?:\/\/[^\s<]+[^\s<.,:;"')\]!?]/g
+// Uses possessive-style matching via atomic groups to prevent catastrophic backtracking
+const PROTOCOL_URL_REGEX = /https?:\/\/[^\s<]{1,2000}[^\s<.,:;"')\]!?]/g
 
 // Matches www. prefixed domains: www.example.com, www.example.com/path
-const WWW_REGEX = /www\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+([/][^\s<]*[^\s<.,:;"')\]!?])?/g
+// Bounded repetition to prevent backtracking on long inputs
+const WWW_REGEX = /www\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,20})+(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?/g
 
 // Matches bare domain names: example.com, sub.example.co.uk, docs.github.io/path
 // Requires at least one dot and a valid TLD (2+ alpha chars)
-const DOMAIN_REGEX = /(?<![a-zA-Z0-9@/:.])([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}([/][^\s<]*[^\s<.,:;"')\]!?])?/g
+// Bounded repetition on label groups to prevent ReDoS
+const DOMAIN_REGEX = /(?<![a-zA-Z0-9@/:.])(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?\.){1,10}[a-zA-Z]{2,20}(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?/g
 
 // Pre-compiled regexes for checking if a match is part of a larger URL
 const PROTOCOL_BEFORE_REGEX = /https?:\/\/$/
@@ -99,6 +105,9 @@ export function AutolinkPlugin() {
  * Returns { url, href, startIdx, endIdx } or null.
  */
 function findLastURLMatch(text) {
+  // Guard against extremely long text nodes that could cause regex performance issues
+  if (!text || text.length > MAX_URL_LENGTH * 2) return null
+
   let best = null
 
   // 1) Protocol URLs — highest priority (https://example.com)

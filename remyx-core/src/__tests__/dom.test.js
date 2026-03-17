@@ -148,6 +148,28 @@ describe('dom utilities', () => {
       expect(el.tagName).toBe('EM')
       expect(el.attributes.length).toBe(0)
     })
+
+    it('should fall back to extractContents+appendChild+insertNode when surroundContents throws', () => {
+      // surroundContents throws when the range partially selects a non-text node.
+      // Create a range that spans across two sibling elements to trigger this.
+      root.innerHTML = '<p><em>Hello</em><strong>World</strong></p>'
+      const em = root.querySelector('em')
+      const strong = root.querySelector('strong')
+      const range = document.createRange()
+      // Select from inside <em> to inside <strong> — crosses element boundaries
+      range.setStart(em.firstChild, 3) // "lo" part of "Hello"
+      range.setEnd(strong.firstChild, 3) // "Wor" part of "World"
+
+      const el = wrapInTag(range, 'span', { class: 'highlight' })
+
+      expect(el.tagName).toBe('SPAN')
+      expect(el.getAttribute('class')).toBe('highlight')
+      // The wrapper should contain the extracted content
+      expect(el.textContent).toContain('lo')
+      expect(el.textContent).toContain('Wor')
+      // The wrapper should be inserted into the DOM
+      expect(root.contains(el)).toBe(true)
+    })
   })
 
   describe('unwrapTag', () => {

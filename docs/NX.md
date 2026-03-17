@@ -37,7 +37,7 @@ This document covers how to use [Nx](https://nx.dev) to build, version, publish,
 
 Nx is configured as a lightweight layer on top of the existing npm workspaces monorepo. It provides:
 
-- **Task orchestration** — Builds packages in dependency order (`@remyx/core` before `@remyx/react`)
+- **Task orchestration** — Builds packages in dependency order (`@remyxjs/core` before `@remyxjs/react`)
 - **Caching** — Skips unchanged builds, tests, and lints
 - **Affected detection** — Only rebuilds/retests packages touched by a git diff
 - **Release management** — Versioning, changelog generation, and npm publishing in one command
@@ -47,18 +47,18 @@ Nx is configured as a lightweight layer on top of the existing npm workspaces mo
 
 | Nx Project | npm Package | Targets |
 | --- | --- | --- |
-| `@remyx/core` | `@remyx/core` | build, dev, nx-release-publish |
-| `@remyx/react` | `@remyx/react` | build, dev, nx-release-publish |
+| `@remyxjs/core` | `@remyxjs/core` | build, dev, nx-release-publish |
+| `@remyxjs/react` | `@remyxjs/react` | build, dev, nx-release-publish |
 | `create-remyx` | `create-remyx` | nx-release-publish |
 
 ### Dependency Order
 
 ```
-@remyx/core  →  @remyx/react
+@remyxjs/core  →  @remyxjs/react
                 create-remyx (independent)
 ```
 
-`@remyx/react` depends on `@remyx/core`, so nx always builds core first. `create-remyx` has no build step and is independent.
+`@remyxjs/react` depends on `@remyxjs/core`, so nx always builds core first. `create-remyx` has no build step and is independent.
 
 ---
 
@@ -76,7 +76,7 @@ To verify the setup:
 
 ```bash
 npx nx show projects        # List all detected projects
-npx nx show project @remyx/core  # Show targets for a project
+npx nx show project @remyxjs/core  # Show targets for a project
 ```
 
 ---
@@ -91,23 +91,23 @@ npm run build:all
 npx nx run-many --target=build
 ```
 
-Nx builds `@remyx/core` first (because `@remyx/react` depends on it), then `@remyx/react` in parallel if possible. `create-remyx` is skipped since it has no build target.
+Nx builds `@remyxjs/core` first (because `@remyxjs/react` depends on it), then `@remyxjs/react` in parallel if possible. `create-remyx` is skipped since it has no build target.
 
 ### Build a Single Package
 
 ```bash
-npx nx run @remyx/core:build
-npx nx run @remyx/react:build
+npx nx run @remyxjs/core:build
+npx nx run @remyxjs/react:build
 ```
 
 Or use the shorthand:
 
 ```bash
-npx nx build @remyx/core
-npx nx build @remyx/react
+npx nx build @remyxjs/core
+npx nx build @remyxjs/react
 ```
 
-When you build `@remyx/react`, nx automatically builds `@remyx/core` first if it's out of date (because of the `dependsOn: ["^build"]` configuration).
+When you build `@remyxjs/react`, nx automatically builds `@remyxjs/core` first if it's out of date (because of the `dependsOn: ["^build"]` configuration).
 
 ### Build Only Affected Packages
 
@@ -142,9 +142,12 @@ Nx release handles three steps: **version** (bump package.json versions), **chan
 
 Before publishing, ensure you are:
 1. Logged into npm: `npm login`
-2. On a clean git working tree (no uncommitted changes)
-3. On the `main` branch (or your release branch)
-4. All packages are built: `npm run build:all`
+2. A member of the `@remyxjs` npm organization: `npm access list collaborators @remyxjs/core`
+3. On a clean git working tree (no uncommitted changes)
+4. On the `main` branch (or your release branch)
+5. All packages are built: `npm run build:all`
+
+> **Note:** All `@remyxjs/*` scoped packages have `"publishConfig": { "access": "public" }` in their `package.json`, so they are published as public packages by default.
 
 ### Full Release (Version + Changelog + Publish)
 
@@ -209,13 +212,13 @@ npm run release:publish
 npx nx release publish
 ```
 
-This runs `npm publish` for each package in the release configuration. Packages are published in dependency order (`@remyx/core` first).
+This runs `npm publish` for each package in the release configuration. Packages are published in dependency order (`@remyxjs/core` first).
 
 ### Publish a Single Package
 
 ```bash
-npx nx run @remyx/core:nx-release-publish
-npx nx run @remyx/react:nx-release-publish
+npx nx run @remyxjs/core:nx-release-publish
+npx nx run @remyxjs/react:nx-release-publish
 npx nx run create-remyx:nx-release-publish
 ```
 
@@ -254,10 +257,10 @@ npx nx release prerelease
 
 ```bash
 # Only release core
-npx nx release --projects=@remyx/core
+npx nx release --projects=@remyxjs/core
 
 # Release core and react, skip create-remyx
-npx nx release --projects=@remyx/core,@remyx/react
+npx nx release --projects=@remyxjs/core,@remyxjs/react
 ```
 
 ---
@@ -286,7 +289,7 @@ npx nx affected --targets=lint,build,test
 Affected detection works by:
 1. Computing a git diff between your branch and `main`
 2. Mapping changed files to their owning project
-3. Including all downstream dependents (e.g., changing `@remyx/core` also affects `@remyx/react`)
+3. Including all downstream dependents (e.g., changing `@remyxjs/core` also affects `@remyxjs/react`)
 
 ---
 
@@ -313,7 +316,7 @@ Force a fresh run, ignoring cached results:
 
 ```bash
 npx nx run-many --target=build --skip-nx-cache
-npx nx run @remyx/core:build --skip-nx-cache
+npx nx run @remyxjs/core:build --skip-nx-cache
 ```
 
 ### Reset Cache
@@ -371,7 +374,7 @@ The `nx.json` file at the repo root configures nx behavior:
     }
   },
   "release": {
-    "projects": ["@remyx/core", "@remyx/react", "create-remyx"],
+    "projects": ["@remyxjs/core", "@remyxjs/react", "create-remyx"],
     "projectsRelationship": "independent",
     "version": { "conventionalCommits": true },
     "changelog": { ... },
@@ -441,38 +444,36 @@ jobs:
 
 ### Publishing from CI
 
-```yaml
-name: Release
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version bump (patch, minor, major)'
-        required: true
-        type: choice
-        options: [patch, minor, major]
+The repo includes a ready-to-use GitHub Actions workflow at `.github/workflows/publish.yml`. It supports:
 
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+- **Manual dispatch** — Trigger from the GitHub Actions UI with version bump type, optional prerelease ID, dry-run mode, and first-release flag
+- **Automatic builds** — Runs `nx run-many --target=build` before publishing
+- **Git automation** — Commits version bumps and creates tags as `github-actions[bot]`
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
+#### Setup
 
-      - run: npm ci
-      - run: npx nx release ${{ inputs.version }} --yes
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+1. **Create an npm access token** — Go to [npmjs.com → Access Tokens](https://www.npmjs.com/settings/~/tokens) and create a **Granular Access Token** with read/write permissions for the `@remyxjs` scope
+2. **Add the token as a GitHub secret** — Go to your repo → Settings → Secrets and variables → Actions → New repository secret → Name: `NPM_TOKEN`, Value: your token
+3. **Trigger a release** — Go to Actions → "Publish to npm" → Run workflow → Select version bump type
+
+#### Manual release from CI
+
+```bash
+# Go to GitHub → Actions → "Publish to npm" → Run workflow
+# Select: patch | minor | major | premajor | preminor | prepatch | prerelease
 ```
 
-The `--yes` flag skips the interactive confirmation prompt, which is necessary in CI.
+#### Authentication
+
+The `.npmrc` file at the repo root reads the `NPM_TOKEN` environment variable for authentication:
+
+```
+//registry.npmjs.org/:_authToken=${NPM_TOKEN}
+```
+
+In CI, `NODE_AUTH_TOKEN` is set from the GitHub secret. For local publishing, either export the environment variable or run `npm login` interactively.
+
+The `--yes` flag in the workflow skips the interactive confirmation prompt, which is necessary in CI.
 
 ---
 
@@ -484,7 +485,7 @@ The `--yes` flag skips the interactive confirmation prompt, which is necessary i
 npx nx show projects  # Verify the project name
 ```
 
-Project names come from the `name` field in each `package.json`. Use the full scoped name: `@remyx/core`, not `remyx-core`.
+Project names come from the `name` field in each `package.json`. Use the full scoped name: `@remyxjs/core`, not `remyx-core`.
 
 ### Cache producing stale results
 
@@ -501,7 +502,7 @@ Nx infers the dependency graph from `package.json` dependencies. Verify the grap
 npx nx graph
 ```
 
-If `@remyx/react` doesn't depend on `@remyx/core` in its `package.json`, nx won't know to build core first.
+If `@remyxjs/react` doesn't depend on `@remyxjs/core` in its `package.json`, nx won't know to build core first.
 
 ### "Cannot publish — package already exists"
 
@@ -514,11 +515,11 @@ npx nx release publish
 
 ### Publish permissions
 
-Make sure you're logged into npm and have publish permissions for the `@remyx` scope:
+Make sure you're logged into npm and have publish permissions for the `@remyxjs` scope:
 
 ```bash
 npm whoami
-npm access list collaborators @remyx/core
+npm access list collaborators @remyxjs/core
 ```
 
 ---
@@ -528,7 +529,7 @@ npm access list collaborators @remyx/core
 | Task | Command |
 | --- | --- |
 | **Build all** | `npm run build:all` |
-| **Build one** | `npx nx build @remyx/core` |
+| **Build one** | `npx nx build @remyxjs/core` |
 | **Build affected** | `npm run affected:build` |
 | **Test affected** | `npm run affected:test` |
 | **Lint affected** | `npm run affected:lint` |
@@ -536,12 +537,12 @@ npm access list collaborators @remyx/core
 | **Dry-run release** | `npm run release:dry-run` |
 | **Version only** | `npm run release:version` |
 | **Publish only** | `npm run release:publish` |
-| **Publish one** | `npx nx run @remyx/core:nx-release-publish` |
+| **Publish one** | `npx nx run @remyxjs/core:nx-release-publish` |
 | **First release** | `npx nx release --first-release` |
 | **Prerelease** | `npx nx release prerelease --preid=beta` |
 | **Dep graph** | `npm run graph` |
 | **List projects** | `npx nx show projects` |
-| **Inspect project** | `npx nx show project @remyx/core` |
-| **Skip cache** | `npx nx build @remyx/core --skip-nx-cache` |
+| **Inspect project** | `npx nx show project @remyxjs/core` |
+| **Skip cache** | `npx nx build @remyxjs/core --skip-nx-cache` |
 | **Reset cache** | `npx nx reset` |
 | **Run anything** | `npx nx run-many --target=<target>` |

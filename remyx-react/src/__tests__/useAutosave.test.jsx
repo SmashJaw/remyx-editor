@@ -1,8 +1,8 @@
 import { renderHook, act } from '@testing-library/react'
 import { useAutosave } from '../hooks/useAutosave.js'
 
-// Mock the AutosaveManager — avoid importing all of @remyx/core which pulls in CSS
-jest.mock('@remyx/core', () => ({
+// Mock the AutosaveManager — avoid importing all of @remyxjs/core which pulls in CSS
+jest.mock('@remyxjs/core', () => ({
   AutosaveManager: jest.fn().mockImplementation(() => ({
     init: jest.fn(),
     destroy: jest.fn(),
@@ -133,5 +133,148 @@ describe('useAutosave', () => {
     // After unmount, emitting events should not cause errors
     engine.eventBus.emit('autosave:saving')
     engine.eventBus.emit('content:change')
+  })
+
+  it('does not change saveStatus to unsaved while saving', () => {
+    const engine = createMockEngine()
+    const { result } = renderHook(() => useAutosave(engine, { enabled: true }))
+
+    act(() => {
+      engine.eventBus.emit('autosave:saving')
+    })
+    expect(result.current.saveStatus).toBe('saving')
+
+    act(() => {
+      engine.eventBus.emit('content:change')
+    })
+    // Should remain 'saving', not flip to 'unsaved'
+    expect(result.current.saveStatus).toBe('saving')
+  })
+
+  it('sets recoveryData, emits autosave:recovered, and calls onRecover when recovery data exists', async () => {
+    const { AutosaveManager } = require('@remyxjs/core')
+    const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
+    AutosaveManager.mockImplementationOnce(() => ({
+      init: jest.fn(),
+      destroy: jest.fn(),
+      save: jest.fn(),
+      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
+      clearRecovery: jest.fn(),
+    }))
+
+    const onRecover = jest.fn()
+    const engine = createMockEngine()
+    const { result } = renderHook(() =>
+      useAutosave(engine, { enabled: true, onRecover })
+    )
+
+    // Wait for the async checkRecovery promise to resolve
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.recoveryData).toEqual(recoveryPayload)
+    expect(engine.eventBus.emit).toHaveBeenCalledWith('autosave:recovered', recoveryPayload)
+    expect(onRecover).toHaveBeenCalledWith(recoveryPayload)
+  })
+
+  it('recoverContent calls engine.setHTML, emits content:change, clears recoveryData, and calls clearRecovery', async () => {
+    const { AutosaveManager } = require('@remyxjs/core')
+    const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
+    const mockClearRecovery = jest.fn()
+    AutosaveManager.mockImplementationOnce(() => ({
+      init: jest.fn(),
+      destroy: jest.fn(),
+      save: jest.fn(),
+      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
+      clearRecovery: mockClearRecovery,
+    }))
+
+    const engine = createMockEngine()
+    const { result } = renderHook(() =>
+      useAutosave(engine, { enabled: true })
+    )
+
+    // Wait for recovery data to be set
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.recoveryData).toEqual(recoveryPayload)
+
+    // Now call recoverContent
+    act(() => {
+      result.current.recoverContent()
+    })
+
+    expect(engine.setHTML).toHaveBeenCalledWith('<p>Recovered</p>')
+    expect(engine.eventBus.emit).toHaveBeenCalledWith('content:change')
+    expect(result.current.recoveryData).toBeNull()
+    expect(mockClearRecovery).toHaveBeenCalled()
+  })
+
+  it('dismissRecovery clears recoveryData and calls clearRecovery', async () => {
+    const { AutosaveManager } = require('@remyxjs/core')
+    const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
+    const mockClearRecovery = jest.fn()
+    AutosaveManager.mockImplementationOnce(() => ({
+      init: jest.fn(),
+      destroy: jest.fn(),
+      save: jest.fn(),
+      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
+      clearRecovery: mockClearRecovery,
+    }))
+
+    const engine = createMockEngine()
+    const { result } = renderHook(() =>
+      useAutosave(engine, { enabled: true })
+    )
+
+    // Wait for recovery data to be set
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current.recoveryData).toEqual(recoveryPayload)
+
+    // Now call dismissRecovery
+    act(() => {
+      result.current.dismissRecovery()
+    })
+
+    expect(result.current.recoveryData).toBeNull()
+    expect(mockClearRecovery).toHaveBeenCalled()
+  })
+
+  it('transitions saveStatus through saving → saved with timestamp', () => {
+    const engine = createMockEngine()
+    const { result } = renderHook(() => useAutosave(engine, { enabled: true }))
+
+    act(() => {
+      engine.eventBus.emit('autosave:saving')
+    })
+    expect(result.current.saveStatus).toBe('saving')
+
+    const now = Date.now()
+    act(() => {
+      engine.eventBus.emit('autosave:saved', { timestamp: now })
+    })
+    expect(result.current.saveStatus).toBe('saved')
+    expect(result.current.lastSaved).toBe(now)
+  })
+
+  it('transitions saveStatus to error on autosave:error after saving', () => {
+    const engine = createMockEngine()
+    const { result } = renderHook(() => useAutosave(engine, { enabled: true }))
+
+    act(() => {
+      engine.eventBus.emit('autosave:saving')
+    })
+    expect(result.current.saveStatus).toBe('saving')
+
+    act(() => {
+      engine.eventBus.emit('autosave:error')
+    })
+    expect(result.current.saveStatus).toBe('error')
   })
 })

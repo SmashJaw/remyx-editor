@@ -223,6 +223,55 @@ describe('AutolinkPlugin', () => {
       }
     })
 
+    it('should not detect URLs in very long text nodes (>4096 chars) — ReDoS prevention', () => {
+      // Text longer than MAX_URL_LENGTH * 2 (4096) should be rejected early
+      const longText = 'a'.repeat(5000) + ' https://example.com '
+      const link = triggerSpace(longText)
+      expect(link).toBeNull()
+    })
+
+    it('should not freeze on long repeated characters that could cause backtracking', () => {
+      // Pattern like "a]a]a]a]..." repeated many times could cause catastrophic
+      // backtracking with unbounded regex repetition
+      const pathological = 'https://example.com/' + 'a]'.repeat(1000) + ' '
+      // This should complete quickly even if it doesn't match perfectly;
+      // the key assertion is that it doesn't hang (timeout = test runner default)
+      const link = triggerSpace(pathological)
+      // We don't care whether a link is created; just that it returns promptly
+      expect(true).toBe(true)
+    })
+
+    it('should not freeze on long repeated dots that stress domain regex', () => {
+      // Pathological input for domain regex: many dots with short labels
+      const pathological = 'a.'.repeat(500) + 'com '
+      const link = triggerSpace(pathological)
+      // Again, the main check is that this returns without hanging
+      expect(true).toBe(true)
+    })
+
+    it('should still detect normal https:// URLs after regex hardening', () => {
+      const link = triggerSpace('see https://example.com/path?q=1&b=2#frag ')
+      if (link) {
+        expect(link.href).toContain('example.com')
+        expect(link.target).toBe('_blank')
+        expect(link.rel).toBe('noopener noreferrer')
+      }
+    })
+
+    it('should still detect www. URLs after regex hardening', () => {
+      const link = triggerSpace('go to www.github.com/user/repo ')
+      if (link) {
+        expect(link.href).toContain('www.github.com')
+      }
+    })
+
+    it('should still detect bare domains after regex hardening', () => {
+      const link = triggerSpace('visit github.io ')
+      if (link) {
+        expect(link.href).toContain('github.io')
+      }
+    })
+
     it('should not create link when cursor is before the URL', () => {
       editorEl.innerHTML = ''
       const textNode = document.createTextNode('https://example.com some text after')

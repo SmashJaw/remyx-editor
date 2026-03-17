@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ModalOverlay } from './ModalOverlay.jsx'
-import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyx/core'
+import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyxjs/core'
 
 export function ExportModal({ open, onClose, engine }) {
   const [error, setError] = useState('')

@@ -40,7 +40,7 @@ npm install
 npm run build:all
 ```
 
-The `npm install` at the repo root resolves all workspace dependencies, including the internal link between `@remyx/react` and `@remyx/core`. You do not need to run install inside individual packages.
+The `npm install` at the repo root resolves all workspace dependencies, including the internal link between `@remyxjs/react` and `@remyxjs/core`. You do not need to run install inside individual packages.
 
 ---
 
@@ -51,13 +51,13 @@ Remyx Editor is a monorepo managed with **npm workspaces**. All publishable pack
 ```
 remyx/
   packages/
-    remyx-core/        @remyx/core      0.27.0  Framework-agnostic editor engine
-    remyx-react/       @remyx/react     0.27.0  React components and hooks
+    remyx-core/        @remyxjs/core      0.27.0  Framework-agnostic editor engine
+    remyx-react/       @remyxjs/react     0.27.0  React components and hooks
     create-remyx/      create-remyx     0.27.0  Reserved for future CLI tool
     docs/              (not published)           Documentation, changelog, roadmap
 ```
 
-### @remyx/core
+### @remyxjs/core
 
 The core engine contains all editing logic and has zero framework dependencies:
 
@@ -73,9 +73,9 @@ packages/remyx-core/src/
   index.js          Public API re-exports
 ```
 
-### @remyx/react
+### @remyxjs/react
 
-React bindings that wrap `@remyx/core`:
+React bindings that wrap `@remyxjs/core`:
 
 ```
 packages/remyx-react/src/
@@ -86,7 +86,7 @@ packages/remyx-react/src/
 
 ### create-remyx
 
-Reserved for a future CLI tool. Project scaffolding has moved to `@remyx/react` — use `npx create-remyx-app`.
+Reserved for a future CLI tool. Project scaffolding has moved to `@remyxjs/react` — use `npx create-remyx-app`.
 
 ---
 
@@ -96,8 +96,8 @@ Build commands are run from `packages/`. Lint, typecheck, and test commands are 
 
 | Command | Where | Description |
 |---|---|---|
-| `npm run build:core` | `packages/` | Build `@remyx/core` only |
-| `npm run build:react` | `packages/` | Build `@remyx/react` only |
+| `npm run build:core` | `packages/` | Build `@remyxjs/core` only |
+| `npm run build:react` | `packages/` | Build `@remyxjs/react` only |
 | `npm run build:all` | `packages/` | Build core then react (in dependency order via Nx) |
 | `npm run lint` | repo root | Run ESLint across the entire repo |
 | `npm run typecheck` | repo root | Type-check with TypeScript |
@@ -114,7 +114,7 @@ npm run dev    # vite build --watch
 
 ### Build order
 
-Always build `@remyx/core` before `@remyx/react`, since React depends on Core. The `build:all` script handles this automatically.
+Always build `@remyxjs/core` before `@remyxjs/react`, since React depends on Core. The `build:all` script handles this automatically.
 
 ### Testing
 
@@ -229,12 +229,12 @@ If the command should be available to consumers, re-export the constant name fro
 
 ## How to Create Plugins
 
-Plugins extend the editor without modifying core source. Use the `createPlugin` factory from `@remyx/core`.
+Plugins extend the editor without modifying core source. Use the `createPlugin` factory from `@remyxjs/core`.
 
 ### Basic plugin
 
 ```js
-import { createPlugin } from '@remyx/core'
+import { createPlugin } from '@remyxjs/core'
 
 export function MyPlugin() {
   return createPlugin({
@@ -263,7 +263,7 @@ export function MyPlugin() {
 Plugins can register their own commands and contribute toolbar items, status bar items, and context menu items:
 
 ```js
-import { createPlugin } from '@remyx/core'
+import { createPlugin } from '@remyxjs/core'
 
 export function EmojiPlugin() {
   return createPlugin({

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { RemyxEditor } from '@remyx/react'
-import '@remyx/core/style.css'
-import '@remyx/react/style.css'
+import { RemyxEditor } from '@remyxjs/react'
+import '@remyxjs/core/style.css'
+import '@remyxjs/react/style.css'
 
 function App() {
   const [content, setContent] = useState('')

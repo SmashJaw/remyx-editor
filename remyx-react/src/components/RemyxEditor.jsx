@@ -9,13 +9,17 @@ import { useResolvedConfig } from '../hooks/useResolvedConfig.js'
 import { useAutosave } from '../hooks/useAutosave.js'
 import { usePortalAttachment } from '../hooks/usePortalAttachment.js'
 import { useEditorRect } from '../hooks/useEditorRect.js'
-import { loadGoogleFonts, DEFAULT_FONTS } from '@remyx/core'
+import { useDragDrop } from '../hooks/useDragDrop.js'
+import { loadGoogleFonts, DEFAULT_FONTS } from '@remyxjs/core'
 import { MenuBar } from './MenuBar/MenuBar.jsx'
 import { Toolbar } from './Toolbar/Toolbar.jsx'
 import { EditArea } from './EditArea/EditArea.jsx'
 import { FloatingToolbar } from './EditArea/FloatingToolbar.jsx'
 import { ImageResizeHandles } from './EditArea/ImageResizeHandles.jsx'
 import { TableControls } from './EditArea/TableControls.jsx'
+import { CodeBlockControls } from './EditArea/CodeBlockControls.jsx'
+import { DropZoneOverlay } from './EditArea/DropZoneOverlay.jsx'
+import { BlockDragHandle } from './EditArea/BlockDragHandle.jsx'
 import { StatusBar, WordCountButton } from './StatusBar/StatusBar.jsx'
 import { RecoveryBanner } from './RecoveryBanner/RecoveryBanner.jsx'
 import { ContextMenu } from './ContextMenu/ContextMenu.jsx'
@@ -96,6 +100,16 @@ export default function RemyxEditor(props) {
 
   // Track editor rect for positioning overlays (ResizeObserver + rAF throttled)
   const editorRect = useEditorRect(editorRootRef, ready)
+
+  // Expose engine on the DOM element for E2E testing and external integrations
+  useEffect(() => {
+    if (editorRootRef.current && engine) {
+      editorRootRef.current.__engine = engine
+    }
+  }, [engine])
+
+  // Track drag-and-drop state for overlay rendering
+  const { isExternalDrag, dragFileTypes } = useDragDrop(engine)
 
   // Handle source mode toggle
   useEffect(() => {
@@ -251,6 +265,27 @@ export default function RemyxEditor(props) {
             editorRect={editorRect}
           />
         )}
+
+        {selectionState.focusedCodeBlock && (
+          <CodeBlockControls
+            codeBlock={selectionState.focusedCodeBlock}
+            engine={engine}
+            editorRect={editorRect}
+          />
+        )}
+
+        {!readOnly && engine && (
+          <BlockDragHandle
+            engine={engine}
+            editorRect={editorRect}
+            editAreaRef={editAreaRef}
+          />
+        )}
+
+        <DropZoneOverlay
+          visible={isExternalDrag}
+          fileTypes={dragFileTypes}
+        />
 
         <Suspense fallback={null}>
           {modals.findReplace.open && (
