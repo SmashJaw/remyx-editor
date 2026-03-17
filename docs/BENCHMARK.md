@@ -1,6 +1,6 @@
 # Performance Benchmark
 
-> Measured on 2026-03-16 at commit `08d7117` (v0.24.0)
+> Measured on 2026-03-16 at commit `08d7117` (v0.24.0, bundle sizes still current as of v0.27.0)
 > Environment: Apple M3 Max, 48 GB RAM, Node v24.2.0, Vite 7.3.1
 
 ---
@@ -10,10 +10,10 @@
 | Metric | Count |
 |---|---|
 | Source files (core JS) | 92 |
-| Source files (core CSS) | 3 |
+| Source files (core CSS) | 7 |
 | Source files (react JSX) | 28 |
 | Source files (react JS) | 12 |
-| Test files | 42 |
+| Test files | 45 |
 | Lines of code (core) | 14,195 |
 | Lines of code (react) | 4,441 |
 | Lines of code (tests) | 8,146 |
@@ -100,8 +100,8 @@ All times are wall-clock averages over 3 runs.
 
 | Metric | Value |
 |---|---|
-| Test suites | 42 |
-| Total tests | 815 |
+| Test suites | 45 |
+| Total tests | 857 |
 | Cold run (no cache) | **1.8s** (wall: 3.2s) |
 | Warm run (cached) | **1.5s** (wall: 2.4s) |
 | Tests per second | ~453 (cold) / ~543 (warm) |
@@ -138,7 +138,7 @@ All times are wall-clock averages over 3 runs.
 
 4. **PDF vendor dominance**: The demo app's 2.5 MB dist is inflated by pdf.js (~1.6 MB). The editor's own code is ~380 KB minified (114.78 KB gzipped).
 
-5. **Fast test suite**: 815 tests run in under 2 seconds with Jest 30's parallel workers utilizing all cores.
+5. **Fast test suite**: 857 tests run in under 2 seconds with Jest 30's parallel workers utilizing all cores.
 
 6. **Lint issues**: 64 ESLint errors remain — primarily React Refresh violations from mixed component/constant exports and ref access warnings.
 

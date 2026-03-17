@@ -163,9 +163,9 @@ This runs all three steps interactively:
 You can also specify the version bump explicitly:
 
 ```bash
-npx nx release patch    # 0.24.0 → 0.24.1
-npx nx release minor    # 0.24.0 → 0.25.0
-npx nx release major    # 0.24.0 → 1.0.0
+npx nx release patch    # 0.27.0 → 0.27.1
+npx nx release minor    # 0.27.0 → 0.28.0
+npx nx release major    # 0.27.0 → 1.0.0
 ```
 
 ### Dry Run a Release

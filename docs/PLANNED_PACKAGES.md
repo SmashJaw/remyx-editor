@@ -11,14 +11,24 @@
 
 ```
 packages/
-  remyx-core/          → @remyx/core         (framework-agnostic engine)
-  remyx-react/         → @remyx/react        (React components + hooks + TypeScript declarations)
-  remyx-vue/           → @remyx/vue          (Vue 3 composables + components)
-  remyx-angular/       → @remyx/angular      (Angular module + components)
-  remyx-svelte/        → @remyx/svelte       (Svelte components + actions)
-  remyx-vanilla/       → @remyx/vanilla      (Vanilla JS / Web Component)
-  remyx-ssr/           → @remyx/ssr          (Node.js server-side utilities)
-  create-remyx/        → create-remyx        (CLI wizard for scaffolding custom editors)
+  remyx-core/          → @remyx/core         ✅ Shipped  (framework-agnostic engine)
+  remyx-react/         → @remyx/react        ✅ Shipped  (React components + hooks + TS declarations)
+  remyx-vue/           → @remyx/vue          Planned    (Vue 3 composables + components)
+  remyx-angular/       → @remyx/angular      Planned    (Angular module + components)
+  remyx-svelte/        → @remyx/svelte       Planned    (Svelte components + actions)
+  remyx-vanilla/       → @remyx/vanilla      Planned    (Vanilla JS / Web Component)
+  remyx-ssr/           → @remyx/ssr          Planned    (Node.js server-side utilities)
+  create-remyx/        → create-remyx        Planned    (advanced CLI wizard)
+
+CMS integrations (depend on @remyx/vanilla):
+  remyx-wp/            → remyx-wp            Planned    (WordPress Gutenberg block)
+  remyx-drupal/        → remyx_drupal        Planned    (Drupal 10/11 module)
+  remyx-moodle/        → atto_remyx          Planned    (Moodle 4.x Atto plugin)
+  remyx-joomla/        → plg_editors_remyx   Planned    (Joomla 5 editor plugin)
+  remyx-craft/         → craft-remyx         Planned    (Craft CMS Redactor replacement)
+  remyx-strapi/        → @remyx/strapi       Planned    (Strapi 5 custom field)
+  remyx-ghost/         → ghost-remyx         Planned    (Ghost Koenig replacement)
+  remyx-shopify/       → @remyx/shopify      Planned    (Shopify theme/app extensions)
 ```
 
 ---
@@ -26,15 +36,23 @@ packages/
 ## Package Dependency Graph
 
 ```
-@remyx/core ←── @remyx/react
+@remyx/core ←── @remyx/react      ✅ Shipped
             ←── @remyx/vue
             ←── @remyx/angular
             ←── @remyx/svelte
-            ←── @remyx/vanilla
+            ←── @remyx/vanilla ←── remyx-wp
+            │                  ←── remyx_drupal
+            │                  ←── atto_remyx
+            │                  ←── plg_editors_remyx
+            │                  ←── craft-remyx
+            │                  ←── @remyx/strapi
+            │                  ←── ghost-remyx
+            │                  ←── @remyx/shopify
             ←── @remyx/ssr
 ```
 
 Every framework package depends on `@remyx/core` as a peer dependency.
+CMS integrations depend on `@remyx/vanilla` (Web Component) for framework-agnostic drop-in.
 
 ---
 
@@ -1056,17 +1074,19 @@ export default defineConfig({
 Step 1  → @remyx/core             ✅ DONE — 49 files, 80 exports, builds clean
 Step 2  → @remyx/react + TS defs  ✅ DONE — 36 modules, 91 KB ES + 62 KB CJS, all imports via @remyx/core
 Step 3  → remyx-editor removed    ✅ DONE — deleted entirely, consumers use @remyx/react directly
-─── Above this line = backward-compatible release ───
+─── Above this line = shipped ───
 Step 4  → @remyx/vue              (depends on Step 1, parallel with 5-8)
 Step 5  → @remyx/angular          (depends on Step 1, parallel with 4,6-8)
 Step 6  → @remyx/svelte           (depends on Step 1, parallel with 4-5,7-8)
-Step 7  → @remyx/vanilla          (depends on Step 1, parallel with 4-6,8)
+Step 7  → @remyx/vanilla          (depends on Step 1, parallel with 4-6,8) ← CMS packages depend on this
 Step 8  → @remyx/ssr              (depends on Step 1, parallel with 4-7)
 Step 9  → Root monorepo update    (after Step 3, incrementally with 4-8)
 Step 10 → create-remyx CLI        (after Steps 4-7, needs framework templates)
+Step 11 → CMS integrations        (after Step 7, all parallel with each other)
 ```
 
 Steps 4-8 are fully independent and can be done in any order or in parallel.
+Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete first.
 
 ---
 
@@ -1080,12 +1100,20 @@ Steps 4-8 are fully independent and can be done in any order or in parallel.
 | 4 | `@remyx/vue` | Large | 3-4 | P1 — High demand |
 | 5 | `@remyx/angular` | Large | 3-4 | P2 — Enterprise |
 | 6 | `@remyx/svelte` | Medium-Large | 2-3 | P2 — Growing ecosystem |
-| 7 | `@remyx/vanilla` | Large | 3-4 | P1 — Widest compat |
+| 7 | `@remyx/vanilla` | Large | 3-4 | P0 — CMS packages depend on this |
 | 8 | `@remyx/ssr` | Small-Medium | 1-2 | P2 — Niche |
 | 9 | Root config | Small | 1 | P0 — Required |
 | 10 | `create-remyx` CLI | Medium-Large | 2-3 | P1 — DX onboarding |
+| 11a | `remyx-wp` (WordPress) | Medium | 2-3 | P1 — Largest CMS market share |
+| 11b | `remyx_drupal` (Drupal) | Medium | 2-3 | P1 — Enterprise/gov/edu |
+| 11c | `atto_remyx` (Moodle) | Small-Medium | 1-2 | P2 — Education sector |
+| 11d | `plg_editors_remyx` (Joomla) | Small-Medium | 1-2 | P2 — Open source CMS |
+| 11e | `craft-remyx` (Craft CMS) | Small | 1 | P3 — Niche |
+| 11f | `@remyx/strapi` (Strapi) | Small | 1 | P2 — Headless CMS |
+| 11g | `ghost-remyx` (Ghost) | Small-Medium | 1-2 | P2 — Publishing platform |
+| 11h | `@remyx/shopify` (Shopify) | Small-Medium | 1-2 | P2 — E-commerce |
 
-**Total estimated effort:** 17-27 sessions
+**Total estimated effort:** 27-42 sessions
 
 ---
 
@@ -1125,6 +1153,30 @@ Each package should have:
 
 ---
 
+## CMS Integration Strategy
+
+All CMS integrations share a common approach:
+
+1. **Depend on `@remyx/vanilla`** — the `<remyx-editor>` Web Component provides a framework-agnostic drop-in
+2. **CMS-specific wrapper** — each integration provides the glue code for the CMS's editor API (registering as an editor, saving content, loading content, toolbar integration)
+3. **Theme inheritance** — CMS integrations pick up the Remyx theme system; admins can select a theme in the CMS config
+4. **Configuration** — each CMS integration exposes Remyx configuration through the CMS's native settings/admin UI
+
+### CMS-Specific Notes
+
+| CMS | Integration Point | Notes |
+| --- | --- | --- |
+| WordPress | Gutenberg block + Classic Editor `wp_editor` replacement | Uses `wp.element` for Gutenberg, Web Component for Classic |
+| Drupal | CKEditor replacement via Text Editor plugin API | Drupal 10/11 `editor.editor` plugin type |
+| Moodle | Atto editor plugin (`atto_remyx`) | PHP plugin with `lib.php`, JS AMD module |
+| Joomla | Editor plugin (`plg_editors_remyx`) | `onDisplay` method renders Web Component |
+| Craft CMS | Redactor field replacement | Craft field type class + asset bundle |
+| Strapi | Custom field plugin | Admin panel customization API |
+| Ghost | Koenig editor replacement card | Ghost Bookmarklet/card API |
+| Shopify | Liquid section + app extension | Theme app extension with Web Component |
+
+---
+
 ## How to Use This Plan
 
 Each step is designed to be executable in 1-3 sessions. To continue work:
@@ -1135,3 +1187,4 @@ Each step is designed to be executable in 1-3 sessions. To continue work:
 4. Verify the step passes its verification criteria before moving to the next
 
 Steps 1-3 must be done in order. Steps 4-8 can be done in any order after Step 3 is complete.
+Step 11 (CMS integrations) requires Step 7 (`@remyx/vanilla`) to be complete first.

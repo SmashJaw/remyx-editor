@@ -8,8 +8,8 @@ A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remy
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyx/core`](../remyx-core/) | 0.24.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyx/react`](./) | 0.24.0 | React components, hooks, and TypeScript declarations |
+| [`@remyx/core`](../remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](./) | 0.27.0 | React components, hooks, and TypeScript declarations |
 
 Use `@remyx/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
 

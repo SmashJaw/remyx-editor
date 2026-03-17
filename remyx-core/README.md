@@ -1275,17 +1275,13 @@ All styles use the `.rmx-` prefix and `--rmx-*` CSS custom properties. The style
 
 - **variables.css** — All CSS custom properties and their light-mode defaults
 - **light.css** — Light theme (default, auto-applied)
-- **dark.css** — Dark theme (applied via `.rmx-dark` class or `prefers-color-scheme: dark`)
+- **dark.css** — Dark theme
+- **ocean.css** — Deep blue palette
+- **forest.css** — Green earth-tone palette
+- **sunset.css** — Warm orange/amber palette
+- **rose.css** — Soft pink palette
 
-To force dark mode regardless of system preference:
-
-```css
-.rmx-editor {
-  color-scheme: dark;
-}
-```
-
-Or add the `.rmx-dark` class to the editor wrapper.
+Each theme is a self-contained `.rmx-theme-{name}` class with complete variable overrides, content styles, code editor colors, and syntax token palettes. Apply a theme by adding the class to the editor wrapper or using `@remyx/react`'s `theme` prop.
 
 ## Building Framework Wrappers
 

@@ -40,8 +40,13 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 14 | Form submit listener accumulation | Low | ✅ | react | `usePortalAttachment.js` |
 | 15 | Stale selection offset in `restore()` | Low | ✅ | core | `Selection.js` |
 | 16 | Unused `sourceMode` state variable | Low | ✅ | react | `RemyxEditor.jsx` |
+| 140 | Clipboard file upload race condition (multi-file) | High | 🔲 | core | `Clipboard.js` |
+| 141 | `splitCell` wrong column in multi-row tables | High | 🔲 | core | `tables.js` |
+| 142 | `useAutosave` stale `onRecover` closure | Medium | 🔲 | react | `useAutosave.js` |
+| 143 | History stale snapshot comparison (whitespace) | Medium | 🔲 | core | `History.js` |
+| 144 | `useRemyxEditor` form submit listener leak on DOM removal | Medium | 🔲 | react | `useRemyxEditor.js` |
 
-**16 resolved, 0 open.**
+**16 resolved, 5 open.**
 
 ---
 
@@ -80,8 +85,13 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 45 | Weak randomness for element IDs | Info | ✅ Documented | core | `dom.js` |
 | 46 | Pin third-party dependency versions | Medium | 🔲 | core | `package.json` |
 | 47 | Source mode sanitization notification | Low | 🔲 | react | — |
+| 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | High | 🔲 | core | `AutolinkPlugin.js` |
+| 146 | LinkModal protocol blacklist incomplete (XSS bypass) | High | 🔲 | react | `LinkModal.jsx` |
+| 147 | ImageModal allows `data:image/svg+xml` XSS | Medium | 🔲 | react | `ImageModal.jsx` |
+| 148 | `Selection.insertHTML()` has no caller guardrail | Medium | 🔲 | core | `Selection.js` |
+| 149 | CLI project name allows path traversal | Medium | 🔲 | cli | `create/index.js` |
 
-**27 resolved, 3 open.**
+**27 resolved, 8 open.**
 
 ---
 
@@ -133,8 +143,16 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 89 | Version mismatch — `@remyx/core` devDep | Low | ✅ | react | Updated to 0.24.0 |
 | 90 | Missing React hook test coverage | Low | 🔲 | react | Needs `@testing-library/react-hooks` |
 | 91 | Missing React component test coverage | Low | 🔲 | react | Needs full rendering setup |
+| 150 | Inconsistent modal error handling UX | Medium | 🔲 | react | All modal components |
+| 151 | FloatingToolbar magic numbers for positioning | Low | 🔲 | react | `FloatingToolbar.jsx` |
+| 152 | Missing PropTypes on ContextMenu component | Low | 🔲 | react | `ContextMenu.jsx` |
+| 153 | CLI hardcoded version string (`v0.24.0`) | Low | 🔲 | cli | `create/index.js` |
+| 154 | CLI hardcoded dependency versions in scaffolded `package.json` | Low | 🔲 | cli | `create/index.js` |
+| 155 | CLI `copyDir` lacks error handling | Low | 🔲 | cli | `create/index.js` |
+| 156 | CLI theme injection overly broad string replace | Low | 🔲 | cli | `create/index.js` |
+| 157 | Deprecated `create-remyx` package still has `bin` entry | Low | 🔲 | cli | `create-remyx/package.json` |
 
-**89 resolved, 2 open.**
+**89 resolved, 10 open.**
 
 ---
 
@@ -190,8 +208,16 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 137 | Propagate EventBus handler errors | Low | 🔲 | core | Better DX |
 | 138 | Consolidate `useEditorRect` listeners | Low | 🔲 | react | Fewer layout reads |
 | 139 | Reduce `useCallback` overhead in MenuBar | Low | 🔲 | react | ~20 fewer hook calls |
+| 158 | AutolinkPlugin triple regex on same text | Medium | 🔲 | core | ~60–80% CPU reduction |
+| 159 | `useSelection` handler not memoized with `useCallback` | Medium | 🔲 | react | Fewer re-renders |
+| 160 | CommandPalette rebuilds full command list on engine change | Medium | 🔲 | react | Cache command list |
+| 161 | CodeEditor re-highlights on every keystroke (no debounce) | Medium | 🔲 | react | Major perf win for long code |
+| 162 | TablePickerModal recreates 10×10 grid every render | Medium | 🔲 | react | Memoize grid or event delegation |
+| 163 | StatusBar `wordcount:update` triggers re-render on same values | Low | 🔲 | react | Shallow compare counts |
+| 164 | `useEditorRect` re-attaches listeners on `ready` toggle | Low | 🔲 | react | Remove `ready` from deps |
+| 165 | ModalOverlay focus trap recalculates on every Tab keystroke | Low | 🔲 | react | Cache on modal open |
 
-**21 resolved, 27 open.**
+**21 resolved, 35 open.**
 
 ---
 
@@ -199,11 +225,11 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 
 | Category | Total | Done | Open |
 |----------|-------|------|------|
-| Bugs | 16 | 16 | 0 |
-| Security | 31 | 27 | 3 |
-| Cleanup | 44 | 42 | 2 |
-| Optimizations | 48 | 21 | 27 |
-| **Total** | **139** | **106** | **32** |
+| Bugs | 21 | 16 | 5 |
+| Security | 36 | 27 | 8 |
+| Cleanup | 52 | 42 | 10 |
+| Optimizations | 56 | 21 | 35 |
+| **Total** | **165** | **106** | **58** |
 
 ---
 
@@ -212,6 +238,10 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 ### High
 | # | Title | Category |
 |---|-------|----------|
+| 140 | Clipboard file upload race condition (multi-file) | BUG |
+| 141 | `splitCell` wrong column in multi-row tables | BUG |
+| 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | SEC |
+| 146 | LinkModal protocol blacklist incomplete (XSS bypass) | SEC |
 | 110 | Replace `selectionState` prop drilling with Context | OPT |
 | 112 | WeakMap DOM caching in `useSelection` | OPT |
 | 119 | Memoize `useResolvedConfig` return value | OPT |
@@ -228,8 +258,15 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 ### Medium
 | # | Title | Category |
 |---|-------|----------|
+| 142 | `useAutosave` stale `onRecover` closure | BUG |
+| 143 | History stale snapshot comparison (whitespace) | BUG |
+| 144 | `useRemyxEditor` form submit listener leak on DOM removal | BUG |
 | 39 | Async file upload race condition | SEC |
 | 46 | Pin third-party dependency versions | SEC |
+| 147 | ImageModal allows `data:image/svg+xml` XSS | SEC |
+| 148 | `Selection.insertHTML()` has no caller guardrail | SEC |
+| 149 | CLI project name allows path traversal | SEC |
+| 150 | Inconsistent modal error handling UX | CLN |
 | 113 | Granular sub-exports for tree-shaking | OPT |
 | 114 | Split icon bundle into lazy chunks | OPT |
 | 115 | Event delegation for document-level listeners | OPT |
@@ -240,6 +277,11 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 133 | Block autosave init until recovery check | OPT |
 | 134 | Audit unused CSS rules | OPT |
 | 135 | `contain: layout style` on editor root | OPT |
+| 158 | AutolinkPlugin triple regex on same text | OPT |
+| 159 | `useSelection` handler not memoized with `useCallback` | OPT |
+| 160 | CommandPalette rebuilds full command list on engine change | OPT |
+| 161 | CodeEditor re-highlights on every keystroke (no debounce) | OPT |
+| 162 | TablePickerModal recreates 10×10 grid every render | OPT |
 
 ### Low
 | # | Title | Category |
@@ -247,8 +289,18 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 47 | Source mode sanitization notification | SEC |
 | 90 | Missing React hook test coverage | CLN |
 | 91 | Missing React component test coverage | CLN |
+| 151 | FloatingToolbar magic numbers for positioning | CLN |
+| 152 | Missing PropTypes on ContextMenu component | CLN |
+| 153 | CLI hardcoded version string (`v0.24.0`) | CLN |
+| 154 | CLI hardcoded dependency versions in scaffolded `package.json` | CLN |
+| 155 | CLI `copyDir` lacks error handling | CLN |
+| 156 | CLI theme injection overly broad string replace | CLN |
+| 157 | Deprecated `create-remyx` package still has `bin` entry | CLN |
 | 117 | FileReader progress for large images | OPT |
 | 136 | Prevent duplicate EventBus handlers | OPT |
 | 137 | Propagate EventBus handler errors | OPT |
 | 138 | Consolidate `useEditorRect` listeners | OPT |
 | 139 | Reduce `useCallback` overhead in MenuBar | OPT |
+| 163 | StatusBar `wordcount:update` triggers re-render on same values | OPT |
+| 164 | `useEditorRect` re-attaches listeners on `ready` toggle | OPT |
+| 165 | ModalOverlay focus trap recalculates on every Tab keystroke | OPT |

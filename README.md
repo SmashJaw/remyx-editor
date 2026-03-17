@@ -10,7 +10,7 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Markdown support** — Toggle between WYSIWYG and Markdown editing, paste Markdown and have it auto-converted, export as Markdown
 - **Configurable toolbar** — 4 built-in presets (full, standard, minimal, bare), add/remove items, group separators, per-item theming
 - **Menu bar** — Hierarchical menus (File, Edit, Insert, Format, View) with keyboard navigation and WAI-ARIA patterns
-- **Theming** — Light/dark modes via CSS custom properties, 4 color presets (ocean, forest, sunset, rose), fully customizable
+- **Theming** — 6 built-in themes (`light`, `dark`, `ocean`, `forest`, `sunset`, `rose`) via a single `theme` prop, fully customizable with CSS custom properties
 - **Plugin system** — `createPlugin()` with init/destroy lifecycle, custom commands, toolbar/status-bar/context-menu items, sandboxed API
 - **File uploads** — Paste or drag-and-drop images, configurable upload handler, file size limits
 - **Document import/export** — Import PDF, DOCX, Markdown, HTML, TXT, CSV, TSV, RTF; export to PDF, DOCX, Markdown
@@ -28,9 +28,9 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyx/core`](./remyx-core/) | 0.25.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyx/react`](./remyx-react/) | 0.25.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
-| [`create-remyx`](./create-remyx/) | 0.25.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
+| [`@remyx/core`](./remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyx/react`](./remyx-react/) | 0.27.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyx/core`) |
+| [`create-remyx`](./create-remyx/) | 0.27.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 
@@ -44,6 +44,7 @@ npx create-remyx-app my-editor
 
 You'll be prompted to pick:
 - **Language**: JavaScript (JSX) or TypeScript (TSX)
+- **Theme**: Light, Dark, Ocean, Forest, Sunset, or Rose
 - **PDF/DOCX import**: include or skip heavy document dependencies (~5 MB)
 
 ### Which package should I use?
@@ -255,7 +256,7 @@ npm run build:all
 npm run build:core
 npm run build:react
 
-# Run tests (815 unit tests)
+# Run tests (857 unit tests)
 npm test
 
 # Run tests in watch mode
@@ -290,7 +291,7 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 | [@remyx/core README](./remyx-core/README.md) | Full API — engine, commands, plugins, selection, history, sanitizer, theming, toolbar config, utilities |
 | [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, architecture, adding commands/plugins, PR process |
 | [CHANGELOG.md](./docs/CHANGELOG.md) | Version history and release notes |
-| [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, create-remyx CLI wizard |
+| [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard |
 | [NX.md](./docs/NX.md) | Nx monorepo management — build, version, publish, caching, affected commands |
 | [BENCHMARK.md](./docs/BENCHMARK.md) | Build, bundle, test, and lint performance metrics |
 | [PLANNED_PACKAGES.md](./docs/PLANNED_PACKAGES.md) | Multi-package restructure plan and progress |
