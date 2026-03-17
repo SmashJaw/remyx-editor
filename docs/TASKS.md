@@ -104,7 +104,7 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 50 | Core engine tests | High | ✅ | core | EditorEngine, commands, sanitizer, history, plugins, utils |
 | 51 | React hook tests | High | ✅ | react | useContextMenu, useEditorEngine, etc. |
 | 52 | React component tests | High | ✅ | react | RemyxEditor rendering tests |
-| 53 | E2E tests | High | ✅ | all | 8 Playwright spec files |
+| 53 | ~~E2E tests~~ | High | 🔲 | all | Removed (no production web server); revisit later |
 | 54 | Package metadata (`description`, `keywords`, etc.) | High | ✅ | core/react | Both packages updated |
 | 55 | Add `sideEffects` field | High | ✅ | core/react | `["*.css"]` for core, `false` for react |
 | 56 | Add `tsconfig.json` | High | ✅ | all | Root tsconfig, `npm run typecheck` |

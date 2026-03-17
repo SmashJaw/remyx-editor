@@ -2,8 +2,8 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 0.26.0
-**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), autosave with pluggable storage, command palette
+**Current Version:** 0.27.0
+**Status:** Multi-package architecture complete (`@remyx/core` + `@remyx/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor.
 
@@ -29,6 +29,15 @@ A living document outlining planned features, improvements, and long-term direct
 - `AutosaveManager` class + 5 storage providers in `@remyx/core`
 - `useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyx/react`
 - `autosave` prop on `RemyxEditor` (boolean or config object)
+
+## ~~Unified Theme System~~ ✅ Shipped (v0.27.0)
+
+- ~~6 built-in themes via single `theme` prop: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`~~
+- ~~Each theme is a self-contained CSS class (`.rmx-theme-{name}`) with full variable overrides, content styles, code editor colors, and syntax token palettes~~
+- ~~`customTheme` prop for per-instance CSS variable overrides on top of any theme~~
+- ~~`createTheme()` helper for camelCase-to-CSS-variable conversion~~
+- ~~TypeScript declarations updated across all type locations~~
+- Custom theme authoring guide / theme builder tool
 
 ## Enhanced Tables & Spreadsheet Features
 
@@ -154,40 +163,51 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~Keyboard navigation, hover-to-switch, escape-to-close~~
 - ~~Dark/light/custom theme support~~
 
-## Security Hardening
+## ~~Security Hardening~~ ✅ Mostly Shipped (v0.24.0)
 
-- Sanitizer: extend dangerous-protocol checking to `src`, `action`, `formaction`, and `data` attributes
+- ~~Sanitizer: extend dangerous-protocol checking to `src`, `action`, `formaction`, and `data` attributes~~
 - Sanitizer: domain allowlist for iframe `src` (YouTube, Vimeo, Dailymotion only)
-- Sanitizer: explicit `on*` event handler blocklist as defense-in-depth
-- Sanitizer: fully remove dangerous tags (`script`, `style`, `svg`, `math`, `form`, `object`, `embed`) instead of unwrapping
-- Sanitizer: restrict `<input>` to `type="checkbox"` only
-- Markdown parser: set `html: false` to block raw HTML injection
-- URL protocol validation on `insertLink`, `insertImage`, and `window.open` calls
-- Data URI validation: block `image/svg+xml` data URIs
-- Iframe `sandbox` attribute on embedded media
-- File size limits on pasted/dropped images (configurable, 10 MB default)
-- Plugin sandboxing: restricted engine facade, prevent command overwriting
+- ~~Sanitizer: explicit `on*` event handler blocklist as defense-in-depth~~
+- ~~Sanitizer: fully remove dangerous tags (`script`, `style`, `svg`, `math`, `form`, `object`, `embed`) instead of unwrapping~~
+- ~~Sanitizer: restrict `<input>` to `type="checkbox"` only~~
+- ~~Markdown parser: set `html: false` to block raw HTML injection~~
+- ~~URL protocol validation on `insertLink`, `insertImage`, and `window.open` calls~~
+- ~~Data URI validation: block `image/svg+xml` data URIs~~
+- ~~Iframe `sandbox` attribute on embedded media~~
+- ~~File size limits on pasted/dropped images (configurable, 10 MB default)~~
+- ~~Plugin sandboxing: restricted engine facade, prevent command overwriting~~
 - CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies
 - Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)
-- Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal
-- See [TASKS.md](./TASKS.md) for the full audit report and remediation priorities
+- ~~Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal~~
+- See [TASKS.md](./TASKS.md) for the full audit report and remaining items
 
 ## create-remyx CLI
 
-Interactive CLI tool to help users build custom WYSIWYG editors with the right configuration for their use case.
+Interactive CLI tools for scaffolding Remyx Editor projects.
 
-- `npx create-remyx` launches a guided setup wizard
+### `create-remyx-app` — ✅ Shipped (v0.25.0, enhanced v0.27.0)
+
+Quick project scaffolding via `npx create-remyx-app`:
+
+- ~~Project name prompt~~
+- ~~Language: JavaScript (JSX) or TypeScript (TSX)~~
+- ~~Theme selection: Light, Dark, Ocean, Forest, Sunset, Rose~~ (v0.27.0)
+- ~~Optional PDF/DOCX import (mammoth + pdfjs-dist)~~
+- ~~Vite-based project with `@remyx/core` + `@remyx/react`~~
+- ~~Post-scaffold instructions: install, dev, build~~
+
+### `create-remyx` — Planned (advanced wizard)
+
+Full-featured interactive wizard via `npx create-remyx`:
+
 - Pick a framework: React, Vue, Svelte, Angular, or Vanilla JS
 - Choose features: toolbar layout, menu bar, status bar, floating toolbar, context menu
 - Select plugins: word count, autolink, placeholder, code highlighting, math, comments
-- Configure theme: light, dark, or custom with live preview of theme variables
+- Configure theme with live preview of theme variables
 - Pick document formats: HTML output, Markdown output, or both
-- Optional add-ons: PDF/DOCX import, image upload handler scaffold, collaboration stub
-- Generate a ready-to-run project with Vite, framework bindings, and all selected options pre-configured
+- Optional add-ons: image upload handler scaffold, collaboration stub
 - Output a `remyx.config.js` (or `.ts`) with the full `defineConfig()` setup
-- TypeScript or JavaScript scaffolding based on user preference
 - Template variants: minimal (bare editor), standard (toolbar + status bar), full-featured (all UI chrome)
-- Post-scaffold instructions: install, dev, build, and deploy
 - Plugin authoring mode: `npx create-remyx --plugin` scaffolds a plugin package with `createPlugin()` boilerplate, test setup, and build config
 
 ## External Configuration
@@ -373,48 +393,47 @@ Interactive CLI tool to help users build custom WYSIWYG editors with the right c
 
 ## Build & DevOps
 
-- Nx monorepo integration (see above) — task orchestration, caching, affected commands
-- GitHub Actions CI pipeline: build → lint → test on every PR, with Nx-powered caching
+- ~~Nx monorepo integration — task orchestration, caching, affected commands~~
+- ~~GitHub Actions CI pipeline: build → lint → test on every push/PR~~
 - Automated npm publishing via `nx release` on tagged commits
-- Pre-commit hooks (Husky + lint-staged) for consistent code quality
+- ~~Pre-commit hooks (Husky + lint-staged) for consistent code quality~~
 - Bundle size tracking: fail CI if any package exceeds its size budget
 - Automated dependency updates (Renovate or Dependabot) with auto-merge for passing patch bumps
 
 ## Quality Improvements
 
-- Comprehensive unit test suite (Vitest) for engine, commands, sanitizer, and converters
-- End-to-end tests (Playwright) covering toolbar interactions, paste, drag-and-drop, and modals
+- ~~Comprehensive unit test suite (Jest) for engine, commands, sanitizer, and converters~~ — 857 tests across 45 files
+- ~~End-to-end tests (Playwright)~~ — Removed; the repo does not serve a production web server. Will revisit when a hosted demo is available.
 - Visual regression tests for theme and layout stability
-- Accessibility audit: full WCAG 2.1 AA compliance, screen reader testing, keyboard navigation
+- ~~Accessibility: WAI-ARIA menu pattern, focus trapping, skip navigation, `baseHeadingLevel`~~
 - RTL (right-to-left) language support with `dir="rtl"` auto-detection
 - Internationalization (i18n): externalized strings, locale packs, pluralization
 - Improved undo/redo with operation coalescing (batch rapid keystrokes into a single undo step)
 - Better large-document performance: virtualized rendering for 10k+ paragraph documents
 - Print stylesheet for clean printed output
 - Cross-browser testing matrix: Chrome, Firefox, Safari, Edge (latest 2 versions)
-- Content Security Policy (CSP) compatibility — no inline styles or eval required
-- XSS-hardened sanitizer with configurable allowlists and deny-by-default
-- Graceful degradation: core editing works without JavaScript features like Web Workers
-- Error boundaries: editor never crashes the host app — isolates and reports errors via `onError` callback
+- ~~XSS-hardened sanitizer with configurable allowlists and deny-by-default~~
+- ~~Error boundaries: `EditorErrorBoundary` wraps the editor, `onError` callback for error reporting~~
 - Automated performance benchmarks: track keystroke latency, paste speed, and render time per release
 
 ## Performance Optimizations
 
-- Tree-shakeable ESM build — import only what you use
-- Code-split heavy features (PDF import, markdown, syntax highlighting) behind dynamic `import()`
+- ~~Tree-shakeable ESM build — import only what you use~~
+- ~~Code-split heavy features (PDF import, DOCX, document converters) behind dynamic `import()`~~
+- ~~Memoized toolbar rendering — `React.memo` + `shallowEqual` bail-out on selection state~~
+- ~~Terser minification with `drop_console` and `drop_debugger`~~
+- ~~Lazy-loaded modals — all 9 modals deferred via `React.lazy` (~20–30 KB)~~
+- ~~PDF/DOCX opt-in — `mammoth` and `pdfjs-dist` as optional peer deps~~
 - Reduce initial bundle size to < 50 KB gzipped for the core editor
-- Memoized toolbar rendering — skip re-renders when selection state hasn't changed
 - Batch DOM mutations with `requestAnimationFrame` for smoother typing
 - Web Worker offloading for expensive operations (sanitization, markdown parsing, document conversion)
-- Profiled and optimized hot paths: keystroke handling, selection polling, content serialization
 - Lighthouse performance score target: 95+
-- Incremental DOM diffing: only re-render changed portions of the document tree
 - Idle-time processing: defer non-critical work (word count, readability scores) to `requestIdleCallback`
-- Memory pooling for frequently created/destroyed objects (selections, ranges, format state)
 - Virtualized rendering for long documents: only mount visible blocks in the DOM
 - Lazy plugin loading: plugins initialize on first use, not on editor mount
 - Compressed undo history: store diffs instead of full snapshots to reduce memory usage
 - Input batching: coalesce rapid keystrokes into single DOM updates to eliminate layout thrash
+- See [TASKS.md](./TASKS.md) for the full optimization inventory (48 items, 21 complete)
 
 ---
 

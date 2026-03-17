@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [Unreleased]
+
+### Removed
+
+- **Playwright e2e test suite** — Removed `playwright.config.js`, `e2e/` directory (8 spec files), and `@playwright/test` dependency. The root repo does not serve a production web server; e2e tests will be revisited when needed.
+- **Duplicate config files in `packages/`** — Removed `babel.config.js`, `eslint.config.js`, `jest.config.js`, and `tsconfig.json` from `packages/`. All tooling (lint, test, typecheck) now runs from the repo root only.
+- **Redundant `packages/` devDependencies** — Stripped `packages/package.json` to only Nx and build/release scripts. Testing, linting, and type-checking deps live at the repo root.
+
+### Changed
+
+- **CONTRIBUTING.md** — Updated development workflow to clarify that lint, test, and typecheck commands run from the repo root, while build commands run from `packages/`.
+
+---
+
 ## [0.27.0] — 2026-03-16
 
 ### Added
@@ -25,6 +39,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - **Autosave timing reactivity** — `useAutosave` hook now includes `configKey`, `configInterval`, `configDebounce`, and `configProvider` in its `useEffect` dependency array, so runtime changes to autosave timing props take effect without remounting.
+- **Clipboard multi-file race condition** — Serialized async `convertDocument` calls with a promise chain to prevent interleaved `insertHTML` when pasting multiple document files.
+- **`splitCell` wrong column in multi-row tables** — Pre-compute visual column index once from the original row and walk subsequent rows with a colSpan-aware accumulator to find the correct insertion point.
+- **`useAutosave` stale `onRecover` closure** — Replaced closure capture with a `useRef` so the latest `onRecover` callback is always called, even if the parent re-renders.
+- **History stale snapshot comparison** — Normalize whitespace before comparing snapshots to catch browser-induced `&nbsp;` ↔ space changes that produce visually identical content.
+- **`useRemyxEditor` form submit listener leak** — Store `form` and `syncToTextarea` in refs so cleanup always removes the listener, even if the DOM is removed before React unmount.
 
 ---
 
@@ -43,10 +62,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **Command Palette** — Searchable overlay listing all editor commands, organized by category (Text, Lists, Media, Layout, Advanced). Open via `Mod+Shift+P` keyboard shortcut or the new `commandPalette` toolbar button. Supports fuzzy search across labels, descriptions, and keywords. Includes `SLASH_COMMAND_ITEMS` catalog (19 built-in commands) and `filterSlashItems()` utility exported from `@remyx/core`. New `commandPalette` prop on `RemyxEditor` (default `true`).
 - **Comprehensive Jest test suite** — 42 test files with 815 tests covering core engine, commands (16 modules), plugins (4), utilities (5), React hooks (4), React components (2), and config provider (1). Migrated from Vitest to Jest for consistent tooling.
-- **Playwright e2e test suite** — 8 spec files covering editor basics, formatting, toolbar, keyboard shortcuts, themes, accessibility, fullscreen, and modals.
+- **Playwright e2e test suite** — 8 spec files covering editor basics, formatting, toolbar, keyboard shortcuts, themes, accessibility, fullscreen, and modals. *(Removed in a later release — see [Unreleased].)*
 - **Unit test coverage** — Statements 82.85%, Branches 74.11%, Functions 77.41%, Lines 85.21% (up from ~67%).
-- **Coverage HTML reports** — Unit coverage at `coverage/unit/index.html`, e2e report at `coverage/e2e/`.
-- **New test scripts** — `npm test`, `npm run test:watch`, `npm run test:coverage`, `npm run e2e`, `npm run e2e:report`.
+- **Coverage HTML reports** — Unit coverage at `coverage/unit/index.html`.
+- **New test scripts** — `npm test`, `npm run test:watch`, `npm run test:coverage`.
 - **BENCHMARK.md** — Performance benchmark document covering build times, bundle sizes, test speed, lint speed, code-split chunk inventory, and improvement opportunities.
 
 ### Changed
@@ -54,7 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Scaffolding moved to `@remyx/react`** — Project scaffolding CLI relocated from `create-remyx` to `@remyx/react/create/` and renamed to `create-remyx-app` (`npx create-remyx-app`). The `create-remyx` package is now reserved for a future interactive CLI wizard.
 - **`create-remyx` repurposed** — Gutted scaffolding code; package now displays a redirect message. Will become an interactive editor configuration wizard (see ROADMAP.md).
 - **Test runner migrated from Vitest to Jest** — All existing tests converted from `vi.*` to `jest.*` API. Added `jest.config.js` and `babel.config.js` for JSX transform and module resolution.
-- **CONTRIBUTING.md updated** — Testing section now documents Jest and Playwright workflows, test structure, and writing guidelines.
+- **CONTRIBUTING.md updated** — Testing section now documents Jest workflows, test structure, and writing guidelines.
 - **History test fix** — Corrected undo test assertion that expected wrong state after single undo step.
 - **Root package.json version** — Updated from 0.23.0 to 0.24.0 to match all sub-packages.
 - **`@remyx/react` peerDependencies** — `@remyx/core` constraint updated from `>=0.23.4` to `>=0.24.0`.
