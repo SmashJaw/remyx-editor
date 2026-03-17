@@ -95,15 +95,14 @@ function App() {
 ### Add a theme
 
 ```jsx
-import { THEME_PRESETS } from '@remyx/core';
-
 <RemyxEditor
   value={content}
   onChange={setContent}
-  theme={THEME_PRESETS.ocean}
-  darkMode={true}
+  theme="ocean"
 />
 ```
+
+Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
 
 ### Handle file uploads
 
@@ -295,10 +294,7 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 | [NX.md](./docs/NX.md) | Nx monorepo management — build, version, publish, caching, affected commands |
 | [BENCHMARK.md](./docs/BENCHMARK.md) | Build, bundle, test, and lint performance metrics |
 | [PLANNED_PACKAGES.md](./docs/PLANNED_PACKAGES.md) | Multi-package restructure plan and progress |
-| [BUGS.md](./docs/BUGS.md) | Known bugs and resolution status |
-| [SECURITY.md](./docs/SECURITY.md) | Security audit findings and remediation status |
-| [CLEANUP.md](./docs/CLEANUP.md) | Cleanup tasks and technical debt |
-| [OPTIMIZATION.md](./docs/OPTIMIZATION.md) | Bundle size and runtime performance roadmap |
+| [TASKS.md](./docs/TASKS.md) | All bugs, security fixes, cleanup items, and optimizations (numbered reference) |
 
 ## License
 

@@ -164,7 +164,7 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 | `outputFormat` | `'html' \| 'markdown'` | `'html'` | Format passed to `onChange` |
 | `toolbar` | `string[][]` | Full toolbar | Custom toolbar layout |
 | `menuBar` | `boolean \| MenuBarConfig[]` | — | Enable menu bar |
-| `theme` | `'light' \| 'dark'` | `'light'` | Editor theme |
+| `theme` | `'light' \| 'dark' \| 'ocean' \| 'forest' \| 'sunset' \| 'rose'` | `'light'` | Editor theme |
 | `placeholder` | `string` | `''` | Placeholder text |
 | `height` | `number` | `300` | Editor height in px |
 | `minHeight` | `number` | — | Minimum height |
@@ -569,13 +569,23 @@ Or pass raw CSS variables directly:
 
 ### Theme Presets
 
-```jsx
-import { THEME_PRESETS } from '@remyx/react';
+All 6 built-in themes are available via the `theme` prop:
 
-<RemyxEditor theme="dark" customTheme={THEME_PRESETS.ocean} />
-<RemyxEditor theme="dark" customTheme={THEME_PRESETS.forest} />
-<RemyxEditor theme="dark" customTheme={THEME_PRESETS.sunset} />
-<RemyxEditor theme="dark" customTheme={THEME_PRESETS.rose} />
+```jsx
+<RemyxEditor theme="light" />   {/* Default — clean white */}
+<RemyxEditor theme="dark" />    {/* Neutral dark */}
+<RemyxEditor theme="ocean" />   {/* Deep blue */}
+<RemyxEditor theme="forest" />  {/* Green earth-tone */}
+<RemyxEditor theme="sunset" />  {/* Warm orange/amber */}
+<RemyxEditor theme="rose" />    {/* Soft pink */}
+```
+
+Override individual variables on top of any theme with `customTheme`:
+
+```jsx
+import { createTheme } from '@remyx/react';
+
+<RemyxEditor theme="ocean" customTheme={createTheme({ primary: '#ff6b6b' })} />
 ```
 
 ### Available Theme Variables

@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.27.0] — 2026-03-16
+
+### Added
+
+- **Unified theme system** — All 6 themes (`light`, `dark`, `ocean`, `forest`, `sunset`, `rose`) are now first-class CSS class themes set via a single `theme` prop. Previously `ocean`/`forest`/`sunset`/`rose` required the separate `customTheme` prop with inline CSS variable objects; they are now self-contained `.rmx-theme-{name}` stylesheets matching the `dark.css` pattern. Each theme file includes complete variable overrides, content styles (code blocks, blockquotes, tables, find highlights, links, images), code editor colors, and syntax token palettes. The `customTheme` prop remains available for per-instance overrides on top of any theme.
+- **Theme CSS files** — New `ocean.css`, `forest.css`, `sunset.css`, `rose.css` in `@remyx/core/src/themes/`.
+- **CLI theme selection** — `create-remyx-app` now prompts users to choose a theme (Light, Dark, Ocean, Forest, Sunset, Rose) during project scaffolding. The selected theme is injected into the generated `App.jsx`/`App.tsx`.
+
+### Changed
+
+- **`theme` prop type expanded** — Updated TypeScript declarations from `'light' | 'dark'` to `'light' | 'dark' | 'ocean' | 'forest' | 'sunset' | 'rose' | (string & {})` across all 3 type locations.
+- **`THEME_PRESETS` docs updated** — JSDoc now recommends `theme="ocean"` over `customTheme={THEME_PRESETS.ocean}`.
+- **READMEs updated** — `packages/README.md`, `packages/remyx-core/README.md`, and `packages/remyx-react/README.md` reflect the unified theme prop and list all 6 built-in themes.
+
+### Fixed
+
+- **Autosave timing reactivity** — `useAutosave` hook now includes `configKey`, `configInterval`, `configDebounce`, and `configProvider` in its `useEffect` dependency array, so runtime changes to autosave timing props take effect without remounting.
+
+---
+
 ## [0.26.0] — 2026-03-16
 
 ### Added
@@ -41,7 +61,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-- **Audit fixes (commit 08d7117)** — Fixed 6 bugs, 26 security issues, 15 cleanup items, and 4 optimizations documented in BUGS.md, SECURITY.md, CLEANUP.md, and OPTIMIZATION.md.
+- **Audit fixes (commit 08d7117)** — Fixed 6 bugs, 26 security issues, 15 cleanup items, and 4 optimizations documented in TASKS.md.
 
 ---
 

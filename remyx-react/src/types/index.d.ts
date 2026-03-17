@@ -205,7 +205,7 @@ export interface RemyxEditorProps {
   outputFormat?: 'html' | 'markdown'
   toolbar?: string[][]
   menuBar?: boolean | MenuBarConfig[]
-  theme?: 'light' | 'dark'
+  theme?: 'light' | 'dark' | 'ocean' | 'forest' | 'sunset' | 'rose' | (string & {})
   placeholder?: string
   height?: number
   minHeight?: number
@@ -249,7 +249,7 @@ export interface UseRemyxEditorOptions {
   onChange?: (content: string) => void
   outputFormat?: 'html' | 'markdown'
   placeholder?: string
-  theme?: 'light' | 'dark'
+  theme?: 'light' | 'dark' | 'ocean' | 'forest' | 'sunset' | 'rose' | (string & {})
   height?: number
   readOnly?: boolean
   plugins?: Plugin[]
@@ -275,7 +275,7 @@ export declare function useEditorEngine(
 // ── Config Provider ───────────────────────────────────────────────
 
 export interface RemyxConfig {
-  theme?: 'light' | 'dark'
+  theme?: 'light' | 'dark' | 'ocean' | 'forest' | 'sunset' | 'rose' | (string & {})
   placeholder?: string
   height?: number
   toolbar?: string[][]

@@ -2,8 +2,18 @@ import { createTheme } from './themeConfig.js'
 
 /**
  * Built-in theme presets.
- * Each preset is a CSS custom property object ready to pass to `customTheme`.
- * They layer on top of the base `theme` (light or dark).
+ *
+ * **Recommended:** Use the `theme` prop directly instead of `customTheme`:
+ * ```jsx
+ * <RemyxEditor theme="ocean" />
+ * <RemyxEditor theme="forest" />
+ * ```
+ *
+ * These presets are also available as CSS custom property objects for use with
+ * `customTheme` when you need to override individual variables on top of a theme:
+ * ```jsx
+ * <RemyxEditor theme="ocean" customTheme={createTheme({ primary: '#ff0000' })} />
+ * ```
  */
 export const THEME_PRESETS = {
   /** Deep blue ocean palette */

@@ -54,7 +54,22 @@ async function main() {
   const useTypeScript = langChoice === '2'
   const variant = useTypeScript ? 'typescript' : 'jsx'
 
-  // 3. Install heavy optional deps?
+  // 3. Theme
+  console.log()
+  console.log(bold('  Theme:'))
+  console.log(`    ${cyan('1.')} Light  ${dim('— clean white (default)')}`)
+  console.log(`    ${cyan('2.')} Dark   ${dim('— neutral dark')}`)
+  console.log(`    ${cyan('3.')} Ocean  ${dim('— deep blue')}`)
+  console.log(`    ${cyan('4.')} Forest ${dim('— green earth-tone')}`)
+  console.log(`    ${cyan('5.')} Sunset ${dim('— warm orange / amber')}`)
+  console.log(`    ${cyan('6.')} Rose   ${dim('— soft pink')}`)
+  console.log()
+  const themeChoice = await ask(bold('  Choose (1-6): ') + dim('(1) '))
+  const themeNames = ['light', 'dark', 'ocean', 'forest', 'sunset', 'rose']
+  const themeIndex = parseInt(themeChoice, 10)
+  const selectedTheme = themeNames[(themeIndex >= 1 && themeIndex <= 6) ? themeIndex - 1 : 0]
+
+  // 4. Install heavy optional deps?
   console.log()
   console.log(bold('  Optional features:'))
   console.log(`    PDF & DOCX import requires ${dim('pdfjs-dist')} and ${dim('mammoth')} (~5 MB)`)
@@ -72,9 +87,9 @@ async function main() {
   console.log(`  ${bold('Scaffolding')} ${cyan(projectName)} ...`)
   console.log()
 
-  // Copy template
+  // Copy template (inject selected theme into App source)
   const templateDir = join(__dirname, 'templates', variant)
-  copyDir(templateDir, targetDir)
+  copyDir(templateDir, targetDir, { theme: selectedTheme })
 
   // Write package.json
   const pkg = buildPackageJson(projectName, useTypeScript, includeDocs)
@@ -102,6 +117,7 @@ async function main() {
   } else {
     console.log(dim(`  Tip: switch to TypeScript later by renaming .jsx -> .tsx and adding tsconfig.json`))
   }
+  console.log(dim(`  Theme: ${selectedTheme} — change anytime via the theme prop`))
   console.log()
 }
 
@@ -150,13 +166,18 @@ function buildPackageJson(name, useTypeScript, includeDocs) {
   return pkg
 }
 
-function copyDir(src, dest) {
+function copyDir(src, dest, opts = {}) {
   mkdirSync(dest, { recursive: true })
   for (const entry of readdirSync(src)) {
     const srcPath = join(src, entry)
     const destPath = join(dest, entry)
     if (statSync(srcPath).isDirectory()) {
-      copyDir(srcPath, destPath)
+      copyDir(srcPath, destPath, opts)
+    } else if (opts.theme && /\.(jsx|tsx)$/.test(entry)) {
+      // Inject selected theme into React source files
+      let content = readFileSync(srcPath, 'utf-8')
+      content = content.replace('theme="light"', `theme="${opts.theme}"`)
+      writeFileSync(destPath, content)
     } else {
       writeFileSync(destPath, readFileSync(srcPath))
     }

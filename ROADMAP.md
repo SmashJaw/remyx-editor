@@ -170,7 +170,7 @@ A living document outlining planned features, improvements, and long-term direct
 - CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies
 - Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)
 - Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal
-- See [SECURITY.md](./SECURITY.md) for the full audit report and remediation priorities
+- See [TASKS.md](./TASKS.md) for the full audit report and remediation priorities
 
 ## create-remyx CLI
 
@@ -209,12 +209,19 @@ Interactive CLI tool to help users build custom WYSIWYG editors with the right c
 | **Svelte 5** | Planned | `@remyx/svelte` |
 | **Vanilla JS / Web Component** | Planned | `@remyx/vanilla` |
 | **Node.js (SSR)** | Planned | `@remyx/ssr` |
-| **Django** | Planned | `django-remyx` form widget + template tag |
-| **Rails** | Planned | `remyx-rails` Action Text integration |
+| **WordPress** | Planned | `remyx-wp` — Gutenberg block + Classic Editor replacement |
+| **Drupal** | Planned | `remyx_drupal` — CKEditor replacement module for Drupal 10/11 |
+| **Moodle** | Planned | `atto_remyx` — Atto editor plugin for Moodle 4.x |
+| **Joomla** | Planned | `plg_editors_remyx` — editor plugin for Joomla 5 |
+| **Craft CMS** | Planned | `craft-remyx` — Redactor field replacement plugin |
+| **Strapi** | Planned | `@remyx/strapi` — custom field plugin for Strapi 5 |
+| **Ghost** | Planned | `ghost-remyx` — Koenig editor replacement |
+| **Shopify** | Planned | `@remyx/shopify` — Liquid-compatible rich text for theme/app extensions |
 
 - Shared core engine across all framework wrappers
 - Framework-specific bindings for reactivity, lifecycle, and two-way data binding
 - Web Component wrapper (`<remyx-editor>`) for framework-agnostic embedding
+- CMS integrations use `@remyx/vanilla` (Web Component) for framework-agnostic drop-in
 
 ## ~~Slash Commands &~~ Command Palette — **Shipped in v0.25.0**
 

@@ -75,8 +75,9 @@ export function useAutosave(engine, config) {
       manager.destroy()
       managerRef.current = null
     }
+    // Re-create manager when timing, key, or provider changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engine, enabled])
+  }, [engine, enabled, configKey, configInterval, configDebounce, configProvider])
 
   const recoverContent = useCallback(() => {
     if (!engine || !recoveryData) return

@@ -129,7 +129,7 @@ engine.destroy();
   utils/          markdown, paste cleaning, export, fonts, themes, toolbar, DOM
   constants/      defaults, keybindings, schema, commands
   config/         defineConfig
-  themes/         variables.css, light.css, dark.css
+  themes/         variables.css, light.css, dark.css, ocean.css, forest.css, sunset.css, rose.css
 ```
 
 ## EditorEngine
@@ -1046,21 +1046,32 @@ All styles use CSS custom properties with the `--rmx-` prefix. Override them in 
 
 See `packages/remyx-core/src/themes/variables.css` for the full list of 40+ variables.
 
-### Theme Presets
+### Built-in Themes
+
+Six built-in themes are available via CSS classes (applied automatically by `@remyx/react`'s `theme` prop, or manually via `.rmx-theme-{name}`):
+
+| Theme | Class | Description |
+| --- | --- | --- |
+| `light` | `.rmx-theme-light` | Clean white (default) |
+| `dark` | `.rmx-theme-dark` | Neutral dark |
+| `ocean` | `.rmx-theme-ocean` | Deep blue palette |
+| `forest` | `.rmx-theme-forest` | Green earth-tone palette |
+| `sunset` | `.rmx-theme-sunset` | Warm orange/amber palette |
+| `rose` | `.rmx-theme-rose` | Soft pink palette |
+
+For vanilla JS usage, add the class to the editor wrapper:
+
+```js
+document.querySelector('.rmx-editor').classList.add('rmx-theme-ocean');
+```
+
+The `THEME_PRESETS` export is still available for programmatic overrides via `customTheme`:
 
 ```js
 import { THEME_PRESETS, createTheme } from '@remyx/core';
-
-// Available presets: ocean, forest, sunset, rose
-const oceanTheme = createTheme(THEME_PRESETS.ocean);
+// Override a single variable on top of ocean
+const modified = { ...THEME_PRESETS.ocean, ...createTheme({ primary: '#ff6b6b' }) };
 ```
-
-| Preset | Accent | Description |
-| --- | --- | --- |
-| `ocean` | Blue | Cool blue tones |
-| `forest` | Green | Nature-inspired greens |
-| `sunset` | Orange | Warm orange tones |
-| `rose` | Pink | Soft pink theme |
 
 ### Custom Themes
 
