@@ -1,21 +1,21 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { DragDrop } from '../core/DragDrop.js'
 
-jest.mock('../utils/pasteClean.js', () => ({
-  cleanPastedHTML: jest.fn((html) => html),
-  looksLikeMarkdown: jest.fn(() => false),
+vi.mock('../utils/pasteClean.js', () => ({
+  cleanPastedHTML: vi.fn((html) => html),
+  looksLikeMarkdown: vi.fn(() => false),
 }))
 
-jest.mock('../utils/markdownConverter.js', () => ({
-  markdownToHtml: jest.fn((text) => `<p>${text}</p>`),
+vi.mock('../utils/markdownConverter.js', () => ({
+  markdownToHtml: vi.fn((text) => `<p>${text}</p>`),
 }))
 
-jest.mock('../utils/documentConverter/index.js', () => ({
-  isImportableFile: jest.fn(() => false),
-  convertDocument: jest.fn(() => Promise.resolve('<p>converted</p>')),
+vi.mock('../utils/documentConverter/index.js', () => ({
+  isImportableFile: vi.fn(() => false),
+  convertDocument: vi.fn(() => Promise.resolve('<p>converted</p>')),
 }))
 
-jest.mock('../constants/defaults.js', () => ({
+vi.mock('../constants/defaults.js', () => ({
   DEFAULT_MAX_FILE_SIZE: 10 * 1024 * 1024,
 }))
 
@@ -39,11 +39,11 @@ describe('DragDrop', () => {
         enableDocumentImport: true,
         enableAttachments: true,
       },
-      selection: { insertHTML: jest.fn() },
-      history: { snapshot: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn(() => jest.fn()) },
-      sanitizer: { sanitize: jest.fn((html) => html) },
-      commands: { execute: jest.fn() },
+      selection: { insertHTML: vi.fn() },
+      history: { snapshot: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn(() => vi.fn()) },
+      sanitizer: { sanitize: vi.fn((html) => html) },
+      commands: { execute: vi.fn() },
       outputFormat: 'html',
     }
     dragDrop = new DragDrop(mockEngine)
@@ -54,7 +54,7 @@ describe('DragDrop', () => {
     isImportableFile.mockReturnValue(false)
 
     // Mock caretRangeFromPoint
-    document.caretRangeFromPoint = jest.fn(() => {
+    document.caretRangeFromPoint = vi.fn(() => {
       const range = document.createRange()
       return range
     })
@@ -81,7 +81,7 @@ describe('DragDrop', () => {
 
   describe('init', () => {
     it('should add all six drag/drop event listeners', () => {
-      const spy = jest.spyOn(element, 'addEventListener')
+      const spy = vi.spyOn(element, 'addEventListener')
       dragDrop.init()
       expect(spy).toHaveBeenCalledWith('dragover', dragDrop._handleDragOver)
       expect(spy).toHaveBeenCalledWith('drop', dragDrop._handleDrop)
@@ -102,7 +102,7 @@ describe('DragDrop', () => {
   describe('destroy', () => {
     it('should remove all six drag/drop event listeners', () => {
       dragDrop.init()
-      const spy = jest.spyOn(element, 'removeEventListener')
+      const spy = vi.spyOn(element, 'removeEventListener')
       dragDrop.destroy()
       expect(spy).toHaveBeenCalledWith('dragover', dragDrop._handleDragOver)
       expect(spy).toHaveBeenCalledWith('drop', dragDrop._handleDrop)
@@ -129,7 +129,7 @@ describe('DragDrop', () => {
       dragDrop.init()
       const event = new Event('dragover', { bubbles: true, cancelable: true })
       event.dataTransfer = { dropEffect: '' }
-      const spy = jest.spyOn(event, 'preventDefault')
+      const spy = vi.spyOn(event, 'preventDefault')
       element.dispatchEvent(event)
       expect(spy).toHaveBeenCalled()
     })
@@ -165,7 +165,7 @@ describe('DragDrop', () => {
       dragDrop.init()
       const event = new Event('dragenter', { bubbles: true, cancelable: true })
       event.dataTransfer = { types: [] }
-      const spy = jest.spyOn(event, 'preventDefault')
+      const spy = vi.spyOn(event, 'preventDefault')
       element.dispatchEvent(event)
       expect(spy).toHaveBeenCalled()
     })
@@ -249,7 +249,7 @@ describe('DragDrop', () => {
       const event = new Event('drop', { bubbles: true, cancelable: true })
       event.dataTransfer = {
         files,
-        getData: jest.fn((type) => {
+        getData: vi.fn((type) => {
           if (type === 'text/html') return html
           if (type === 'text/plain') return text
           if (type === 'application/x-remyx-content') return ''
@@ -264,7 +264,7 @@ describe('DragDrop', () => {
     it('should preventDefault on drop', () => {
       dragDrop.init()
       const event = createDropEvent()
-      const spy = jest.spyOn(event, 'preventDefault')
+      const spy = vi.spyOn(event, 'preventDefault')
       element.dispatchEvent(event)
       expect(spy).toHaveBeenCalled()
     })
@@ -358,7 +358,7 @@ describe('DragDrop', () => {
       const event = new Event('drop', { bubbles: true, cancelable: true })
       event.dataTransfer = {
         files,
-        getData: jest.fn(() => ''),
+        getData: vi.fn(() => ''),
       }
       event.clientX = 100
       event.clientY = 100
@@ -366,7 +366,7 @@ describe('DragDrop', () => {
     }
 
     it('should handle image file drop with uploadHandler', async () => {
-      const uploadHandler = jest.fn().mockResolvedValue('https://example.com/img.png')
+      const uploadHandler = vi.fn().mockResolvedValue('https://example.com/img.png')
       mockEngine.options.uploadHandler = uploadHandler
       dragDrop.init()
 
@@ -374,6 +374,9 @@ describe('DragDrop', () => {
       const event = createDropEventWithFiles([imageFile])
       element.dispatchEvent(event)
 
+      // Wait for serialized promise chain to execute
+      await Promise.resolve()
+      await Promise.resolve()
       expect(uploadHandler).toHaveBeenCalledWith(imageFile)
       await Promise.resolve()
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
@@ -382,26 +385,38 @@ describe('DragDrop', () => {
       })
     })
 
-    it('should use FileReader for image drop when no uploadHandler', () => {
+    it('should use FileReader for image drop when no uploadHandler', async () => {
       mockEngine.options.uploadHandler = null
       dragDrop.init()
 
       const imageFile = new File(['data'], 'photo.jpg', { type: 'image/jpeg' })
       const event = createDropEventWithFiles([imageFile])
 
-      const mockReader = { readAsDataURL: jest.fn(), onload: null }
-      jest.spyOn(global, 'FileReader').mockImplementation(() => mockReader)
+      let readerInstance
+      const readAsDataURLSpy = vi.fn()
+      const OriginalFileReader = globalThis.FileReader
+      globalThis.FileReader = class MockFileReader {
+        constructor() {
+          this.readAsDataURL = readAsDataURLSpy
+          this.onload = null
+          this.onerror = null
+          readerInstance = this
+        }
+      }
 
       element.dispatchEvent(event)
-      expect(mockReader.readAsDataURL).toHaveBeenCalledWith(imageFile)
+      // Wait for serialized promise chain
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(readAsDataURLSpy).toHaveBeenCalledWith(imageFile)
 
-      mockReader.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
+      readerInstance.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
         src: 'data:image/jpeg;base64,abc',
         alt: 'photo.jpg',
       })
 
-      global.FileReader.mockRestore()
+      globalThis.FileReader = OriginalFileReader
     })
 
     it('should skip image files that exceed max size', () => {
@@ -412,7 +427,7 @@ describe('DragDrop', () => {
       Object.defineProperty(bigFile, 'size', { value: 200 })
 
       const event = createDropEventWithFiles([bigFile])
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       element.dispatchEvent(event)
 
       expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('file:too-large', {
@@ -431,7 +446,7 @@ describe('DragDrop', () => {
     })
 
     it('should return true for files over the limit', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       mockEngine.options.maxFileSize = 500
       const file = new File(['data'], 'big.txt', { type: 'text/plain' })
       Object.defineProperty(file, 'size', { value: 1000 })
@@ -461,13 +476,13 @@ describe('DragDrop', () => {
   describe('_setCursorAtDropPoint', () => {
     it('should set cursor using caretRangeFromPoint when available', () => {
       const mockRange = document.createRange()
-      document.caretRangeFromPoint = jest.fn(() => mockRange)
+      document.caretRangeFromPoint = vi.fn(() => mockRange)
 
       const mockSel = {
-        removeAllRanges: jest.fn(),
-        addRange: jest.fn(),
+        removeAllRanges: vi.fn(),
+        addRange: vi.fn(),
       }
-      jest.spyOn(window, 'getSelection').mockReturnValue(mockSel)
+      vi.spyOn(window, 'getSelection').mockReturnValue(mockSel)
 
       dragDrop._setCursorAtDropPoint({ clientX: 50, clientY: 50 })
 
@@ -489,20 +504,23 @@ describe('DragDrop', () => {
   describe('_handleDrop with upload errors', () => {
     it('should emit upload:error when image upload fails', async () => {
       const uploadError = new Error('upload failed')
-      mockEngine.options.uploadHandler = jest.fn().mockRejectedValue(uploadError)
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      mockEngine.options.uploadHandler = vi.fn().mockRejectedValue(uploadError)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       dragDrop.init()
 
       const imageFile = new File(['data'], 'fail.png', { type: 'image/png' })
       const event = new Event('drop', { bubbles: true, cancelable: true })
       event.dataTransfer = {
         files: [imageFile],
-        getData: jest.fn(() => ''),
+        getData: vi.fn(() => ''),
       }
       event.clientX = 100
       event.clientY = 100
       element.dispatchEvent(event)
 
+      // Wait for serialized promise chain
+      await Promise.resolve()
+      await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
 
@@ -606,8 +624,8 @@ describe('DragDrop', () => {
 
       const event = new Event('dragstart', { bubbles: true })
       event.dataTransfer = {
-        setData: jest.fn(),
-        setDragImage: jest.fn(),
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
         effectAllowed: '',
       }
       p.dispatchEvent(event)
@@ -625,8 +643,8 @@ describe('DragDrop', () => {
 
       const event = new Event('dragstart', { bubbles: true })
       event.dataTransfer = {
-        setData: jest.fn(),
-        setDragImage: jest.fn(),
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
         effectAllowed: '',
       }
       p.dispatchEvent(event)
@@ -646,8 +664,8 @@ describe('DragDrop', () => {
 
       const event = new Event('dragstart', { bubbles: true })
       event.dataTransfer = {
-        setData: jest.fn(),
-        setDragImage: jest.fn(),
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
         effectAllowed: '',
       }
       p.dispatchEvent(event)
@@ -661,7 +679,7 @@ describe('DragDrop', () => {
       element.appendChild(span)
 
       const event = new Event('dragstart', { bubbles: true })
-      event.dataTransfer = { setData: jest.fn(), setDragImage: jest.fn(), effectAllowed: '' }
+      event.dataTransfer = { setData: vi.fn(), setDragImage: vi.fn(), effectAllowed: '' }
       span.dispatchEvent(event)
 
       expect(dragDrop._dragSource).toBeNull()
@@ -886,7 +904,7 @@ describe('DragDrop', () => {
       const mockEngine2 = {
         ...mockEngine,
         element: element2,
-        eventBus: { emit: jest.fn(), on: jest.fn(() => jest.fn()) },
+        eventBus: { emit: vi.fn(), on: vi.fn(() => vi.fn()) },
       }
       const dragDrop2 = new DragDrop(mockEngine2)
 
@@ -899,8 +917,8 @@ describe('DragDrop', () => {
 
       const event = new Event('dragstart', { bubbles: true })
       event.dataTransfer = {
-        setData: jest.fn(),
-        setDragImage: jest.fn(),
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
         effectAllowed: '',
       }
       p.dispatchEvent(event)
@@ -921,7 +939,7 @@ describe('DragDrop', () => {
       const event = new Event('drop', { bubbles: true, cancelable: true })
       event.dataTransfer = {
         files,
-        getData: jest.fn((type) => {
+        getData: vi.fn((type) => {
           if (type === 'text/html') return html
           if (type === 'text/plain') return text
           if (type === 'application/x-remyx-content') return remyx
@@ -947,7 +965,7 @@ describe('DragDrop', () => {
       dragDrop._dropPosition = 'after'
       dragDrop._dragSourceEditor = dragDrop
 
-      const spy = jest.spyOn(dragDrop, '_handleBlockDrop')
+      const spy = vi.spyOn(dragDrop, '_handleBlockDrop')
       const event = createDropEvent()
       element.dispatchEvent(event)
 
@@ -962,7 +980,7 @@ describe('DragDrop', () => {
       const docFile = new File(['data'], 'doc.docx', { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
       const event = createDropEvent({ files: [docFile] })
 
-      const spy = jest.spyOn(dragDrop, '_handleDocumentDrop')
+      const spy = vi.spyOn(dragDrop, '_handleDocumentDrop')
       element.dispatchEvent(event)
 
       expect(spy).toHaveBeenCalledWith(expect.any(Event), [docFile])
@@ -971,14 +989,14 @@ describe('DragDrop', () => {
     })
 
     it('should route to _handleFileDrop for non-image non-importable files with uploadHandler', () => {
-      mockEngine.options.uploadHandler = jest.fn().mockResolvedValue('https://example.com/file.pdf')
+      mockEngine.options.uploadHandler = vi.fn().mockResolvedValue('https://example.com/file.pdf')
       isImportableFile.mockReturnValue(false)
       dragDrop.init()
 
       const pdfFile = new File(['data'], 'file.pdf', { type: 'application/pdf' })
       const event = createDropEvent({ files: [pdfFile] })
 
-      const spy = jest.spyOn(dragDrop, '_handleFileDrop')
+      const spy = vi.spyOn(dragDrop, '_handleFileDrop')
       element.dispatchEvent(event)
 
       expect(spy).toHaveBeenCalledWith(expect.any(Event), [pdfFile])
@@ -990,7 +1008,7 @@ describe('DragDrop', () => {
       dragDrop._dragSource = null
 
       const event = createDropEvent({ remyx: '<p>From other editor</p>' })
-      const spy = jest.spyOn(dragDrop, '_handleInterEditorDrop')
+      const spy = vi.spyOn(dragDrop, '_handleInterEditorDrop')
       element.dispatchEvent(event)
 
       expect(spy).toHaveBeenCalledWith(expect.any(Event), '<p>From other editor</p>')
@@ -1004,8 +1022,8 @@ describe('DragDrop', () => {
       const mockEngine2 = {
         ...mockEngine,
         element: element2,
-        history: { snapshot: jest.fn() },
-        eventBus: { emit: jest.fn(), on: jest.fn(() => jest.fn()) },
+        history: { snapshot: vi.fn() },
+        eventBus: { emit: vi.fn(), on: vi.fn(() => vi.fn()) },
       }
       const dragDrop2 = new DragDrop(mockEngine2)
       dragDrop.init()
@@ -1037,8 +1055,8 @@ describe('DragDrop', () => {
       const mockEngine2 = {
         ...mockEngine,
         element: element2,
-        history: { snapshot: jest.fn() },
-        eventBus: { emit: jest.fn(), on: jest.fn(() => jest.fn()) },
+        history: { snapshot: vi.fn() },
+        eventBus: { emit: vi.fn(), on: vi.fn(() => vi.fn()) },
       }
       const dragDrop2 = new DragDrop(mockEngine2)
       dragDrop.init()
@@ -1086,7 +1104,7 @@ describe('DragDrop', () => {
 
   describe('_handleInterEditorDrop', () => {
     it('should set cursor, snapshot, sanitize and insert HTML', () => {
-      const spy = jest.spyOn(dragDrop, '_setCursorAtDropPoint')
+      const spy = vi.spyOn(dragDrop, '_setCursorAtDropPoint')
       const event = { clientX: 50, clientY: 50 }
 
       dragDrop._handleInterEditorDrop(event, '<p>Inter content</p>')
@@ -1105,7 +1123,6 @@ describe('DragDrop', () => {
 
   describe('_handleDocumentDrop', () => {
     it('should convert documents and insert sanitized HTML', async () => {
-      const { convertDocument } = require('../utils/documentConverter/index.js')
       convertDocument.mockResolvedValue('<p>converted doc</p>')
 
       const docFile = new File(['data'], 'test.docx', { type: 'application/vnd.openxmlformats' })
@@ -1124,13 +1141,12 @@ describe('DragDrop', () => {
     })
 
     it('should skip files exceeding max size', async () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       mockEngine.options.maxFileSize = 50
 
       const bigFile = new File(['data'], 'big.docx', { type: 'application/vnd.openxmlformats' })
       Object.defineProperty(bigFile, 'size', { value: 100 })
 
-      const { convertDocument } = require('../utils/documentConverter/index.js')
       convertDocument.mockClear()
 
       dragDrop._handleDocumentDrop({ clientX: 0, clientY: 0 }, [bigFile])
@@ -1141,8 +1157,7 @@ describe('DragDrop', () => {
     })
 
     it('should handle document conversion failure gracefully', async () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-      const { convertDocument } = require('../utils/documentConverter/index.js')
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       convertDocument.mockRejectedValue(new Error('conversion failed'))
 
       const docFile = new File(['data'], 'bad.docx', { type: 'application/vnd.openxmlformats' })
@@ -1160,7 +1175,7 @@ describe('DragDrop', () => {
 
   describe('_handleFileDrop', () => {
     it('should upload files and insert attachments', async () => {
-      mockEngine.options.uploadHandler = jest.fn().mockResolvedValue('https://cdn.example.com/file.zip')
+      mockEngine.options.uploadHandler = vi.fn().mockResolvedValue('https://cdn.example.com/file.zip')
 
       const file = new File(['data'], 'archive.zip', { type: 'application/zip' })
       Object.defineProperty(file, 'size', { value: 5000 })
@@ -1168,6 +1183,9 @@ describe('DragDrop', () => {
       dragDrop._handleFileDrop({ clientX: 100, clientY: 100 }, [file])
 
       expect(mockEngine.history.snapshot).toHaveBeenCalled()
+      // Wait for serialized promise chain
+      await Promise.resolve()
+      await Promise.resolve()
       expect(mockEngine.options.uploadHandler).toHaveBeenCalledWith(file)
 
       await Promise.resolve()
@@ -1181,13 +1199,16 @@ describe('DragDrop', () => {
 
     it('should emit upload:error when file upload fails', async () => {
       const uploadError = new Error('upload failed')
-      mockEngine.options.uploadHandler = jest.fn().mockRejectedValue(uploadError)
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      mockEngine.options.uploadHandler = vi.fn().mockRejectedValue(uploadError)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const file = new File(['data'], 'fail.zip', { type: 'application/zip' })
 
       dragDrop._handleFileDrop({ clientX: 0, clientY: 0 }, [file])
 
+      // Wait for serialized promise chain
+      await Promise.resolve()
+      await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
 
@@ -1199,7 +1220,7 @@ describe('DragDrop', () => {
     })
 
     it('should handle multiple files', async () => {
-      mockEngine.options.uploadHandler = jest.fn()
+      mockEngine.options.uploadHandler = vi.fn()
         .mockResolvedValueOnce('https://cdn.example.com/a.txt')
         .mockResolvedValueOnce('https://cdn.example.com/b.txt')
 
@@ -1210,9 +1231,10 @@ describe('DragDrop', () => {
 
       dragDrop._handleFileDrop({ clientX: 0, clientY: 0 }, [file1, file2])
 
-      expect(mockEngine.options.uploadHandler).toHaveBeenCalledTimes(2)
+      // Wait for serialized promise chain (each file goes through chain.then(() => upload.then(...)))
+      for (let i = 0; i < 10; i++) await Promise.resolve()
 
-      await Promise.resolve()
+      expect(mockEngine.options.uploadHandler).toHaveBeenCalledTimes(2)
 
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertAttachment', {
         url: 'https://cdn.example.com/a.txt',
@@ -1234,10 +1256,10 @@ describe('DragDrop', () => {
       element.appendChild(p1)
 
       // Mock getBoundingClientRect
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 100, bottom: 150, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1253,10 +1275,10 @@ describe('DragDrop', () => {
       p1.textContent = 'Block 1'
       element.appendChild(p1)
 
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 100, bottom: 150, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1273,13 +1295,13 @@ describe('DragDrop', () => {
       element.appendChild(p1)
       element.appendChild(p2)
 
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 50, left: 0, right: 200, height: 50, width: 200,
       }))
-      p2.getBoundingClientRect = jest.fn(() => ({
+      p2.getBoundingClientRect = vi.fn(() => ({
         top: 60, bottom: 110, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1296,13 +1318,13 @@ describe('DragDrop', () => {
       element.appendChild(p1)
       element.appendChild(p2)
 
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 50, left: 0, right: 200, height: 50, width: 200,
       }))
-      p2.getBoundingClientRect = jest.fn(() => ({
+      p2.getBoundingClientRect = vi.fn(() => ({
         top: 60, bottom: 110, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1328,14 +1350,14 @@ describe('DragDrop', () => {
       const p1 = document.createElement('p')
       element.appendChild(p1)
 
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 50, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
-      const spy = jest.spyOn(dragDrop, '_showDropIndicator')
+      const spy = vi.spyOn(dragDrop, '_showDropIndicator')
       dragDrop._dragSource = document.createElement('h1')
       dragDrop._updateDropTarget({ clientY: 10 })
 
@@ -1347,10 +1369,10 @@ describe('DragDrop', () => {
       const p1 = document.createElement('p')
       element.appendChild(p1)
 
-      p1.getBoundingClientRect = jest.fn(() => ({
+      p1.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 50, left: 0, right: 200, height: 50, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1360,7 +1382,7 @@ describe('DragDrop', () => {
       dragDrop._updateDropTarget({ clientY: 10 })
       expect(dragDrop._dropTarget).toBe(p1)
 
-      const spy = jest.spyOn(dragDrop, '_showDropIndicator')
+      const spy = vi.spyOn(dragDrop, '_showDropIndicator')
       // Second call with same position should not trigger indicator update
       dragDrop._updateDropTarget({ clientY: 10 })
       expect(spy).not.toHaveBeenCalled()
@@ -1370,13 +1392,13 @@ describe('DragDrop', () => {
 
   describe('_showDropIndicator', () => {
     it('should create a drop indicator div with correct class', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 100, bottom: 150, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1388,14 +1410,14 @@ describe('DragDrop', () => {
     })
 
     it('should position indicator at block top for before position', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 10, bottom: 500, left: 0, right: 200, height: 490, width: 200,
       }))
       Object.defineProperty(element, 'scrollTop', { value: 0, writable: true })
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 110, bottom: 160, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1405,14 +1427,14 @@ describe('DragDrop', () => {
     })
 
     it('should position indicator at block bottom for after position', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 10, bottom: 500, left: 0, right: 200, height: 490, width: 200,
       }))
       Object.defineProperty(element, 'scrollTop', { value: 0, writable: true })
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 110, bottom: 160, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1422,13 +1444,13 @@ describe('DragDrop', () => {
     })
 
     it('should reuse existing indicator element on subsequent calls', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 50, bottom: 100, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1440,14 +1462,14 @@ describe('DragDrop', () => {
     })
 
     it('should emit drag:indicator event', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
       Object.defineProperty(element, 'scrollTop', { value: 0, writable: true })
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 50, bottom: 100, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1461,13 +1483,13 @@ describe('DragDrop', () => {
     })
 
     it('should append indicator to editor element', () => {
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
       const block = document.createElement('p')
       element.appendChild(block)
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 50, bottom: 100, left: 0, right: 200, height: 50, width: 200,
       }))
 
@@ -1511,14 +1533,14 @@ describe('DragDrop', () => {
       block.className = 'my-block'
       Object.defineProperty(block, 'offsetWidth', { value: 300 })
 
-      block.getBoundingClientRect = jest.fn(() => ({
+      block.getBoundingClientRect = vi.fn(() => ({
         top: 50, left: 20, bottom: 100, right: 320, height: 50, width: 300,
       }))
 
       const event = {
         clientX: 60,
         clientY: 70,
-        dataTransfer: { setDragImage: jest.fn() },
+        dataTransfer: { setDragImage: vi.fn() },
       }
 
       dragDrop._createGhostPreview(block, event)
@@ -1725,16 +1747,16 @@ describe('DragDrop', () => {
       ul.appendChild(li3)
       element.appendChild(ul)
 
-      li1.getBoundingClientRect = jest.fn(() => ({
+      li1.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 30, left: 0, right: 200, height: 30, width: 200,
       }))
-      li2.getBoundingClientRect = jest.fn(() => ({
+      li2.getBoundingClientRect = vi.fn(() => ({
         top: 30, bottom: 60, left: 0, right: 200, height: 30, width: 200,
       }))
-      li3.getBoundingClientRect = jest.fn(() => ({
+      li3.getBoundingClientRect = vi.fn(() => ({
         top: 60, bottom: 90, left: 0, right: 200, height: 30, width: 200,
       }))
-      element.getBoundingClientRect = jest.fn(() => ({
+      element.getBoundingClientRect = vi.fn(() => ({
         top: 0, bottom: 500, left: 0, right: 200, height: 500, width: 200,
       }))
 
@@ -1751,7 +1773,7 @@ describe('DragDrop', () => {
       dragDrop.init()
       dragDrop._isExternalDrag = true
 
-      const spy = jest.spyOn(dragDrop, '_updateDropTarget')
+      const spy = vi.spyOn(dragDrop, '_updateDropTarget')
       const event = new Event('dragover', { bubbles: true, cancelable: true })
       event.dataTransfer = { dropEffect: '' }
       event.clientY = 50
@@ -1766,7 +1788,7 @@ describe('DragDrop', () => {
       dragDrop._isExternalDrag = false
       dragDrop._dragSource = null
 
-      const spy = jest.spyOn(dragDrop, '_updateDropTarget')
+      const spy = vi.spyOn(dragDrop, '_updateDropTarget')
       const event = new Event('dragover', { bubbles: true, cancelable: true })
       event.dataTransfer = { dropEffect: '' }
       element.dispatchEvent(event)

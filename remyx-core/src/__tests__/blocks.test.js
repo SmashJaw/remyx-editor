@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerBlockCommands } from '../commands/blocks.js'
 
 describe('registerBlockCommands', () => {
@@ -6,7 +7,7 @@ describe('registerBlockCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = jest.fn().mockReturnValue(true)
+    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -15,26 +16,26 @@ describe('registerBlockCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
-        getClosestElement: jest.fn(),
-        setRange: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
+        getClosestElement: vi.fn(),
+        setRange: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,
@@ -61,7 +62,7 @@ describe('registerBlockCommands', () => {
 
   it('should create blockquote via execCommand when not in one', () => {
     mockEngine.selection.getClosestElement.mockReturnValue(null)
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
 
     commands.blockquote.execute(mockEngine)
     expect(spy).toHaveBeenCalledWith('formatBlock', false, '<blockquote>')
@@ -127,7 +128,7 @@ describe('registerBlockCommands', () => {
   })
 
   it('should execute horizontalRule with insertHorizontalRule', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.horizontalRule.execute()
     expect(spy).toHaveBeenCalledWith('insertHorizontalRule', false, null)
     spy.mockRestore()

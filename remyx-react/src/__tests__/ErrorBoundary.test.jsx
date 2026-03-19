@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest'
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { EditorErrorBoundary } from '../components/ErrorBoundary.jsx'
@@ -58,7 +59,7 @@ describe('EditorErrorBoundary', () => {
   })
 
   it('calls onError callback when an error occurs', () => {
-    const onError = jest.fn()
+    const onError = vi.fn()
 
     render(
       <EditorErrorBoundary onError={onError}>

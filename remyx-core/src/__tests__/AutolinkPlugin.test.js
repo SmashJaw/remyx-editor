@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AutolinkPlugin } from '../plugins/builtins/AutolinkPlugin.js'
 
 describe('AutolinkPlugin', () => {
@@ -32,14 +33,14 @@ describe('AutolinkPlugin', () => {
     })
 
     it('should add a keydown listener on init', () => {
-      const spy = jest.spyOn(mockEngine.element, 'addEventListener')
+      const spy = vi.spyOn(mockEngine.element, 'addEventListener')
       plugin.init(mockEngine)
       expect(spy).toHaveBeenCalledWith('keydown', expect.any(Function))
       plugin.destroy(mockEngine)
     })
 
     it('should remove the keydown listener on destroy', () => {
-      const spy = jest.spyOn(mockEngine.element, 'removeEventListener')
+      const spy = vi.spyOn(mockEngine.element, 'removeEventListener')
       plugin.init(mockEngine)
       plugin.destroy(mockEngine)
       expect(spy).toHaveBeenCalledWith('keydown', expect.any(Function))
@@ -53,7 +54,7 @@ describe('AutolinkPlugin', () => {
       plugin.init(mockEngine)
       plugin.destroy(mockEngine)
       // Calling destroy again should not call removeEventListener again
-      const spy = jest.spyOn(mockEngine.element, 'removeEventListener')
+      const spy = vi.spyOn(mockEngine.element, 'removeEventListener')
       plugin.destroy(mockEngine)
       expect(spy).not.toHaveBeenCalled()
     })

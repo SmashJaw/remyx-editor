@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerListCommands } from '../commands/lists.js'
 
 describe('registerListCommands', () => {
@@ -6,7 +7,7 @@ describe('registerListCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = jest.fn().mockReturnValue(true)
+    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -15,25 +16,25 @@ describe('registerListCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
-        getClosestElement: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
+        getClosestElement: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,
@@ -56,21 +57,21 @@ describe('registerListCommands', () => {
   })
 
   it('should execute orderedList with insertOrderedList', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.orderedList.execute()
     expect(spy).toHaveBeenCalledWith('insertOrderedList', false, null)
     spy.mockRestore()
   })
 
   it('should execute unorderedList with insertUnorderedList', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.unorderedList.execute()
     expect(spy).toHaveBeenCalledWith('insertUnorderedList', false, null)
     spy.mockRestore()
   })
 
   it('should execute indent and outdent', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.indent.execute()
     expect(spy).toHaveBeenCalledWith('indent', false, null)
     commands.outdent.execute()

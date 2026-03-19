@@ -1,10 +1,11 @@
+import { describe, it, expect, vi } from 'vitest'
 import React from 'react'
 import { renderHook } from '@testing-library/react'
 import { useResolvedConfig, DEFAULT_EDITOR_HEIGHT } from '../hooks/useResolvedConfig.js'
 import { RemyxConfigProvider } from '../config/RemyxConfigProvider.jsx'
 
 // Mock @remyxjs/core defaults
-jest.mock('@remyxjs/core', () => ({
+vi.mock('@remyxjs/core', () => ({
   DEFAULT_TOOLBAR: [['bold', 'italic', 'underline'], ['link', 'image']],
   DEFAULT_FONTS: ['Arial', 'Verdana'],
   DEFAULT_MENU_BAR: [
@@ -14,8 +15,8 @@ jest.mock('@remyxjs/core', () => ({
 }))
 
 // Mock collectMenuBarCommands
-jest.mock('../components/MenuBar/MenuBar.jsx', () => ({
-  collectMenuBarCommands: jest.fn((config) => {
+vi.mock('../components/MenuBar/MenuBar.jsx', () => ({
+  collectMenuBarCommands: vi.fn((config) => {
     const cmds = new Set()
     for (const menu of config) {
       for (const item of menu.items) {

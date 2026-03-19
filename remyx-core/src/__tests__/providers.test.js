@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   LocalStorageProvider,
   SessionStorageProvider,
@@ -161,8 +162,8 @@ describe('FileSystemProvider', () => {
 
   it('throws if required functions are missing', () => {
     expect(() => new FileSystemProvider({})).toThrow('writeFn')
-    expect(() => new FileSystemProvider({ writeFn: jest.fn() })).toThrow('readFn')
-    expect(() => new FileSystemProvider({ writeFn: jest.fn(), readFn: jest.fn() })).toThrow('deleteFn')
+    expect(() => new FileSystemProvider({ writeFn: vi.fn() })).toThrow('readFn')
+    expect(() => new FileSystemProvider({ writeFn: vi.fn(), readFn: vi.fn() })).toThrow('deleteFn')
   })
 })
 
@@ -170,7 +171,7 @@ describe('FileSystemProvider', () => {
 
 describe('CloudProvider', () => {
   it('sends PUT request on save', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ ok: true })
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true })
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       headers: { Authorization: 'Bearer token123' },
@@ -187,7 +188,7 @@ describe('CloudProvider', () => {
   })
 
   it('sends GET request on load', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       text: async () => JSON.stringify({ content: '<p>Loaded</p>', timestamp: 123, version: 1 }),
     })
@@ -201,7 +202,7 @@ describe('CloudProvider', () => {
   })
 
   it('returns null on 404', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ ok: false, status: 404 })
+    const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 404 })
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       fetchFn: mockFetch,
@@ -211,7 +212,7 @@ describe('CloudProvider', () => {
   })
 
   it('retries on network error', async () => {
-    const mockFetch = jest.fn()
+    const mockFetch = vi.fn()
       .mockRejectedValueOnce(new Error('Network error'))
       .mockResolvedValueOnce({ ok: true })
     const provider = new CloudProvider({
@@ -224,7 +225,7 @@ describe('CloudProvider', () => {
   })
 
   it('uses buildUrl for custom URL patterns (e.g. S3 presigned)', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ ok: true })
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true })
     const provider = new CloudProvider({
       endpoint: 'https://bucket.s3.amazonaws.com',
       buildUrl: (key) => `https://bucket.s3.amazonaws.com/${key}?X-Amz-Signature=abc`,
@@ -236,11 +237,11 @@ describe('CloudProvider', () => {
   })
 
   it('throws without endpoint or buildUrl', () => {
-    expect(() => new CloudProvider({ fetchFn: jest.fn() })).toThrow('endpoint or buildUrl')
+    expect(() => new CloudProvider({ fetchFn: vi.fn() })).toThrow('endpoint or buildUrl')
   })
 
   it('_loadUrl appends with & when endpoint already has query params', () => {
-    const mockFetch = jest.fn().mockResolvedValue({
+    const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
       text: async () => JSON.stringify({ content: '<p>Test</p>', timestamp: 1, version: 1 }),
     })
@@ -255,7 +256,7 @@ describe('CloudProvider', () => {
   })
 
   it('load returns null on non-404 error status', async () => {
-    const mockFetch = jest.fn().mockResolvedValue({ ok: false, status: 500 })
+    const mockFetch = vi.fn().mockResolvedValue({ ok: false, status: 500 })
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       fetchFn: mockFetch,
@@ -267,7 +268,7 @@ describe('CloudProvider', () => {
   })
 
   it('load returns null on fetch network error', async () => {
-    const mockFetch = jest.fn().mockRejectedValue(new Error('Network failure'))
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Network failure'))
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       fetchFn: mockFetch,
@@ -278,7 +279,7 @@ describe('CloudProvider', () => {
   })
 
   it('clear catches errors silently', async () => {
-    const mockFetch = jest.fn().mockRejectedValue(new Error('Network failure'))
+    const mockFetch = vi.fn().mockRejectedValue(new Error('Network failure'))
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       fetchFn: mockFetch,
@@ -289,7 +290,7 @@ describe('CloudProvider', () => {
   })
 
   it('_deleteUrl falls back to _loadUrl when no buildDeleteUrl is provided', () => {
-    const mockFetch = jest.fn()
+    const mockFetch = vi.fn()
     const provider = new CloudProvider({
       endpoint: 'https://api.example.com/autosave',
       fetchFn: mockFetch,
@@ -345,17 +346,17 @@ describe('createStorageProvider', () => {
   })
 
   it('resolves cloud config', () => {
-    const p = createStorageProvider({ endpoint: 'https://api.example.com', fetchFn: jest.fn() })
+    const p = createStorageProvider({ endpoint: 'https://api.example.com', fetchFn: vi.fn() })
     expect(p).toBeInstanceOf(CloudProvider)
   })
 
   it('resolves filesystem config', () => {
-    const p = createStorageProvider({ writeFn: jest.fn(), readFn: jest.fn(), deleteFn: jest.fn() })
+    const p = createStorageProvider({ writeFn: vi.fn(), readFn: vi.fn(), deleteFn: vi.fn() })
     expect(p).toBeInstanceOf(FileSystemProvider)
   })
 
   it('resolves custom provider from plain object with save/load/clear', () => {
-    const p = createStorageProvider({ save: jest.fn(), load: jest.fn(), clear: jest.fn() })
+    const p = createStorageProvider({ save: vi.fn(), load: vi.fn(), clear: vi.fn() })
     expect(p).toBeInstanceOf(CustomProvider)
   })
 
@@ -379,9 +380,9 @@ describe('createStorageProvider', () => {
 
   it('resolves FileSystemProvider from config with writeFn/readFn/deleteFn', () => {
     const p = createStorageProvider({
-      writeFn: jest.fn(),
-      readFn: jest.fn(),
-      deleteFn: jest.fn(),
+      writeFn: vi.fn(),
+      readFn: vi.fn(),
+      deleteFn: vi.fn(),
     })
     expect(p).toBeInstanceOf(FileSystemProvider)
   })

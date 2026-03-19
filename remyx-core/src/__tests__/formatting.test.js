@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerFormattingCommands } from '../commands/formatting.js'
 
 describe('registerFormattingCommands', () => {
@@ -6,8 +7,8 @@ describe('registerFormattingCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = jest.fn().mockReturnValue(true)
-    document.queryCommandState = jest.fn().mockReturnValue(false)
+    document.execCommand = vi.fn().mockReturnValue(true)
+    document.queryCommandState = vi.fn().mockReturnValue(false)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -16,24 +17,24 @@ describe('registerFormattingCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,
@@ -82,42 +83,42 @@ describe('registerFormattingCommands', () => {
   })
 
   it('should call document.execCommand for bold execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.bold.execute()
     expect(spy).toHaveBeenCalledWith('bold', false, null)
     spy.mockRestore()
   })
 
   it('should call document.execCommand for italic execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.italic.execute()
     expect(spy).toHaveBeenCalledWith('italic', false, null)
     spy.mockRestore()
   })
 
   it('should call document.execCommand for strikethrough execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.strikethrough.execute()
     expect(spy).toHaveBeenCalledWith('strikeThrough', false, null)
     spy.mockRestore()
   })
 
   it('should call document.execCommand for removeFormat execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.removeFormat.execute()
     expect(spy).toHaveBeenCalledWith('removeFormat', false, null)
     spy.mockRestore()
   })
 
   it('should check queryCommandState for bold isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
     expect(commands.bold.isActive()).toBe(true)
     expect(spy).toHaveBeenCalledWith('bold')
     spy.mockRestore()
   })
 
   it('should check queryCommandState for italic isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(false)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(false)
     expect(commands.italic.isActive()).toBe(false)
     expect(spy).toHaveBeenCalledWith('italic')
     spy.mockRestore()
@@ -132,49 +133,49 @@ describe('registerFormattingCommands', () => {
   })
 
   it('should call document.execCommand for underline execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.underline.execute()
     expect(spy).toHaveBeenCalledWith('underline', false, null)
     spy.mockRestore()
   })
 
   it('should check queryCommandState for underline isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
     expect(commands.underline.isActive()).toBe(true)
     expect(spy).toHaveBeenCalledWith('underline')
     spy.mockRestore()
   })
 
   it('should call document.execCommand for subscript execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.subscript.execute()
     expect(spy).toHaveBeenCalledWith('subscript', false, null)
     spy.mockRestore()
   })
 
   it('should check queryCommandState for subscript isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
     expect(commands.subscript.isActive()).toBe(true)
     expect(spy).toHaveBeenCalledWith('subscript')
     spy.mockRestore()
   })
 
   it('should call document.execCommand for superscript execute', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.superscript.execute()
     expect(spy).toHaveBeenCalledWith('superscript', false, null)
     spy.mockRestore()
   })
 
   it('should check queryCommandState for superscript isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(false)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(false)
     expect(commands.superscript.isActive()).toBe(false)
     expect(spy).toHaveBeenCalledWith('superscript')
     spy.mockRestore()
   })
 
   it('should check queryCommandState for strikethrough isActive', () => {
-    const spy = jest.spyOn(document, 'queryCommandState').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
     expect(commands.strikethrough.isActive()).toBe(true)
     expect(spy).toHaveBeenCalledWith('strikeThrough')
     spy.mockRestore()

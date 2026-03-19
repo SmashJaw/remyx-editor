@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - **Code block syntax highlighting** — Language-specific syntax highlighting for `<pre><code>` blocks using custom lightweight tokenizers (zero external dependencies). Supports 11 languages: JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, and HTML with automatic language detection. New `SyntaxHighlightPlugin` built-in plugin with MutationObserver-based auto-highlighting, debounced to avoid disrupting contenteditable typing. Skips blocks the user is actively editing and re-highlights on blur. Theme-aware token colors via `.rmx-syn-*` CSS classes across all 6 themes. New `setCodeLanguage` and `getCodeLanguage` commands. Language selector dropdown overlay on focused code blocks in `@remyxjs/react`. Markdown round-trip preserves language identifiers (`` ```js ``, `` ```python ``). New exports: `SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` from `@remyxjs/core`.
+- **Source mode sanitization notification** — `SourceModal` now emits a `source:sanitized` event when the sanitizer strips unsafe content from user-edited HTML, so consumers can surface a warning.
 
 ### Removed
 
@@ -23,6 +24,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - **CONTRIBUTING.md** — Updated development workflow to clarify that lint, test, and typecheck commands run from the repo root, while build commands run from `packages/`.
+
+### Fixed
+
+- **External SVG URL insertion** — `insertImage` command now blocks `.svg` URLs (not just `data:image/svg` URIs) to prevent CSS-based attacks via external SVGs.
+- **CloudProvider endpoint URL injection** — `CloudProvider` constructor validates endpoint URL protocol (http/https only) to prevent injection via user-supplied strings.
+- **SourceModal XSS** — User-edited HTML in source mode is now re-sanitized via `engine.sanitizer.sanitize()` before applying to the editor.
+- **Percent-encoded protocol bypass** — `LinkModal`, `EmbedModal`, and `AttachmentModal` now `decodeURIComponent()` URLs before protocol validation, preventing bypasses like `java%73cript:`.
+- **Async file upload race condition** — Image and file drops in `DragDrop` (and non-image file pastes in `Clipboard`) are now serialized via promise chains to prevent interleaved insertion.
+- **Export PDF iframe sandbox** — PDF export iframe now has `sandbox="allow-same-origin allow-modals"` to restrict script execution.
+- **Markdown URL validation** — Replaced regex-based `SAFE_URL_PROTOCOL` test with `URL` constructor + protocol allowlist (`http:`, `https:`, `mailto:`, `tel:`), also decoding percent-encoded input.
+- **CodeBlockControls duplicate listeners** — Added `codeBlock` to outside-click `useEffect` deps and reset dropdown state on block change.
+- **ImageResizeHandles touch support** — Replaced `mouse*` events with `pointer*` events and `setPointerCapture` for cross-device resize support.
+- **AutosaveManager infinite retry** — Save retries now use exponential backoff (1s–30s) and cap at 5 consecutive failures, emitting a fatal `autosave:error` event when exceeded.
+- **`useAutosave` unhandled rejection** — `checkRecovery()` promise now has a `.catch()` handler to prevent unhandled promise rejections.
+- **ContextMenu command error** — `item.command()` callbacks are now wrapped in try-catch to prevent uncaught errors from breaking the menu.
+- **FindReplace stale mark references** — Added `pruneStaleMatches()` that filters by `isConnected` before highlight, replace, and replaceAll operations.
+- **Export iframe double-cleanup** — PDF export now uses a shared `cleaned` guard to prevent the `onafterprint` and timeout callbacks from racing to remove the iframe.
+
+### Security
+
+- **Pinned runtime dependencies** — `marked`, `turndown`, and `turndown-plugin-gfm` in `@remyxjs/core` are now pinned to exact versions (no `^` ranges) to prevent unvetted patch updates.
 
 ---
 

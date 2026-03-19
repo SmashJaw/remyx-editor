@@ -11,9 +11,11 @@ export function ImageResizeHandles({ image, engine, editorRect }) {
   const top = imgRect.top - editorRect.top
   const left = imgRect.left - editorRect.left
 
-  const handleMouseDown = useCallback((e, corner) => {
+  const handlePointerDown = useCallback((e, corner) => {
     e.preventDefault()
     e.stopPropagation()
+    // Capture pointer for reliable tracking across touch and mouse
+    e.target.setPointerCapture(e.pointerId)
     setResizing(true)
     setStartPos({ x: e.clientX, y: e.clientY })
     setStartSize({ width: image.offsetWidth, height: image.offsetHeight })
@@ -22,7 +24,7 @@ export function ImageResizeHandles({ image, engine, editorRect }) {
   useEffect(() => {
     if (!resizing) return
 
-    const handleMouseMove = (e) => {
+    const handlePointerMove = (e) => {
       if (!startPos || !startSize) return
       const dx = e.clientX - startPos.x
       const aspectRatio = startSize.width > 0 ? startSize.height / startSize.width : 1
@@ -33,16 +35,16 @@ export function ImageResizeHandles({ image, engine, editorRect }) {
       image.style.height = `${newHeight}px`
     }
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setResizing(false)
       engine?.eventBus.emit('content:change')
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener('pointermove', handlePointerMove)
+    document.addEventListener('pointerup', handlePointerUp)
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('pointermove', handlePointerMove)
+      document.removeEventListener('pointerup', handlePointerUp)
     }
   }, [resizing, startPos, startSize, image, engine])
 
@@ -63,8 +65,8 @@ export function ImageResizeHandles({ image, engine, editorRect }) {
         <div
           key={corner}
           className={`rmx-image-handle rmx-handle-${corner}`}
-          style={{ pointerEvents: 'all' }}
-          onMouseDown={(e) => handleMouseDown(e, corner)}
+          style={{ pointerEvents: 'all', touchAction: 'none' }}
+          onPointerDown={(e) => handlePointerDown(e, corner)}
         />
       ))}
     </div>

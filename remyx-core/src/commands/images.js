@@ -15,6 +15,16 @@ export function registerImageCommands(engine) {
       // Block SVG data URIs — can contain executable JavaScript
       if (/^data:image\/svg/i.test(src)) return
 
+      // Block external SVG URLs — SVGs loaded via <img src> can still
+      // exploit CSS-based attacks; only raster formats are safe over URL
+      try {
+        const url = new URL(src, window.location.href)
+        if (url.pathname.toLowerCase().endsWith('.svg')) return
+      } catch {
+        // relative URLs that fail parsing are checked via extension
+        if (/\.svg(\?|#|$)/i.test(src)) return
+      }
+
       // Ensure editor has focus (e.g. when called from a modal)
       eng.element.focus()
 

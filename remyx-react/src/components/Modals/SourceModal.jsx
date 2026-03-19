@@ -16,7 +16,15 @@ export function SourceModal({ open, onClose, engine }) {
 
   const handleApply = () => {
     engine.history.snapshot()
-    const htmlToApply = isMarkdown ? markdownToHtml(source) : source
+    const rawHtml = isMarkdown ? markdownToHtml(source) : source
+    // Re-sanitize user-edited HTML to prevent XSS injection via source mode
+    const htmlToApply = engine.sanitizer.sanitize(rawHtml)
+    // Notify if sanitizer modified the input (unsafe content was stripped)
+    if (htmlToApply !== rawHtml) {
+      engine.eventBus.emit('source:sanitized', {
+        message: 'Some HTML elements or attributes were removed for security.',
+      })
+    }
     engine.setHTML(htmlToApply)
     engine.eventBus.emit('content:change')
     onClose()

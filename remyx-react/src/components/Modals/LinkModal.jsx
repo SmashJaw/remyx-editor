@@ -22,8 +22,14 @@ export function LinkModal({ open, onClose, engine, data }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!href.trim()) return
+    // Decode percent-encoding before validation to prevent bypasses like java%73cript:
+    let trimmedHref
+    try {
+      trimmedHref = decodeURIComponent(href.trim())
+    } catch {
+      trimmedHref = href.trim()
+    }
     // Block any protocol not in the allowlist (blocks javascript:, vbscript:, data:, mhtml:, etc.)
-    const trimmedHref = href.trim()
     if (!SAFE_PROTOCOL.test(trimmedHref) && !RELATIVE_URL.test(trimmedHref)) return
 
     if (data?.href) {

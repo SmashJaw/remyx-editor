@@ -1,4 +1,4 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Selection } from '../core/Selection.js'
 
 describe('Selection', () => {
@@ -346,7 +346,7 @@ describe('Selection', () => {
   describe('insertHTML', () => {
     it('should call document.execCommand with insertHTML', () => {
       // jsdom does not define execCommand, so define it for this test
-      const mockExecCommand = jest.fn().mockReturnValue(true)
+      const mockExecCommand = vi.fn().mockReturnValue(true)
       document.execCommand = mockExecCommand
       selection.insertHTML('<b>test</b>')
       expect(mockExecCommand).toHaveBeenCalledWith('insertHTML', false, '<b>test</b>')
@@ -354,8 +354,8 @@ describe('Selection', () => {
     })
 
     it('should call sanitizer.sanitize when a sanitizer is set', () => {
-      const mockSanitizer = { sanitize: jest.fn((html) => '<b>clean</b>') }
-      const mockExecCommand = jest.fn().mockReturnValue(true)
+      const mockSanitizer = { sanitize: vi.fn((html) => '<b>clean</b>') }
+      const mockExecCommand = vi.fn().mockReturnValue(true)
       document.execCommand = mockExecCommand
 
       selection.setSanitizer(mockSanitizer)
@@ -370,7 +370,7 @@ describe('Selection', () => {
     })
 
     it('should use raw html when no sanitizer is set (backward compat)', () => {
-      const mockExecCommand = jest.fn().mockReturnValue(true)
+      const mockExecCommand = vi.fn().mockReturnValue(true)
       document.execCommand = mockExecCommand
 
       // Ensure no sanitizer is attached
@@ -385,7 +385,7 @@ describe('Selection', () => {
 
   describe('setSanitizer', () => {
     it('should attach a sanitizer instance', () => {
-      const mockSanitizer = { sanitize: jest.fn() }
+      const mockSanitizer = { sanitize: vi.fn() }
       selection.setSanitizer(mockSanitizer)
       expect(selection._sanitizer).toBe(mockSanitizer)
 
@@ -394,8 +394,8 @@ describe('Selection', () => {
     })
 
     it('should overwrite a previously set sanitizer', () => {
-      const first = { sanitize: jest.fn() }
-      const second = { sanitize: jest.fn() }
+      const first = { sanitize: vi.fn() }
+      const second = { sanitize: vi.fn() }
       selection.setSanitizer(first)
       selection.setSanitizer(second)
       expect(selection._sanitizer).toBe(second)
@@ -594,7 +594,7 @@ describe('Selection', () => {
       // jsdom does not implement getBoundingClientRect on Range, so mock it
       const range = selection.getRange()
       const mockRect = { top: 0, left: 0, bottom: 10, right: 50, width: 50, height: 10 }
-      range.getBoundingClientRect = jest.fn().mockReturnValue(mockRect)
+      range.getBoundingClientRect = vi.fn().mockReturnValue(mockRect)
       const rect = selection.getBoundingRect()
       expect(rect).toEqual(mockRect)
     })

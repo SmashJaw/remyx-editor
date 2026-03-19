@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AutosaveManager } from '../core/AutosaveManager.js'
 import { EventBus } from '../core/EventBus.js'
 
@@ -7,8 +8,8 @@ function createMockEngine(html = '<p>Hello</p>') {
   return {
     element: document.createElement('div'),
     eventBus,
-    getHTML: jest.fn(() => html),
-    setHTML: jest.fn(),
+    getHTML: vi.fn(() => html),
+    setHTML: vi.fn(),
   }
 }
 
@@ -16,14 +17,14 @@ function createMockEngine(html = '<p>Hello</p>') {
 function createMemoryProvider() {
   const store = {}
   return {
-    save: jest.fn(async (key, content) => {
+    save: vi.fn(async (key, content) => {
       store[key] = JSON.stringify({ content, timestamp: Date.now(), version: 1 })
     }),
-    load: jest.fn(async (key) => {
+    load: vi.fn(async (key) => {
       if (!store[key]) return null
       return JSON.parse(store[key])
     }),
-    clear: jest.fn(async (key) => { delete store[key] }),
+    clear: vi.fn(async (key) => { delete store[key] }),
     _store: store,
   }
 }
@@ -32,13 +33,13 @@ describe('AutosaveManager', () => {
   let engine, manager
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
     engine = createMockEngine()
   })
 
   afterEach(() => {
     if (manager) manager.destroy()
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   describe('constructor', () => {
@@ -72,8 +73,8 @@ describe('AutosaveManager', () => {
       const provider = createMemoryProvider()
       manager = new AutosaveManager(engine, { provider })
 
-      const savingHandler = jest.fn()
-      const savedHandler = jest.fn()
+      const savingHandler = vi.fn()
+      const savedHandler = vi.fn()
       engine.eventBus.on('autosave:saving', savingHandler)
       engine.eventBus.on('autosave:saved', savedHandler)
 
@@ -101,7 +102,7 @@ describe('AutosaveManager', () => {
       provider.save.mockRejectedValueOnce(new Error('Write failed'))
       manager = new AutosaveManager(engine, { provider })
 
-      const errorHandler = jest.fn()
+      const errorHandler = vi.fn()
       engine.eventBus.on('autosave:error', errorHandler)
 
       await manager.save()
@@ -138,7 +139,7 @@ describe('AutosaveManager', () => {
       expect(provider.save).not.toHaveBeenCalled()
 
       // Advance past debounce
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
 
       // Wait for async save to complete
       await Promise.resolve()
@@ -152,7 +153,7 @@ describe('AutosaveManager', () => {
       manager = new AutosaveManager(engine, { provider, interval: 5000 })
       manager.init()
 
-      jest.advanceTimersByTime(5000)
+      vi.advanceTimersByTime(5000)
       await Promise.resolve()
       await Promise.resolve()
 
@@ -165,7 +166,7 @@ describe('AutosaveManager', () => {
       manager.init()
 
       engine.eventBus.emit('content:change')
-      jest.advanceTimersByTime(10000)
+      vi.advanceTimersByTime(10000)
 
       expect(provider.save).not.toHaveBeenCalled()
     })
@@ -230,7 +231,7 @@ describe('AutosaveManager', () => {
 
       // Content changes after destroy should not trigger saves
       engine.eventBus.emit('content:change')
-      jest.advanceTimersByTime(5000)
+      vi.advanceTimersByTime(5000)
       await Promise.resolve()
 
       // Only the final save in destroy() should have been called
@@ -258,7 +259,7 @@ describe('AutosaveManager', () => {
     it('removes beforeunload handler', async () => {
       const provider = createMemoryProvider()
       manager = new AutosaveManager(engine, { provider })
-      const removeSpy = jest.spyOn(window, 'removeEventListener')
+      const removeSpy = vi.spyOn(window, 'removeEventListener')
 
       manager.init()
       expect(manager._beforeUnloadHandler).not.toBeNull()
@@ -279,7 +280,7 @@ describe('AutosaveManager', () => {
     it('sets up a beforeunload handler that calls _attemptSyncSave', () => {
       const provider = createMemoryProvider()
       manager = new AutosaveManager(engine, { provider })
-      const addSpy = jest.spyOn(window, 'addEventListener')
+      const addSpy = vi.spyOn(window, 'addEventListener')
 
       manager.init()
 
@@ -287,7 +288,7 @@ describe('AutosaveManager', () => {
       expect(manager._beforeUnloadHandler).toBeInstanceOf(Function)
 
       // Calling the handler should trigger _attemptSyncSave
-      const syncSpy = jest.spyOn(manager, '_attemptSyncSave')
+      const syncSpy = vi.spyOn(manager, '_attemptSyncSave')
       manager._beforeUnloadHandler()
       expect(syncSpy).toHaveBeenCalledTimes(1)
 
@@ -333,7 +334,7 @@ describe('AutosaveManager', () => {
       const provider = createMemoryProvider()
       manager = new AutosaveManager(engine, { provider })
       // Add saveSync directly on the resolved provider (after createStorageProvider wraps it)
-      manager.provider.saveSync = jest.fn()
+      manager.provider.saveSync = vi.fn()
       // _lastSavedContent must differ from current to trigger save
       manager._lastSavedContent = 'something different'
 
@@ -351,7 +352,7 @@ describe('AutosaveManager', () => {
       manager._lastSavedContent = 'something different'
 
       const originalSendBeacon = navigator.sendBeacon
-      navigator.sendBeacon = jest.fn(() => true)
+      navigator.sendBeacon = vi.fn(() => true)
 
       manager._attemptSyncSave()
 
@@ -369,7 +370,7 @@ describe('AutosaveManager', () => {
 
     it('returns early if content is unchanged', () => {
       const provider = createMemoryProvider()
-      provider.saveSync = jest.fn()
+      provider.saveSync = vi.fn()
       manager = new AutosaveManager(engine, { provider })
 
       // Set _lastSavedContent to match what getHTML returns
@@ -382,7 +383,7 @@ describe('AutosaveManager', () => {
 
     it('returns early if destroyed', () => {
       const provider = createMemoryProvider()
-      provider.saveSync = jest.fn()
+      provider.saveSync = vi.fn()
       manager = new AutosaveManager(engine, { provider })
       manager._destroyed = true
 

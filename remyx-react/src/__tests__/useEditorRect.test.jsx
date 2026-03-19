@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 
@@ -8,25 +9,27 @@ describe('useEditorRect', () => {
   beforeEach(() => {
     observeCallback = null
     mockResizeObserver = {
-      observe: jest.fn(),
-      disconnect: jest.fn(),
-      unobserve: jest.fn(),
+      observe: vi.fn(),
+      disconnect: vi.fn(),
+      unobserve: vi.fn(),
     }
 
-    global.ResizeObserver = jest.fn((callback) => {
-      observeCallback = callback
-      return mockResizeObserver
-    })
+    globalThis.ResizeObserver = class MockResizeObserver {
+      constructor(callback) {
+        observeCallback = callback
+        Object.assign(this, mockResizeObserver)
+      }
+    }
 
-    global.requestAnimationFrame = jest.fn((cb) => {
+    globalThis.requestAnimationFrame = vi.fn((cb) => {
       cb()
       return 1
     })
-    global.cancelAnimationFrame = jest.fn()
+    globalThis.cancelAnimationFrame = vi.fn()
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('returns null when ref.current is null', () => {
@@ -38,7 +41,7 @@ describe('useEditorRect', () => {
 
   it('returns null when not ready', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
@@ -57,7 +60,7 @@ describe('useEditorRect', () => {
   it('measures the element rect on mount', () => {
     const mockRect = { top: 50, left: 100, width: 800, height: 400, right: 900, bottom: 450 }
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => mockRect)
+    el.getBoundingClientRect = vi.fn(() => mockRect)
     const ref = { current: el }
 
     const { result } = renderHook(() => useEditorRect(ref, true))
@@ -68,20 +71,19 @@ describe('useEditorRect', () => {
 
   it('sets up ResizeObserver on the element', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
 
     renderHook(() => useEditorRect(ref, true))
 
-    expect(global.ResizeObserver).toHaveBeenCalled()
     expect(mockResizeObserver.observe).toHaveBeenCalledWith(el)
   })
 
   it('disconnects ResizeObserver on unmount', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
@@ -96,7 +98,7 @@ describe('useEditorRect', () => {
   it('updates rect when ResizeObserver fires', () => {
     const el = document.createElement('div')
     let callCount = 0
-    el.getBoundingClientRect = jest.fn(() => {
+    el.getBoundingClientRect = vi.fn(() => {
       callCount++
       if (callCount <= 1) {
         return { top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400 }
@@ -125,11 +127,11 @@ describe('useEditorRect', () => {
 
   it('cleans up scroll listener on unmount', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
-    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener')
 
     const { unmount } = renderHook(() => useEditorRect(ref, true))
 
@@ -141,7 +143,7 @@ describe('useEditorRect', () => {
   it('updates rect when scroll event fires via rAF', () => {
     const el = document.createElement('div')
     let callCount = 0
-    el.getBoundingClientRect = jest.fn(() => {
+    el.getBoundingClientRect = vi.fn(() => {
       callCount++
       if (callCount <= 1) {
         return { top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400 }
@@ -151,8 +153,8 @@ describe('useEditorRect', () => {
     const ref = { current: el }
 
     // Make rAF synchronous
-    global.requestAnimationFrame = jest.fn((cb) => { cb(); return 42 })
-    global.cancelAnimationFrame = jest.fn()
+    global.requestAnimationFrame = vi.fn((cb) => { cb(); return 42 })
+    global.cancelAnimationFrame = vi.fn()
 
     const { result } = renderHook(() => useEditorRect(ref, true))
 
@@ -168,15 +170,15 @@ describe('useEditorRect', () => {
 
   it('cancels pending rAF on cleanup', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
 
     // Make rAF return a handle but NOT execute the callback
     let rafId = 100
-    global.requestAnimationFrame = jest.fn(() => ++rafId)
-    global.cancelAnimationFrame = jest.fn()
+    global.requestAnimationFrame = vi.fn(() => ++rafId)
+    global.cancelAnimationFrame = vi.fn()
 
     const { unmount } = renderHook(() => useEditorRect(ref, true))
 
@@ -193,14 +195,14 @@ describe('useEditorRect', () => {
 
   it('scroll handler cancels previous rAF before scheduling a new one', () => {
     const el = document.createElement('div')
-    el.getBoundingClientRect = jest.fn(() => ({
+    el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
 
     let rafId = 200
-    global.requestAnimationFrame = jest.fn(() => ++rafId)
-    global.cancelAnimationFrame = jest.fn()
+    global.requestAnimationFrame = vi.fn(() => ++rafId)
+    global.cancelAnimationFrame = vi.fn()
 
     renderHook(() => useEditorRect(ref, true))
 

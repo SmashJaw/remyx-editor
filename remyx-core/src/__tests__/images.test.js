@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerImageCommands } from '../commands/images.js'
 
 describe('registerImageCommands', () => {
@@ -13,26 +14,26 @@ describe('registerImageCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        insertNode: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
-        setRange: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        insertNode: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
+        setRange: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,

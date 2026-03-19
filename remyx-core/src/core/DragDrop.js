@@ -588,22 +588,31 @@ export class DragDrop {
     this._setCursorAtDropPoint(e)
     this.engine.history.snapshot()
 
-    imageFiles.filter((f) => !this._exceedsMaxFileSize(f)).forEach((file) => {
-      if (this.engine.options.uploadHandler) {
-        this.engine.options.uploadHandler(file).then((url) => {
-          this.engine.commands.execute('insertImage', { src: url, alt: file.name })
-        }).catch((err) => {
-          console.error(`Image upload failed for "${file.name}":`, err)
-          this.engine.eventBus.emit('upload:error', { file, error: err })
-        })
-      } else {
-        const reader = new FileReader()
-        reader.onload = (ev) => {
-          this.engine.commands.execute('insertImage', { src: ev.target.result, alt: file.name })
+    const validFiles = imageFiles.filter((f) => !this._exceedsMaxFileSize(f))
+    // Serialize uploads to prevent race conditions with concurrent insertImage calls
+    let chain = Promise.resolve()
+    for (const file of validFiles) {
+      chain = chain.then(() => {
+        if (this.engine.options.uploadHandler) {
+          return this.engine.options.uploadHandler(file).then((url) => {
+            this.engine.commands.execute('insertImage', { src: url, alt: file.name })
+          }).catch((err) => {
+            console.error(`Image upload failed for "${file.name}":`, err)
+            this.engine.eventBus.emit('upload:error', { file, error: err })
+          })
+        } else {
+          return new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.onload = (ev) => {
+              this.engine.commands.execute('insertImage', { src: ev.target.result, alt: file.name })
+              resolve()
+            }
+            reader.onerror = () => resolve()
+            reader.readAsDataURL(file)
+          })
         }
-        reader.readAsDataURL(file)
-      }
-    })
+      })
+    }
   }
 
   _handleDocumentDrop(e, files) {
@@ -627,18 +636,22 @@ export class DragDrop {
     this._setCursorAtDropPoint(e)
     this.engine.history.snapshot()
 
-    files.forEach((file) => {
-      this.engine.options.uploadHandler(file).then((url) => {
-        this.engine.commands.execute('insertAttachment', {
-          url,
-          filename: file.name,
-          filesize: file.size,
+    // Serialize uploads to prevent race conditions with concurrent insertAttachment calls
+    let chain = Promise.resolve()
+    for (const file of files) {
+      chain = chain.then(() =>
+        this.engine.options.uploadHandler(file).then((url) => {
+          this.engine.commands.execute('insertAttachment', {
+            url,
+            filename: file.name,
+            filesize: file.size,
+          })
+        }).catch((err) => {
+          console.error(`File upload failed for "${file.name}":`, err)
+          this.engine.eventBus.emit('upload:error', { file, error: err })
         })
-      }).catch((err) => {
-        console.error(`File upload failed for "${file.name}":`, err)
-        this.engine.eventBus.emit('upload:error', { file, error: err })
-      })
-    })
+      )
+    }
   }
 
   _setCursorAtDropPoint(e) {

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { cleanPastedHTML, looksLikeMarkdown } from '../utils/pasteClean.js'
 
 describe('cleanPastedHTML', () => {

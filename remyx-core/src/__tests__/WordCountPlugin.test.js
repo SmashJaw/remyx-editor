@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { WordCountPlugin } from '../plugins/builtins/WordCountPlugin.js'
 
 describe('WordCountPlugin', () => {
@@ -5,11 +6,11 @@ describe('WordCountPlugin', () => {
 
   beforeEach(() => {
     plugin = WordCountPlugin()
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   describe('plugin structure', () => {
@@ -97,7 +98,7 @@ describe('WordCountPlugin', () => {
   describe('event emission', () => {
     it('should emit wordcount:update on init', () => {
       const engine = createMockEngine('Hello world')
-      const emitSpy = jest.spyOn(engine.eventBus, 'emit')
+      const emitSpy = vi.spyOn(engine.eventBus, 'emit')
       plugin.init(engine)
 
       expect(emitSpy).toHaveBeenCalledWith('wordcount:update', {
@@ -111,7 +112,7 @@ describe('WordCountPlugin', () => {
       plugin.init(engine)
 
       engine._text = 'Hello world again'
-      const emitSpy = jest.spyOn(engine.eventBus, 'emit')
+      const emitSpy = vi.spyOn(engine.eventBus, 'emit')
       engine.eventBus.trigger('content:change')
 
       expect(emitSpy).toHaveBeenCalledWith('wordcount:update', {
@@ -167,7 +168,7 @@ describe('WordCountPlugin', () => {
       const engine = createMockEngine('test')
       plugin.init(engine)
 
-      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      const clearSpy = vi.spyOn(global, 'clearTimeout')
       plugin.destroy()
 
       expect(clearSpy).toHaveBeenCalled()
@@ -175,12 +176,13 @@ describe('WordCountPlugin', () => {
     })
 
     it('should disconnect MutationObserver and set it to null on destroy', () => {
-      const disconnectSpy = jest.fn()
-      const originalMutationObserver = global.MutationObserver
-      global.MutationObserver = jest.fn(() => ({
-        observe: jest.fn(),
-        disconnect: disconnectSpy,
-      }))
+      const disconnectSpy = vi.fn()
+      const originalMutationObserver = globalThis.MutationObserver
+      globalThis.MutationObserver = class {
+        constructor() { }
+        observe() { }
+        disconnect() { disconnectSpy() }
+      }
 
       const freshPlugin = WordCountPlugin()
       const engine = createMockEngine('test')
@@ -193,19 +195,17 @@ describe('WordCountPlugin', () => {
       // Calling destroy again should not throw (observer is null after first destroy)
       expect(() => freshPlugin.destroy()).not.toThrow()
 
-      global.MutationObserver = originalMutationObserver
+      globalThis.MutationObserver = originalMutationObserver
     })
 
     it('should clear a pending debounce timer on destroy', () => {
-      const originalMutationObserver = global.MutationObserver
+      const originalMutationObserver = globalThis.MutationObserver
       let mutationCallback
-      global.MutationObserver = jest.fn((cb) => {
-        mutationCallback = cb
-        return {
-          observe: jest.fn(),
-          disconnect: jest.fn(),
-        }
-      })
+      globalThis.MutationObserver = class {
+        constructor(cb) { mutationCallback = cb }
+        observe() { }
+        disconnect() { }
+      }
 
       const freshPlugin = WordCountPlugin()
       const engine = createMockEngine('test')
@@ -214,16 +214,16 @@ describe('WordCountPlugin', () => {
       // Trigger a mutation to schedule a debounced update
       mutationCallback([])
 
-      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      const clearSpy = vi.spyOn(global, 'clearTimeout')
       freshPlugin.destroy()
 
       expect(clearSpy).toHaveBeenCalled()
 
       // Advance timers — the debounced update should NOT fire since we destroyed
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
 
       clearSpy.mockRestore()
-      global.MutationObserver = originalMutationObserver
+      globalThis.MutationObserver = originalMutationObserver
     })
   })
 })
@@ -247,7 +247,7 @@ function createMockEngine(text) {
         if (!listeners[event]) listeners[event] = []
         listeners[event].push(handler)
       },
-      emit: jest.fn(),
+      emit: vi.fn(),
       trigger(event) {
         if (listeners[event]) {
           listeners[event].forEach(fn => fn())

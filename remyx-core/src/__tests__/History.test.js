@@ -1,4 +1,4 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { History } from '../core/History.js'
 
 describe('History', () => {
@@ -13,13 +13,13 @@ describe('History', () => {
 
     mockEngine = {
       element,
-      eventBus: { emit: jest.fn() },
+      eventBus: { emit: vi.fn() },
       selection: {
-        save: jest.fn().mockReturnValue(null),
-        restore: jest.fn(),
+        save: vi.fn().mockReturnValue(null),
+        restore: vi.fn(),
       },
       sanitizer: {
-        sanitize: jest.fn((html) => html),
+        sanitize: vi.fn((html) => html),
       },
     }
     history = new History(mockEngine)
@@ -229,7 +229,7 @@ describe('History', () => {
 
   describe('snapshot clears pending debounce timer', () => {
     it('should cancel a pending debounce timer when snapshot is called', () => {
-      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      const clearSpy = vi.spyOn(global, 'clearTimeout')
       // Set up a pending debounce timer
       history._debounceTimer = setTimeout(() => {}, 10000)
       const pendingTimer = history._debounceTimer
@@ -242,7 +242,7 @@ describe('History', () => {
     })
 
     it('should not call clearTimeout when no debounce timer is pending', () => {
-      const clearSpy = jest.spyOn(global, 'clearTimeout')
+      const clearSpy = vi.spyOn(global, 'clearTimeout')
       history._debounceTimer = null
 
       history.snapshot()
@@ -255,15 +255,15 @@ describe('History', () => {
 
   describe('_debouncedSnapshot', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })
 
     afterEach(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('should reset timer on repeated calls', () => {
-      const snapshotSpy = jest.spyOn(history, '_takeSnapshot' in history ? '_takeSnapshot' : 'snapshot')
+      const snapshotSpy = vi.spyOn(history, '_takeSnapshot' in history ? '_takeSnapshot' : 'snapshot')
       // Manually test _debouncedSnapshot behavior
       history._debouncedSnapshot()
       const firstTimer = history._debounceTimer
@@ -286,7 +286,7 @@ describe('History', () => {
       // Before timer fires, no new snapshot
       const stackSizeBefore = history._undoStack.length
 
-      jest.advanceTimersByTime(history.debounceMs)
+      vi.advanceTimersByTime(history.debounceMs)
 
       // After timer fires, snapshot should have been taken
       expect(history._undoStack.length).toBe(stackSizeBefore + 1)

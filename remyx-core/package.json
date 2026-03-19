@@ -33,9 +33,9 @@
   },
   "sideEffects": ["*.css"],
   "dependencies": {
-    "marked": "^15.0.0",
-    "turndown": "^7.2.0",
-    "turndown-plugin-gfm": "^1.0.2"
+    "marked": "15.0.0",
+    "turndown": "7.2.0",
+    "turndown-plugin-gfm": "1.0.2"
   },
   "peerDependencies": {
     "mammoth": "^1.11.0",

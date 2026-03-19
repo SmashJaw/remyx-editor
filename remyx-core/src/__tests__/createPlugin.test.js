@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createPlugin } from '../plugins/createPlugin.js'
 
 describe('createPlugin', () => {
@@ -63,21 +64,21 @@ describe('createPlugin', () => {
     })
 
     it('should preserve custom init function', () => {
-      const init = jest.fn()
+      const init = vi.fn()
       const plugin = createPlugin({ name: 'test', init })
       plugin.init('engine')
       expect(init).toHaveBeenCalledWith('engine')
     })
 
     it('should preserve custom destroy function', () => {
-      const destroy = jest.fn()
+      const destroy = vi.fn()
       const plugin = createPlugin({ name: 'test', destroy })
       plugin.destroy('engine')
       expect(destroy).toHaveBeenCalledWith('engine')
     })
 
     it('should preserve custom commands array', () => {
-      const commands = [{ name: 'doSomething', execute: jest.fn() }]
+      const commands = [{ name: 'doSomething', execute: vi.fn() }]
       const plugin = createPlugin({ name: 'test', commands })
       expect(plugin.commands).toBe(commands)
       expect(plugin.commands).toHaveLength(1)
@@ -96,7 +97,7 @@ describe('createPlugin', () => {
     })
 
     it('should preserve custom contextMenuItems array', () => {
-      const contextMenuItems = [{ label: 'Copy', action: jest.fn() }]
+      const contextMenuItems = [{ label: 'Copy', action: vi.fn() }]
       const plugin = createPlugin({ name: 'test', contextMenuItems })
       expect(plugin.contextMenuItems).toBe(contextMenuItems)
     })

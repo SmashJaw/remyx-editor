@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerAlignmentCommands } from '../commands/alignment.js'
 
 describe('registerAlignmentCommands', () => {
@@ -6,7 +7,7 @@ describe('registerAlignmentCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = jest.fn().mockReturnValue(true)
+    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -15,25 +16,25 @@ describe('registerAlignmentCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
-        getParentBlock: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
+        getParentBlock: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,
@@ -55,28 +56,28 @@ describe('registerAlignmentCommands', () => {
   })
 
   it('should execute alignLeft with justifyLeft', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.alignLeft.execute()
     expect(spy).toHaveBeenCalledWith('justifyLeft', false, null)
     spy.mockRestore()
   })
 
   it('should execute alignCenter with justifyCenter', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.alignCenter.execute()
     expect(spy).toHaveBeenCalledWith('justifyCenter', false, null)
     spy.mockRestore()
   })
 
   it('should execute alignRight with justifyRight', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.alignRight.execute()
     expect(spy).toHaveBeenCalledWith('justifyRight', false, null)
     spy.mockRestore()
   })
 
   it('should execute alignJustify with justifyFull', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.alignJustify.execute()
     expect(spy).toHaveBeenCalledWith('justifyFull', false, null)
     spy.mockRestore()

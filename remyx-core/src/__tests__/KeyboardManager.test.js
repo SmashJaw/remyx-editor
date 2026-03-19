@@ -1,9 +1,9 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { KeyboardManager } from '../core/KeyboardManager.js'
 
 // Mock the platform module so we can control isMac()
-jest.mock('../utils/platform.js', () => ({
-  isMac: jest.fn(() => false),
+vi.mock('../utils/platform.js', () => ({
+  isMac: vi.fn(() => false),
 }))
 
 import { isMac } from '../utils/platform.js'
@@ -17,8 +17,8 @@ describe('KeyboardManager', () => {
     element = document.createElement('div')
     mockEngine = {
       element,
-      commands: { execute: jest.fn() },
-      eventBus: { emit: jest.fn() },
+      commands: { execute: vi.fn() },
+      eventBus: { emit: vi.fn() },
     }
     km = new KeyboardManager(mockEngine)
     isMac.mockReturnValue(false)
@@ -40,7 +40,7 @@ describe('KeyboardManager', () => {
 
   describe('init', () => {
     it('should add a keydown event listener to the element', () => {
-      const spy = jest.spyOn(element, 'addEventListener')
+      const spy = vi.spyOn(element, 'addEventListener')
       km.init()
       expect(spy).toHaveBeenCalledWith('keydown', km._handleKeyDown)
     })
@@ -49,7 +49,7 @@ describe('KeyboardManager', () => {
   describe('destroy', () => {
     it('should remove the keydown event listener from the element', () => {
       km.init()
-      const spy = jest.spyOn(element, 'removeEventListener')
+      const spy = vi.spyOn(element, 'removeEventListener')
       km.destroy()
       expect(spy).toHaveBeenCalledWith('keydown', km._handleKeyDown)
     })
@@ -196,8 +196,8 @@ describe('KeyboardManager', () => {
         bubbles: true,
         cancelable: true,
       })
-      const preventSpy = jest.spyOn(event, 'preventDefault')
-      const stopSpy = jest.spyOn(event, 'stopPropagation')
+      const preventSpy = vi.spyOn(event, 'preventDefault')
+      const stopSpy = vi.spyOn(event, 'stopPropagation')
       element.dispatchEvent(event)
       expect(preventSpy).toHaveBeenCalled()
       expect(stopSpy).toHaveBeenCalled()

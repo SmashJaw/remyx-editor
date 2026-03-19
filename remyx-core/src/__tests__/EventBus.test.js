@@ -1,4 +1,4 @@
-
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { EventBus } from '../core/EventBus.js'
 
 describe('EventBus', () => {
@@ -10,15 +10,15 @@ describe('EventBus', () => {
 
   describe('on', () => {
     it('should subscribe a handler to an event', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.on('test', handler)
       bus.emit('test', 'data')
       expect(handler).toHaveBeenCalledWith('data')
     })
 
     it('should allow multiple handlers for the same event', () => {
-      const handler1 = jest.fn()
-      const handler2 = jest.fn()
+      const handler1 = vi.fn()
+      const handler2 = vi.fn()
       bus.on('test', handler1)
       bus.on('test', handler2)
       bus.emit('test', 'data')
@@ -27,7 +27,7 @@ describe('EventBus', () => {
     })
 
     it('should return an unsubscribe function', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const unsub = bus.on('test', handler)
       unsub()
       bus.emit('test', 'data')
@@ -35,7 +35,7 @@ describe('EventBus', () => {
     })
 
     it('should not call handler for different events', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.on('test', handler)
       bus.emit('other', 'data')
       expect(handler).not.toHaveBeenCalled()
@@ -44,7 +44,7 @@ describe('EventBus', () => {
 
   describe('off', () => {
     it('should remove a specific handler', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.on('test', handler)
       bus.off('test', handler)
       bus.emit('test', 'data')
@@ -52,13 +52,13 @@ describe('EventBus', () => {
     })
 
     it('should not throw when removing a handler from a non-existent event', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       expect(() => bus.off('nonexistent', handler)).not.toThrow()
     })
 
     it('should only remove the specified handler', () => {
-      const handler1 = jest.fn()
-      const handler2 = jest.fn()
+      const handler1 = vi.fn()
+      const handler2 = vi.fn()
       bus.on('test', handler1)
       bus.on('test', handler2)
       bus.off('test', handler1)
@@ -68,7 +68,7 @@ describe('EventBus', () => {
     })
 
     it('should clean up the event key when all handlers are removed', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.on('test', handler)
       bus.off('test', handler)
       // Internal check: the map entry should be deleted
@@ -78,7 +78,7 @@ describe('EventBus', () => {
 
   describe('once', () => {
     it('should call handler only once', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.once('test', handler)
       bus.emit('test', 'first')
       bus.emit('test', 'second')
@@ -87,7 +87,7 @@ describe('EventBus', () => {
     })
 
     it('should return an unsubscribe function', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const unsub = bus.once('test', handler)
       unsub()
       bus.emit('test', 'data')
@@ -97,7 +97,7 @@ describe('EventBus', () => {
 
   describe('emit', () => {
     it('should pass data to all handlers', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       bus.on('test', handler)
       const payload = { key: 'value' }
       bus.emit('test', payload)
@@ -109,9 +109,9 @@ describe('EventBus', () => {
     })
 
     it('should catch and log errors thrown by handlers', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const badHandler = () => { throw new Error('oops') }
-      const goodHandler = jest.fn()
+      const goodHandler = vi.fn()
       bus.on('test', badHandler)
       bus.on('test', goodHandler)
       bus.emit('test', 'data')
@@ -123,8 +123,8 @@ describe('EventBus', () => {
 
   describe('removeAllListeners', () => {
     it('should remove all listeners for a specific event', () => {
-      const handler1 = jest.fn()
-      const handler2 = jest.fn()
+      const handler1 = vi.fn()
+      const handler2 = vi.fn()
       bus.on('test', handler1)
       bus.on('other', handler2)
       bus.removeAllListeners('test')
@@ -135,8 +135,8 @@ describe('EventBus', () => {
     })
 
     it('should remove all listeners when called without an event name', () => {
-      const handler1 = jest.fn()
-      const handler2 = jest.fn()
+      const handler1 = vi.fn()
+      const handler2 = vi.fn()
       bus.on('test', handler1)
       bus.on('other', handler2)
       bus.removeAllListeners()

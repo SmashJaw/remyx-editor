@@ -183,6 +183,18 @@ export class CloudProvider {
     buildDeleteUrl,
   }) {
     if (!endpoint && !buildUrl) throw new Error('CloudProvider requires an endpoint or buildUrl')
+    // Validate endpoint URL to prevent injection via user-supplied strings
+    if (endpoint) {
+      try {
+        const parsed = new URL(endpoint)
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+          throw new Error('CloudProvider endpoint must use http or https protocol')
+        }
+      } catch (err) {
+        if (err.message.includes('protocol')) throw err
+        throw new Error(`CloudProvider endpoint is not a valid URL: ${endpoint}`)
+      }
+    }
     this.endpoint = endpoint
     this.headers = headers
     this.method = method

@@ -21,6 +21,8 @@ export function exportAsMarkdown(html, filename = 'document.md') {
 export function exportAsPDF(html, title = 'Document') {
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:0;height:0;'
+  // Sandbox the iframe but allow scripts (needed for window.print()) and same-origin access
+  iframe.setAttribute('sandbox', 'allow-same-origin allow-modals')
   document.body.appendChild(iframe)
 
   // Re-sanitize HTML and escape title to prevent XSS in export iframe
@@ -50,23 +52,26 @@ export function exportAsPDF(html, title = 'Document') {
 </html>`)
   doc.close()
 
-  iframe.contentWindow.onafterprint = () => {
-    document.body.removeChild(iframe)
+  // Guard against double-cleanup from concurrent onafterprint and timeout
+  let cleaned = false
+  const cleanup = () => {
+    if (cleaned) return
+    cleaned = true
+    clearTimeout(fallbackTimer)
+    if (iframe.parentNode) document.body.removeChild(iframe)
   }
 
+  iframe.contentWindow.onafterprint = cleanup
+
   // Fallback cleanup if onafterprint doesn't fire
-  const fallback = setTimeout(() => {
-    if (iframe.parentNode) document.body.removeChild(iframe)
-  }, 60000)
+  let fallbackTimer = setTimeout(cleanup, 60000)
 
   iframe.onload = () => {
     iframe.contentWindow.focus()
     iframe.contentWindow.print()
-    clearTimeout(fallback)
-    // Re-set fallback after print
-    setTimeout(() => {
-      if (iframe.parentNode) document.body.removeChild(iframe)
-    }, 1000)
+    // Reset fallback to a shorter window after print dialog closes
+    clearTimeout(fallbackTimer)
+    fallbackTimer = setTimeout(cleanup, 1000)
   }
 }
 

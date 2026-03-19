@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSelection } from '../hooks/useSelection.js'
 
@@ -9,7 +10,7 @@ describe('useSelection', () => {
     selectionChangeHandler = null
     mockEngine = {
       eventBus: {
-        on: jest.fn((event, handler) => {
+        on: vi.fn((event, handler) => {
           if (event === 'selection:change') {
             selectionChangeHandler = handler
           }
@@ -18,14 +19,14 @@ describe('useSelection', () => {
             if (event === 'selection:change') selectionChangeHandler = null
           }
         }),
-        off: jest.fn(),
+        off: vi.fn(),
       },
     }
 
     // Mock window.getSelection
     Object.defineProperty(window, 'getSelection', {
       writable: true,
-      value: jest.fn(() => ({
+      value: vi.fn(() => ({
         isCollapsed: true,
         toString: () => '',
         rangeCount: 0,
@@ -98,7 +99,7 @@ describe('useSelection', () => {
   })
 
   it('detects hasSelection from window.getSelection', () => {
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: false,
       toString: () => 'selected text',
       rangeCount: 1,
@@ -119,10 +120,10 @@ describe('useSelection', () => {
   })
 
   it('unsubscribes on unmount', () => {
-    const unsubSelection = jest.fn()
-    const unsubContent = jest.fn()
+    const unsubSelection = vi.fn()
+    const unsubContent = vi.fn()
     let callCount = 0
-    mockEngine.eventBus.on = jest.fn((event, handler) => {
+    mockEngine.eventBus.on = vi.fn((event, handler) => {
       if (event === 'selection:change') {
         selectionChangeHandler = handler
         return unsubSelection
@@ -149,7 +150,7 @@ describe('useSelection', () => {
   })
 
   it('sets selectionRect to null when getBoundingClientRect throws', () => {
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: false,
       toString: () => 'selected text',
       rangeCount: 1,
@@ -173,7 +174,7 @@ describe('useSelection', () => {
     const imgEl = document.createElement('img')
     imgEl.src = 'test.png'
 
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -195,7 +196,7 @@ describe('useSelection', () => {
     imgEl.src = 'test.png'
     container.appendChild(imgEl)
 
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -222,7 +223,7 @@ describe('useSelection', () => {
     table.appendChild(tbody)
     document.body.appendChild(table)
 
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -244,7 +245,7 @@ describe('useSelection', () => {
     const img1 = document.createElement('img')
     const img2 = document.createElement('img')
 
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -259,7 +260,7 @@ describe('useSelection', () => {
     expect(result.current.focusedImage).toBe(img1)
 
     // Change focused element to a different image
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -274,7 +275,7 @@ describe('useSelection', () => {
 
   it('content:change event clears cached DOM references', () => {
     let contentChangeHandler = null
-    mockEngine.eventBus.on = jest.fn((event, handler) => {
+    mockEngine.eventBus.on = vi.fn((event, handler) => {
       if (event === 'selection:change') {
         selectionChangeHandler = handler
       }
@@ -285,7 +286,7 @@ describe('useSelection', () => {
     })
 
     const img = document.createElement('img')
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -306,7 +307,7 @@ describe('useSelection', () => {
     })
 
     // Now fire selection:change with no focusNode to verify cache was cleared
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,
@@ -351,7 +352,7 @@ describe('useSelection', () => {
     table.appendChild(tbody)
     document.body.appendChild(table)
 
-    window.getSelection = jest.fn(() => ({
+    window.getSelection = vi.fn(() => ({
       isCollapsed: true,
       toString: () => '',
       rangeCount: 0,

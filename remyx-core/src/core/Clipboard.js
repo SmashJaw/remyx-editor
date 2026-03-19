@@ -64,18 +64,22 @@ export class Clipboard {
     // Handle non-image file paste as attachment
     const nonImageFiles = files.filter((f) => !f.type.startsWith('image/'))
     if (nonImageFiles.length > 0 && this.engine.options.uploadHandler) {
-      nonImageFiles.forEach((file) => {
-        this.engine.options.uploadHandler(file).then((url) => {
-          this.engine.commands.execute('insertAttachment', {
-            url,
-            filename: file.name,
-            filesize: file.size,
+      // Serialize uploads to prevent race conditions with concurrent insertAttachment calls
+      let chain = Promise.resolve()
+      for (const file of nonImageFiles) {
+        chain = chain.then(() =>
+          this.engine.options.uploadHandler(file).then((url) => {
+            this.engine.commands.execute('insertAttachment', {
+              url,
+              filename: file.name,
+              filesize: file.size,
+            })
+          }).catch((err) => {
+            console.error(`File upload failed for "${file.name}":`, err)
+            this.engine.eventBus.emit('upload:error', { file, error: err })
           })
-        }).catch((err) => {
-          console.error(`File upload failed for "${file.name}":`, err)
-          this.engine.eventBus.emit('upload:error', { file, error: err })
-        })
-      })
+        )
+      }
       return
     }
 

@@ -39,6 +39,8 @@ export class AutosaveManager {
     this._contentChangeHandler = null
     this._beforeUnloadHandler = null
     this._destroyed = false
+    this._consecutiveErrors = 0
+    this._maxRetries = options.maxRetries ?? 5
   }
 
   /**
@@ -124,18 +126,31 @@ export class AutosaveManager {
     try {
       await this.provider.save(this.key, content)
       this._lastSavedContent = content
+      this._consecutiveErrors = 0
 
       const timestamp = Date.now()
       this.engine.eventBus.emit('autosave:saved', { timestamp })
     } catch (error) {
-      this.engine.eventBus.emit('autosave:error', { error })
+      this._consecutiveErrors++
+      this.engine.eventBus.emit('autosave:error', { error, retryCount: this._consecutiveErrors })
     } finally {
       this._isSaving = false
 
-      // If a save was requested while we were saving, do it now
+      // If a save was requested while we were saving, retry with exponential backoff
       if (this._pendingSave) {
         this._pendingSave = false
-        this.save()
+        if (this._consecutiveErrors >= this._maxRetries) {
+          this.engine.eventBus.emit('autosave:error', {
+            error: new Error(`Autosave failed after ${this._maxRetries} consecutive attempts`),
+            fatal: true,
+          })
+        } else if (this._consecutiveErrors > 0) {
+          // Exponential backoff: 1s, 2s, 4s, 8s, 16s
+          const delay = Math.min(1000 * Math.pow(2, this._consecutiveErrors - 1), 30000)
+          setTimeout(() => this.save(), delay)
+        } else {
+          this.save()
+        }
       }
     }
   }

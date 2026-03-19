@@ -97,6 +97,7 @@ export function registerFindReplaceCommands(engine) {
 
   engine.commands.register('replace', {
     execute(eng, { replaceText }) {
+      pruneStaleMatches()
       if (currentMatches.length === 0 || currentIndex < 0 || currentIndex >= currentMatches.length) return
       const mark = currentMatches[currentIndex]
       const textNode = document.createTextNode(replaceText)
@@ -119,6 +120,7 @@ export function registerFindReplaceCommands(engine) {
 
   engine.commands.register('replaceAll', {
     execute(eng, { replaceText }) {
+      pruneStaleMatches()
       currentMatches.forEach((mark) => {
         const textNode = document.createTextNode(replaceText)
         mark.parentNode.replaceChild(textNode, mark)
@@ -142,7 +144,16 @@ export function registerFindReplaceCommands(engine) {
     meta: { tooltip: 'Clear Find' },
   })
 
+  /** Remove stale mark references that are no longer in the document */
+  function pruneStaleMatches() {
+    currentMatches = currentMatches.filter((m) => m.isConnected)
+    if (currentIndex >= currentMatches.length) {
+      currentIndex = currentMatches.length > 0 ? currentMatches.length - 1 : -1
+    }
+  }
+
   function highlightCurrent() {
+    pruneStaleMatches()
     currentMatches.forEach((m, i) => {
       m.className = i === currentIndex ? 'rmx-find-highlight rmx-find-current' : 'rmx-find-highlight'
     })

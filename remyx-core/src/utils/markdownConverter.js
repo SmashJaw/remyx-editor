@@ -69,7 +69,21 @@ function getTurndown() {
 }
 
 // Safe URL protocol allowlist for markdown-generated links and images
-const SAFE_URL_PROTOCOL = /^(https?:|mailto:|tel:|#|\/)/i
+const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:'])
+
+function isSafeUrl(href) {
+  if (!href) return false
+  // Allow relative URLs and anchors
+  if (/^(\/|#)/.test(href)) return true
+  try {
+    // Decode percent-encoding to prevent bypasses like java%73cript:
+    const decoded = decodeURIComponent(href)
+    const url = new URL(decoded, 'https://placeholder.invalid')
+    return SAFE_PROTOCOLS.has(url.protocol)
+  } catch {
+    return false
+  }
+}
 
 function ensureMarkedConfigured() {
   if (!markedConfigured) {
@@ -82,14 +96,14 @@ function ensureMarkedConfigured() {
     const renderer = new marked.Renderer()
     renderer.link = ({ href, title, tokens }) => {
       const text = marked.Parser.parseInline(tokens)
-      if (href && !SAFE_URL_PROTOCOL.test(href)) {
+      if (href && !isSafeUrl(href)) {
         return text
       }
       const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''
       return `<a href="${href}"${titleAttr}>${text}</a>`
     }
     renderer.image = ({ href, title, text }) => {
-      if (href && !SAFE_URL_PROTOCOL.test(href) && !href.startsWith('data:image/')) {
+      if (href && !isSafeUrl(href) && !href.startsWith('data:image/')) {
         return text || ''
       }
       const titleAttr = title ? ` title="${title.replace(/"/g, '&quot;')}"` : ''

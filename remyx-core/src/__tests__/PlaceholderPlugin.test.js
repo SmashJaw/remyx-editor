@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest'
 import { PlaceholderPlugin } from '../plugins/builtins/PlaceholderPlugin.js'
 
 describe('PlaceholderPlugin', () => {

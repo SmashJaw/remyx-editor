@@ -1,17 +1,18 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getExtension, readAsText, readAsArrayBuffer, escapeHtml } from '../utils/documentConverter/shared.js'
 
 // Mock all dynamic converter imports
-jest.mock('../utils/documentConverter/convertDocx.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertPdf.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertMarkdown.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertHtml.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertText.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertCsv.js', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('../utils/documentConverter/convertRtf.js', () => ({ __esModule: true, default: jest.fn() }))
+vi.mock('../utils/documentConverter/convertDocx.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertPdf.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertMarkdown.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertHtml.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertText.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertCsv.js', () => ({ __esModule: true, default: vi.fn() }))
+vi.mock('../utils/documentConverter/convertRtf.js', () => ({ __esModule: true, default: vi.fn() }))
 
 // Mock cleanPastedHTML
-jest.mock('../utils/pasteClean.js', () => ({
-  cleanPastedHTML: jest.fn((html) => `cleaned:${html}`),
+vi.mock('../utils/pasteClean.js', () => ({
+  cleanPastedHTML: vi.fn((html) => `cleaned:${html}`),
 }))
 
 describe('shared.js', () => {
@@ -144,7 +145,7 @@ describe('documentConverter index.js', () => {
   let cleanPastedHTML
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     const mod = await import('../utils/documentConverter/index.js')
     isImportableFile = mod.isImportableFile
     getSupportedExtensions = mod.getSupportedExtensions

@@ -17,7 +17,14 @@ export function AttachmentModal({ open, onClose, engine }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!url.trim()) return
-    if (DANGEROUS_PROTOCOL.test(url)) return
+    // Decode percent-encoding before validation to prevent bypasses like java%73cript:
+    let decoded
+    try {
+      decoded = decodeURIComponent(url.trim())
+    } catch {
+      decoded = url.trim()
+    }
+    if (DANGEROUS_PROTOCOL.test(decoded)) return
     engine.executeCommand('insertAttachment', {
       url,
       filename: filename || 'file',

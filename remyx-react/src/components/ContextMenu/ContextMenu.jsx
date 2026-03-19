@@ -18,7 +18,11 @@ function ContextMenuInner({ contextMenu, onHide, onOpenModal }) {
             className="rmx-context-menu-item"
             onClick={() => {
               if (typeof item.command === 'function') {
-                item.command()
+                try {
+                  item.command()
+                } catch (err) {
+                  console.error('[Remyx] Context menu command failed:', err)
+                }
               } else if (item.command === 'editLinkModal') {
                 onOpenModal?.('link', {
                   href: item.data?.href,

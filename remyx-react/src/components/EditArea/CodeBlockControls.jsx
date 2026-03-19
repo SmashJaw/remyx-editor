@@ -18,6 +18,7 @@ export function CodeBlockControls({ codeBlock, engine, editorRect }) {
   const inputRef = useRef(null)
 
   // Close dropdown on outside click
+  // Include codeBlock in deps to clean up listener when the target block changes
   useEffect(() => {
     if (!open) return
     const handleClick = (e) => {
@@ -28,7 +29,13 @@ export function CodeBlockControls({ codeBlock, engine, editorRect }) {
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
+  }, [open, codeBlock])
+
+  // Reset dropdown state when the code block changes
+  useEffect(() => {
+    setOpen(false)
+    setFilter('')
+  }, [codeBlock])
 
   // Focus filter input when dropdown opens
   useEffect(() => {

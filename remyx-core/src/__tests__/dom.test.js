@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from '../utils/dom.js'
 
 describe('dom utilities', () => {

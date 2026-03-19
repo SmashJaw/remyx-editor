@@ -1,8 +1,9 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '../utils/exportUtils.js'
 
 // Mock the markdownConverter module
-jest.mock('../utils/markdownConverter.js', () => ({
-  htmlToMarkdown: jest.fn((html) => `# Converted\n\n${html}`),
+vi.mock('../utils/markdownConverter.js', () => ({
+  htmlToMarkdown: vi.fn((html) => `# Converted\n\n${html}`),
 }))
 
 describe('exportUtils', () => {
@@ -17,25 +18,26 @@ describe('exportUtils', () => {
     mockAnchor = {
       href: '',
       download: '',
-      click: jest.fn(),
+      click: vi.fn(),
     }
 
-    createElementSpy = jest.spyOn(document, 'createElement').mockImplementation((tag) => {
+    createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tag) => {
       if (tag === 'a') return mockAnchor
       // For iframe in exportAsPDF
       if (tag === 'iframe') {
         const iframeDoc = {
-          open: jest.fn(),
-          write: jest.fn(),
-          close: jest.fn(),
+          open: vi.fn(),
+          write: vi.fn(),
+          close: vi.fn(),
         }
         return {
           style: {},
+          setAttribute: vi.fn(),
           contentDocument: iframeDoc,
           contentWindow: {
             document: iframeDoc,
-            focus: jest.fn(),
-            print: jest.fn(),
+            focus: vi.fn(),
+            print: vi.fn(),
             onafterprint: null,
           },
           onload: null,
@@ -45,20 +47,20 @@ describe('exportUtils', () => {
       return document.createElement.call(document, tag)
     })
 
-    createObjectURLSpy = jest.fn(() => 'blob:mock-url')
-    revokeObjectURLSpy = jest.fn()
+    createObjectURLSpy = vi.fn(() => 'blob:mock-url')
+    revokeObjectURLSpy = vi.fn()
     URL.createObjectURL = createObjectURLSpy
     URL.revokeObjectURL = revokeObjectURLSpy
 
-    appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation(() => {})
-    removeChildSpy = jest.spyOn(document.body, 'removeChild').mockImplementation(() => {})
+    appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => {})
+    removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => {})
   })
 
   afterEach(() => {
     createElementSpy.mockRestore()
     appendChildSpy.mockRestore()
     removeChildSpy.mockRestore()
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('exportAsMarkdown', () => {
@@ -192,7 +194,7 @@ describe('exportUtils', () => {
     })
 
     it('should set fallback timeout after print that removes iframe', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
       const iframe = createMockIframe()
       iframe.parentNode = document.body
       createElementSpy.mockImplementation((tag) => {
@@ -204,14 +206,14 @@ describe('exportUtils', () => {
       iframe.onload()
 
       // Advance past the 1000ms fallback timeout set inside onload
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       expect(removeChildSpy).toHaveBeenCalledWith(iframe)
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('should not remove iframe via fallback if already removed', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
       const iframe = createMockIframe()
       iframe.parentNode = null // simulate already removed
       createElementSpy.mockImplementation((tag) => {
@@ -223,18 +225,18 @@ describe('exportUtils', () => {
       iframe.onload()
 
       // Advance timers - removeChild should not be called since parentNode is null
-      jest.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000)
       // removeChild is called once during onload path setup but not for fallback cleanup
       // since iframe.parentNode is null
       expect(removeChildSpy).not.toHaveBeenCalledWith(iframe)
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 
   describe('exportAsPDF - initial fallback timeout', () => {
     it('should set a 60s fallback timeout that removes iframe if still in DOM', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
       const iframe = createMockIframe()
       iframe.parentNode = document.body
       createElementSpy.mockImplementation((tag) => {
@@ -246,10 +248,10 @@ describe('exportUtils', () => {
 
       // Do NOT trigger onload - simulate the case where it never fires
       // Advance past the 60000ms fallback
-      jest.advanceTimersByTime(60000)
+      vi.advanceTimersByTime(60000)
       expect(removeChildSpy).toHaveBeenCalledWith(iframe)
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 
@@ -317,17 +319,18 @@ describe('exportUtils', () => {
 
 function createMockIframe() {
   const iframeDoc = {
-    open: jest.fn(),
-    write: jest.fn(),
-    close: jest.fn(),
+    open: vi.fn(),
+    write: vi.fn(),
+    close: vi.fn(),
   }
   return {
     style: { cssText: '' },
+    setAttribute: vi.fn(),
     contentDocument: iframeDoc,
     contentWindow: {
       document: iframeDoc,
-      focus: jest.fn(),
-      print: jest.fn(),
+      focus: vi.fn(),
+      print: vi.fn(),
       onafterprint: null,
     },
     onload: null,

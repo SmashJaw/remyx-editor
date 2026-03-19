@@ -1,4 +1,4 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { EditorEngine } from '../core/EditorEngine.js'
 
 describe('EditorEngine', () => {
@@ -174,14 +174,14 @@ describe('EditorEngine', () => {
   describe('focus / blur', () => {
     it('should call focus on the element', () => {
       engine.init()
-      const focusSpy = jest.spyOn(element, 'focus')
+      const focusSpy = vi.spyOn(element, 'focus')
       engine.focus()
       expect(focusSpy).toHaveBeenCalled()
     })
 
     it('should call blur on the element', () => {
       engine.init()
-      const blurSpy = jest.spyOn(element, 'blur')
+      const blurSpy = vi.spyOn(element, 'blur')
       engine.blur()
       expect(blurSpy).toHaveBeenCalled()
     })
@@ -189,13 +189,13 @@ describe('EditorEngine', () => {
 
   describe('executeCommand', () => {
     it('should delegate to commands.execute', () => {
-      const spy = jest.spyOn(engine.commands, 'execute').mockReturnValue(true)
+      const spy = vi.spyOn(engine.commands, 'execute').mockReturnValue(true)
       engine.executeCommand('bold')
       expect(spy).toHaveBeenCalledWith('bold')
     })
 
     it('should pass additional arguments', () => {
-      const spy = jest.spyOn(engine.commands, 'execute').mockReturnValue(true)
+      const spy = vi.spyOn(engine.commands, 'execute').mockReturnValue(true)
       engine.executeCommand('setColor', '#ff0000')
       expect(spy).toHaveBeenCalledWith('setColor', '#ff0000')
     })
@@ -203,14 +203,14 @@ describe('EditorEngine', () => {
 
   describe('event emission', () => {
     it('should provide on/off for event subscription', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('test', handler)
       engine.eventBus.emit('test', 'data')
       expect(handler).toHaveBeenCalledWith('data')
     })
 
     it('should allow unsubscribing via off', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('test', handler)
       engine.off('test', handler)
       engine.eventBus.emit('test', 'data')
@@ -218,7 +218,7 @@ describe('EditorEngine', () => {
     })
 
     it('on should return an unsubscribe function', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const unsub = engine.on('test', handler)
       unsub()
       engine.eventBus.emit('test', 'data')
@@ -227,7 +227,7 @@ describe('EditorEngine', () => {
 
     it('should emit focus event on element focus', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('focus', handler)
       element.dispatchEvent(new Event('focus'))
       expect(handler).toHaveBeenCalled()
@@ -235,7 +235,7 @@ describe('EditorEngine', () => {
 
     it('should emit blur event on element blur', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('blur', handler)
       element.dispatchEvent(new Event('blur'))
       expect(handler).toHaveBeenCalled()
@@ -244,7 +244,7 @@ describe('EditorEngine', () => {
     it('should emit content:change on input', () => {
       engine.init()
       element.innerHTML = '<p>text</p>'
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('content:change', handler)
       element.dispatchEvent(new Event('input'))
       expect(handler).toHaveBeenCalled()
@@ -289,11 +289,11 @@ describe('EditorEngine', () => {
 
   describe('init error handling', () => {
     it('should emit editor:error and re-throw when a subsystem init throws', () => {
-      const errorHandler = jest.fn()
+      const errorHandler = vi.fn()
       engine.on('editor:error', errorHandler)
 
       const initError = new Error('keyboard init failed')
-      jest.spyOn(engine.keyboard, 'init').mockImplementation(() => {
+      vi.spyOn(engine.keyboard, 'init').mockImplementation(() => {
         throw initError
       })
 
@@ -308,10 +308,10 @@ describe('EditorEngine', () => {
   describe('_handleSelectionChange', () => {
     it('should not emit selection:change when selection is not within editor', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('selection:change', handler)
 
-      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(false)
+      vi.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(false)
 
       document.dispatchEvent(new Event('selectionchange'))
       expect(handler).not.toHaveBeenCalled()
@@ -319,11 +319,11 @@ describe('EditorEngine', () => {
 
     it('should not emit selection:change when getRange returns null', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('selection:change', handler)
 
-      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
-      jest.spyOn(engine.selection, 'getRange').mockReturnValue(null)
+      vi.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
+      vi.spyOn(engine.selection, 'getRange').mockReturnValue(null)
 
       document.dispatchEvent(new Event('selectionchange'))
       expect(handler).not.toHaveBeenCalled()
@@ -331,13 +331,13 @@ describe('EditorEngine', () => {
 
     it('should emit selection:change with active formats when selection is valid', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('selection:change', handler)
 
       const fakeFormats = { bold: true, italic: false }
-      jest.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
-      jest.spyOn(engine.selection, 'getRange').mockReturnValue({})
-      jest.spyOn(engine.selection, 'getActiveFormats').mockReturnValue(fakeFormats)
+      vi.spyOn(engine.selection, 'isWithinEditor').mockReturnValue(true)
+      vi.spyOn(engine.selection, 'getRange').mockReturnValue({})
+      vi.spyOn(engine.selection, 'getActiveFormats').mockReturnValue(fakeFormats)
 
       document.dispatchEvent(new Event('selectionchange'))
       expect(handler).toHaveBeenCalledWith(fakeFormats)
@@ -347,7 +347,7 @@ describe('EditorEngine', () => {
   describe('_handleClick', () => {
     it('should toggle checkbox and emit content:change for task checkbox click', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('content:change', handler)
 
       const checkbox = document.createElement('input')
@@ -367,7 +367,7 @@ describe('EditorEngine', () => {
 
     it('should not toggle a non-task checkbox', () => {
       engine.init()
-      const handler = jest.fn()
+      const handler = vi.fn()
       engine.on('content:change', handler)
 
       const checkbox = document.createElement('input')

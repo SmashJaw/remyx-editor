@@ -69,6 +69,8 @@ export function useAutosave(engine, config) {
         engine.eventBus.emit('autosave:recovered', data)
         onRecoverRef.current?.(data)
       }
+    }).catch((err) => {
+      console.warn('[Remyx] Recovery check failed:', err)
     })
 
     manager.init()

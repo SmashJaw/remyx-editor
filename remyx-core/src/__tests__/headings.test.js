@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { registerHeadingCommands } from '../commands/headings.js'
 
 describe('registerHeadingCommands', () => {
@@ -6,8 +7,8 @@ describe('registerHeadingCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = jest.fn().mockReturnValue(true)
-    document.queryCommandState = jest.fn().mockReturnValue(false)
+    document.execCommand = vi.fn().mockReturnValue(true)
+    document.queryCommandState = vi.fn().mockReturnValue(false)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -16,25 +17,25 @@ describe('registerHeadingCommands', () => {
     mockEngine = {
       element,
       commands: {
-        register: jest.fn((name, def) => { commands[name] = def }),
-        execute: jest.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
+        register: vi.fn((name, def) => { commands[name] = def }),
+        execute: vi.fn((name, ...args) => commands[name]?.execute(mockEngine, ...args)),
       },
-      keyboard: { register: jest.fn() },
-      eventBus: { emit: jest.fn(), on: jest.fn() },
-      history: { snapshot: jest.fn() },
+      keyboard: { register: vi.fn() },
+      eventBus: { emit: vi.fn(), on: vi.fn() },
+      history: { snapshot: vi.fn() },
       selection: {
-        getSelection: jest.fn().mockReturnValue(window.getSelection()),
-        getRange: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
-        insertHTML: jest.fn(),
-        wrapWith: jest.fn(),
-        unwrap: jest.fn(),
-        getParentBlock: jest.fn(),
+        getSelection: vi.fn().mockReturnValue(window.getSelection()),
+        getRange: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
+        insertHTML: vi.fn(),
+        wrapWith: vi.fn(),
+        unwrap: vi.fn(),
+        getParentBlock: vi.fn(),
       },
-      sanitizer: { sanitize: jest.fn(html => html) },
-      getHTML: jest.fn().mockReturnValue('<p>test</p>'),
-      setHTML: jest.fn(),
+      sanitizer: { sanitize: vi.fn(html => html) },
+      getHTML: vi.fn().mockReturnValue('<p>test</p>'),
+      setHTML: vi.fn(),
       options: { baseHeadingLevel: 0 },
       isMarkdownMode: false,
       isSourceMode: false,
@@ -57,28 +58,28 @@ describe('registerHeadingCommands', () => {
   })
 
   it('should execute heading with paragraph level', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.heading.execute(mockEngine, 'p')
     expect(spy).toHaveBeenCalledWith('formatBlock', false, '<p>')
     spy.mockRestore()
   })
 
   it('should execute heading with numeric level', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.heading.execute(mockEngine, 2)
     expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
     spy.mockRestore()
   })
 
   it('should execute individual heading commands', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.h3.execute()
     expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h3>')
     spy.mockRestore()
   })
 
   it('should execute paragraph command', () => {
-    const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.paragraph.execute()
     expect(spy).toHaveBeenCalledWith('formatBlock', false, '<p>')
     spy.mockRestore()
@@ -127,21 +128,21 @@ describe('registerHeadingCommands', () => {
     })
 
     it('should apply baseHeadingLevel offset to heading command', () => {
-      const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
       commands.heading.execute(mockEngine, 1)
       expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
       spy.mockRestore()
     })
 
     it('should clamp heading level to 6', () => {
-      const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
       commands.heading.execute(mockEngine, 6)
       expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h6>')
       spy.mockRestore()
     })
 
     it('should apply offset to individual heading commands', () => {
-      const spy = jest.spyOn(document, 'execCommand').mockReturnValue(true)
+      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
       commands.h1.execute()
       expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
       spy.mockRestore()

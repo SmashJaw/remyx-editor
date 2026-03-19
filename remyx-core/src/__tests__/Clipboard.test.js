@@ -1,27 +1,27 @@
-
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { Clipboard } from '../core/Clipboard.js'
 
-jest.mock('../utils/pasteClean.js', () => ({
-  cleanPastedHTML: jest.fn((html) => html),
-  looksLikeMarkdown: jest.fn(() => false),
+vi.mock('../utils/pasteClean.js', () => ({
+  cleanPastedHTML: vi.fn((html) => html),
+  looksLikeMarkdown: vi.fn(() => false),
 }))
 
-jest.mock('../utils/markdownConverter.js', () => ({
-  markdownToHtml: jest.fn((text) => `<p>${text}</p>`),
+vi.mock('../utils/markdownConverter.js', () => ({
+  markdownToHtml: vi.fn((text) => `<p>${text}</p>`),
 }))
 
-jest.mock('../utils/documentConverter/index.js', () => ({
-  isImportableFile: jest.fn(() => false),
-  convertDocument: jest.fn(() => Promise.resolve('<p>converted</p>')),
+vi.mock('../utils/documentConverter/index.js', () => ({
+  isImportableFile: vi.fn(() => false),
+  convertDocument: vi.fn(() => Promise.resolve('<p>converted</p>')),
 }))
 
-jest.mock('../constants/defaults.js', () => ({
+vi.mock('../constants/defaults.js', () => ({
   DEFAULT_MAX_FILE_SIZE: 10 * 1024 * 1024,
 }))
 
 import { cleanPastedHTML, looksLikeMarkdown } from '../utils/pasteClean.js'
 import { markdownToHtml } from '../utils/markdownConverter.js'
-import { isImportableFile } from '../utils/documentConverter/index.js'
+import { isImportableFile, convertDocument } from '../utils/documentConverter/index.js'
 
 describe('Clipboard', () => {
   let clipboard
@@ -38,14 +38,14 @@ describe('Clipboard', () => {
         sanitize: true,
       },
       selection: {
-        insertHTML: jest.fn(),
-        save: jest.fn(),
-        restore: jest.fn(),
+        insertHTML: vi.fn(),
+        save: vi.fn(),
+        restore: vi.fn(),
       },
-      history: { snapshot: jest.fn() },
-      eventBus: { emit: jest.fn() },
-      sanitizer: { sanitize: jest.fn((html) => html) },
-      commands: { execute: jest.fn() },
+      history: { snapshot: vi.fn() },
+      eventBus: { emit: vi.fn() },
+      sanitizer: { sanitize: vi.fn((html) => html) },
+      commands: { execute: vi.fn() },
       outputFormat: 'html',
     }
     clipboard = new Clipboard(mockEngine)
@@ -69,7 +69,7 @@ describe('Clipboard', () => {
 
   describe('init', () => {
     it('should add paste, copy, and cut event listeners', () => {
-      const spy = jest.spyOn(element, 'addEventListener')
+      const spy = vi.spyOn(element, 'addEventListener')
       clipboard.init()
       expect(spy).toHaveBeenCalledWith('paste', clipboard._handlePaste)
       expect(spy).toHaveBeenCalledWith('copy', clipboard._handleCopy)
@@ -81,7 +81,7 @@ describe('Clipboard', () => {
   describe('destroy', () => {
     it('should remove paste, copy, and cut event listeners', () => {
       clipboard.init()
-      const spy = jest.spyOn(element, 'removeEventListener')
+      const spy = vi.spyOn(element, 'removeEventListener')
       clipboard.destroy()
       expect(spy).toHaveBeenCalledWith('paste', clipboard._handlePaste)
       expect(spy).toHaveBeenCalledWith('copy', clipboard._handleCopy)
@@ -93,7 +93,7 @@ describe('Clipboard', () => {
     function createPasteEvent({ html = '', text = '', files = [] } = {}) {
       const event = new Event('paste', { bubbles: true, cancelable: true })
       event.clipboardData = {
-        getData: jest.fn((type) => {
+        getData: vi.fn((type) => {
           if (type === 'text/html') return html
           if (type === 'text/plain') return text
           return ''
@@ -106,7 +106,7 @@ describe('Clipboard', () => {
     it('should preventDefault on paste', () => {
       clipboard.init()
       const event = createPasteEvent({ text: 'hello' })
-      const spy = jest.spyOn(event, 'preventDefault')
+      const spy = vi.spyOn(event, 'preventDefault')
       element.dispatchEvent(event)
       expect(spy).toHaveBeenCalled()
     })
@@ -205,7 +205,7 @@ describe('Clipboard', () => {
 
   describe('_handlePaste with images', () => {
     it('should handle image file paste with uploadHandler', async () => {
-      const uploadHandler = jest.fn().mockResolvedValue('https://example.com/img.png')
+      const uploadHandler = vi.fn().mockResolvedValue('https://example.com/img.png')
       mockEngine.options.uploadHandler = uploadHandler
       clipboard.init()
 
@@ -229,23 +229,29 @@ describe('Clipboard', () => {
       const event = createPasteEventWithFiles([imageFile])
 
       // Mock FileReader
-      const mockReader = {
-        readAsDataURL: jest.fn(),
-        onload: null,
+      let readerInstance
+      const readAsDataURLSpy = vi.fn()
+      const OriginalFileReader = globalThis.FileReader
+      globalThis.FileReader = class MockFileReader {
+        constructor() {
+          this.readAsDataURL = readAsDataURLSpy
+          this.onload = null
+          this.onerror = null
+          readerInstance = this
+        }
       }
-      jest.spyOn(global, 'FileReader').mockImplementation(() => mockReader)
 
       element.dispatchEvent(event)
-      expect(mockReader.readAsDataURL).toHaveBeenCalledWith(imageFile)
+      expect(readAsDataURLSpy).toHaveBeenCalledWith(imageFile)
 
       // Simulate reader load
-      mockReader.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
+      readerInstance.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
         src: 'data:image/jpeg;base64,abc',
         alt: 'photo.jpg',
       })
 
-      global.FileReader.mockRestore()
+      globalThis.FileReader = OriginalFileReader
     })
 
     it('should not handle image paste if file exceeds max size', () => {
@@ -257,7 +263,7 @@ describe('Clipboard', () => {
       Object.defineProperty(bigFile, 'size', { value: 200 })
 
       const event = createPasteEventWithFiles([bigFile])
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       element.dispatchEvent(event)
 
       expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('file:too-large', {
@@ -270,7 +276,7 @@ describe('Clipboard', () => {
     function createPasteEventWithFiles(files) {
       const event = new Event('paste', { bubbles: true, cancelable: true })
       event.clipboardData = {
-        getData: jest.fn(() => ''),
+        getData: vi.fn(() => ''),
         files,
       }
       return event
@@ -287,15 +293,15 @@ describe('Clipboard', () => {
 
   describe('_handleCut', () => {
     it('should emit content:change after cut', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
       clipboard.init()
       const event = new Event('cut', { bubbles: true })
       element.dispatchEvent(event)
 
       expect(mockEngine.eventBus.emit).not.toHaveBeenCalledWith('content:change')
-      jest.runAllTimers()
+      vi.runAllTimers()
       expect(mockEngine.eventBus.emit).toHaveBeenCalledWith('content:change')
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 
@@ -307,7 +313,7 @@ describe('Clipboard', () => {
     })
 
     it('should return true for files over the limit', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       mockEngine.options.maxFileSize = 1000
       const file = new File(['data'], 'big.txt', { type: 'text/plain' })
       Object.defineProperty(file, 'size', { value: 2000 })
@@ -337,8 +343,8 @@ describe('Clipboard', () => {
   describe('_handleImagePaste upload error', () => {
     it('should emit upload:error when upload fails', async () => {
       const uploadError = new Error('upload failed')
-      mockEngine.options.uploadHandler = jest.fn().mockRejectedValue(uploadError)
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      mockEngine.options.uploadHandler = vi.fn().mockRejectedValue(uploadError)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
       const file = new File(['data'], 'fail.png', { type: 'image/png' })
       clipboard._handleImagePaste(file)
@@ -358,14 +364,13 @@ describe('Clipboard', () => {
     function createPasteEventWithFiles(files) {
       const event = new Event('paste', { bubbles: true, cancelable: true })
       event.clipboardData = {
-        getData: jest.fn(() => ''),
+        getData: vi.fn(() => ''),
         files,
       }
       return event
     }
 
     it('should convert importable document files and insert sanitized HTML', async () => {
-      const { convertDocument } = require('../utils/documentConverter/index.js')
       isImportableFile.mockReturnValue(true)
       convertDocument.mockResolvedValue('<p>converted doc</p>')
       clipboard.init()
@@ -386,10 +391,9 @@ describe('Clipboard', () => {
     })
 
     it('should warn when document conversion fails', async () => {
-      const { convertDocument } = require('../utils/documentConverter/index.js')
       isImportableFile.mockReturnValue(true)
       convertDocument.mockRejectedValue(new Error('conversion error'))
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       clipboard.init()
 
       const docFile = new File(['data'], 'bad.pdf', { type: 'application/pdf' })
@@ -409,7 +413,7 @@ describe('Clipboard', () => {
     function createPasteEventWithFiles(files) {
       const event = new Event('paste', { bubbles: true, cancelable: true })
       event.clipboardData = {
-        getData: jest.fn(() => ''),
+        getData: vi.fn(() => ''),
         files,
       }
       return event
@@ -417,7 +421,7 @@ describe('Clipboard', () => {
 
     it('should upload non-image files as attachments when uploadHandler is present', async () => {
       isImportableFile.mockReturnValue(false)
-      mockEngine.options.uploadHandler = jest.fn().mockResolvedValue('https://example.com/file.zip')
+      mockEngine.options.uploadHandler = vi.fn().mockResolvedValue('https://example.com/file.zip')
       clipboard.init()
 
       const zipFile = new File(['data'], 'archive.zip', { type: 'application/zip' })
@@ -439,14 +443,17 @@ describe('Clipboard', () => {
     it('should emit upload:error when non-image file upload fails', async () => {
       isImportableFile.mockReturnValue(false)
       const uploadError = new Error('upload failed')
-      mockEngine.options.uploadHandler = jest.fn().mockRejectedValue(uploadError)
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+      mockEngine.options.uploadHandler = vi.fn().mockRejectedValue(uploadError)
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       clipboard.init()
 
       const txtFile = new File(['data'], 'notes.txt', { type: 'text/plain' })
       const event = createPasteEventWithFiles([txtFile])
       element.dispatchEvent(event)
 
+      // Wait for serialized promise chain
+      await Promise.resolve()
+      await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
 

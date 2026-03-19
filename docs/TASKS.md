@@ -2,7 +2,7 @@
 
 # Task Reference — Remyx Editor
 
-**Last updated:** 2026-03-17
+**Last updated:** 2026-03-18
 **Version:** 0.27.0
 
 A single reference for every bug, security fix, cleanup item, and optimization across the Remyx Editor monorepo. Say **"do task 42"** or **"do Sanitizer LRU Cache"** and it gets done.
@@ -45,15 +45,15 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 142 | `useAutosave` stale `onRecover` closure | Medium | ✅ | react | `useAutosave.js` |
 | 143 | History stale snapshot comparison (whitespace) | Medium | ✅ | core | `History.js` |
 | 144 | `useRemyxEditor` form submit listener leak on DOM removal | Medium | ✅ | react | `useRemyxEditor.js` |
-| 166 | CodeBlockControls accumulates duplicate `mousedown` listeners | Medium | 🔲 | react | `CodeBlockControls.jsx` |
-| 167 | ImageResizeHandles mouse-only — no touch/pointer event support | Medium | 🔲 | react | `ImageResizeHandles.jsx` |
-| 168 | AutosaveManager retries indefinitely without backoff or limit | Medium | 🔲 | core | `AutosaveManager.js` |
-| 169 | `useAutosave` `checkRecovery` promise missing `.catch()` handler | Low | 🔲 | react | `useAutosave.js` |
-| 170 | ContextMenu `item.command()` callback not wrapped in try-catch | Low | 🔲 | react | `ContextMenu.jsx` |
-| 171 | FindReplace `<mark>` references go stale after external DOM mutations | Low | 🔲 | core | `findReplace.js` |
-| 172 | Export iframe double-cleanup race between timeout and `onafterprint` | Low | 🔲 | core | `exportUtils.js` |
+| 166 | CodeBlockControls accumulates duplicate `mousedown` listeners | Medium | ✅ | react | `CodeBlockControls.jsx` |
+| 167 | ImageResizeHandles mouse-only — no touch/pointer event support | Medium | ✅ | react | `ImageResizeHandles.jsx` |
+| 168 | AutosaveManager retries indefinitely without backoff or limit | Medium | ✅ | core | `AutosaveManager.js` |
+| 169 | `useAutosave` `checkRecovery` promise missing `.catch()` handler | Low | ✅ | react | `useAutosave.js` |
+| 170 | ContextMenu `item.command()` callback not wrapped in try-catch | Low | ✅ | react | `ContextMenu.jsx` |
+| 171 | FindReplace `<mark>` references go stale after external DOM mutations | Low | ✅ | core | `findReplace.js` |
+| 172 | Export iframe double-cleanup race between timeout and `onafterprint` | Low | ✅ | core | `exportUtils.js` |
 
-**21 resolved, 7 open.**
+**28 resolved, 0 open.**
 
 ---
 
@@ -83,28 +83,28 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 36 | `dangerouslySetInnerHTML` import preview | Medium | ✅ | react | `ImportDocumentModal.jsx` |
 | 37 | CSS style assignments without validation | Medium | ✅ | core/react | `fontControls.js`, `images.js` |
 | 38 | Unvalidated attachment URLs | Medium | ✅ | core | `attachments.js` |
-| 39 | Async file upload race condition | High | 🔲 | core | `Clipboard.js`, `DragDrop.js` |
+| 39 | Async file upload race condition | High | ✅ | core | `Clipboard.js`, `DragDrop.js` |
 | 40 | `Selection.insertHTML()` unsanitized | Medium | ✅ | core | `Selection.js` |
 | 41 | innerHTML restoration in React hooks | Medium | ✅ | react | `usePortalAttachment.js`, `useRemyxEditor.js` |
 | 42 | Unsafe `Object.assign` on DOM styles | Low | ✅ | react | `useRemyxEditor.js` |
 | 43 | Unvalidated URL inputs in modal forms | Low | ✅ | react | `ImageModal.jsx`, `LinkModal.jsx`, etc. |
 | 44 | Theme/className interpolation unvalidated | Low | ✅ | react | `RemyxEditor.jsx`, `useRemyxEditor.js` |
 | 45 | Weak randomness for element IDs | Info | ✅ Documented | core | `dom.js` |
-| 46 | Pin third-party dependency versions | Medium | 🔲 | core | `package.json` |
-| 47 | Source mode sanitization notification | Low | 🔲 | react | — |
+| 46 | Pin third-party dependency versions | Medium | ✅ | core | `package.json` |
+| 47 | Source mode sanitization notification | Low | ✅ | react | `SourceModal.jsx` |
 | 145 | AutolinkPlugin regex DoS (catastrophic backtracking) | High | ✅ | core | `AutolinkPlugin.js` |
 | 146 | LinkModal protocol blacklist incomplete (XSS bypass) | High | ✅ | react | `LinkModal.jsx` |
 | 147 | ImageModal allows `data:image/svg+xml` XSS | Medium | ✅ | react | `ImageModal.jsx` |
 | 148 | `Selection.insertHTML()` has no caller guardrail | Medium | ✅ | core | `Selection.js` |
 | 149 | CLI project name allows path traversal | Medium | ✅ | cli | `create/index.js` |
-| 173 | External SVG URL insertion not blocked (only `data:image/svg` caught) | High | 🔲 | core | `images.js` |
-| 174 | CloudProvider endpoint URL injection via string interpolation | High | 🔲 | core | `providers.js` |
-| 175 | SourceModal applies user-edited HTML without re-sanitization | High | 🔲 | react | `SourceModal.jsx` |
-| 176 | Percent-encoded protocol bypass in modal URL validators | High | 🔲 | react | `LinkModal.jsx`, `EmbedModal.jsx`, `AttachmentModal.jsx` |
-| 177 | Export PDF iframe missing `sandbox` attribute | Low | 🔲 | core | `exportUtils.js` |
-| 178 | Markdown converter URL validation uses regex instead of URL constructor | Low | 🔲 | core | `markdownConverter.js` |
+| 173 | External SVG URL insertion not blocked (only `data:image/svg` caught) | High | ✅ | core | `images.js` |
+| 174 | CloudProvider endpoint URL injection via string interpolation | High | ✅ | core | `providers.js` |
+| 175 | SourceModal applies user-edited HTML without re-sanitization | High | ✅ | react | `SourceModal.jsx` |
+| 176 | Percent-encoded protocol bypass in modal URL validators | High | ✅ | react | `LinkModal.jsx`, `EmbedModal.jsx`, `AttachmentModal.jsx` |
+| 177 | Export PDF iframe missing `sandbox` attribute | Low | ✅ | core | `exportUtils.js` |
+| 178 | Markdown converter URL validation uses regex instead of URL constructor | Low | ✅ | core | `markdownConverter.js` |
 
-**33 resolved, 9 open.**
+**42 resolved, 0 open.**
 
 ---
 
@@ -168,8 +168,9 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 | 180 | CodeEditor uses deprecated `document.execCommand` for tab insertion | Low | 🔲 | react | `CodeEditor.jsx` |
 | 181 | Missing XSS-specific test coverage for modal components | Medium | 🔲 | react | `__tests__/` |
 | 182 | BlockDragHandle accesses private engine property `_dragSource` | Low | 🔲 | react | `BlockDragHandle.jsx` |
+| 186 | Migrate test framework from Jest to Vitest | High | ✅ | all | Vitest + jsdom configured; all 49 test files (1251 tests) migrated |
 
-**41 resolved, 15 open.**
+**42 resolved, 15 open.**
 
 ---
 
@@ -245,11 +246,11 @@ Replaces: ~~BUGS.md~~, ~~SECURITY.md~~, ~~CLEANUP.md~~, ~~OPTIMIZATION.md~~
 
 | Category | Total | Done | Open |
 |----------|-------|------|------|
-| Bugs | 28 | 21 | 7 |
-| Security | 42 | 33 | 9 |
-| Cleanup | 56 | 41 | 15 |
+| Bugs | 28 | 28 | 0 |
+| Security | 42 | 42 | 0 |
+| Cleanup | 57 | 42 | 15 |
 | Optimizations | 59 | 21 | 38 |
-| **Total** | **185** | **116** | **69** |
+| **Total** | **186** | **133** | **53** |
 
 ---
 
@@ -260,11 +261,6 @@ Security issues are listed first within each tier, followed by bugs, cleanup, th
 ### High
 | # | Title | Category |
 |---|-------|----------|
-| 173 | External SVG URL insertion not blocked (only `data:image/svg` caught) | SEC |
-| 174 | CloudProvider endpoint URL injection via string interpolation | SEC |
-| 175 | SourceModal applies user-edited HTML without re-sanitization | SEC |
-| 176 | Percent-encoded protocol bypass in modal URL validators | SEC |
-| 39 | Async file upload race condition | SEC |
 | 110 | Replace `selectionState` prop drilling with Context | OPT |
 | 112 | WeakMap DOM caching in `useSelection` | OPT |
 | 119 | Memoize `useResolvedConfig` return value | OPT |
@@ -281,10 +277,6 @@ Security issues are listed first within each tier, followed by bugs, cleanup, th
 ### Medium
 | # | Title | Category |
 |---|-------|----------|
-| 46 | Pin third-party dependency versions | SEC |
-| 166 | CodeBlockControls accumulates duplicate `mousedown` listeners | BUG |
-| 167 | ImageResizeHandles mouse-only — no touch/pointer event support | BUG |
-| 168 | AutosaveManager retries indefinitely without backoff or limit | BUG |
 | 181 | Missing XSS-specific test coverage for modal components | CLN |
 | 150 | Inconsistent modal error handling UX | CLN |
 | 113 | Granular sub-exports for tree-shaking | OPT |
@@ -306,13 +298,6 @@ Security issues are listed first within each tier, followed by bugs, cleanup, th
 ### Low
 | # | Title | Category |
 |---|-------|----------|
-| 47 | Source mode sanitization notification | SEC |
-| 177 | Export PDF iframe missing `sandbox` attribute | SEC |
-| 178 | Markdown converter URL validation uses regex instead of URL constructor | SEC |
-| 169 | `useAutosave` `checkRecovery` promise missing `.catch()` | BUG |
-| 170 | ContextMenu `item.command()` callback not wrapped in try-catch | BUG |
-| 171 | FindReplace `<mark>` references stale after external DOM mutations | BUG |
-| 172 | Export iframe double-cleanup race between timeout and `onafterprint` | BUG |
 | 90 | Missing React hook test coverage | CLN |
 | 91 | Missing React component test coverage | CLN |
 | 151 | FloatingToolbar magic numbers for positioning | CLN |

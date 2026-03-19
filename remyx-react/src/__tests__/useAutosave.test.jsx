@@ -1,36 +1,40 @@
+import { describe, it, expect, vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useAutosave } from '../hooks/useAutosave.js'
 
 // Mock the AutosaveManager — avoid importing all of @remyxjs/core which pulls in CSS
-jest.mock('@remyxjs/core', () => ({
-  AutosaveManager: jest.fn().mockImplementation(() => ({
-    init: jest.fn(),
-    destroy: jest.fn(),
-    save: jest.fn(),
-    checkRecovery: jest.fn().mockResolvedValue(null),
-    clearRecovery: jest.fn(),
-  })),
-}))
+vi.mock('@remyxjs/core', () => {
+  const MockAutosaveManager = vi.fn(function () {
+    this.init = vi.fn()
+    this.destroy = vi.fn()
+    this.save = vi.fn()
+    this.checkRecovery = vi.fn().mockResolvedValue(null)
+    this.clearRecovery = vi.fn()
+  })
+  return { AutosaveManager: MockAutosaveManager }
+})
+
+import { AutosaveManager } from '@remyxjs/core'
 
 function createMockEngine() {
   const handlers = {}
   return {
     eventBus: {
-      on: jest.fn((event, handler) => {
+      on: vi.fn((event, handler) => {
         if (!handlers[event]) handlers[event] = []
         handlers[event].push(handler)
         return () => {
           handlers[event] = handlers[event].filter(h => h !== handler)
         }
       }),
-      emit: jest.fn((event, data) => {
+      emit: vi.fn((event, data) => {
         if (handlers[event]) {
           handlers[event].forEach(h => h(data))
         }
       }),
     },
-    getHTML: jest.fn(() => '<p>Test</p>'),
-    setHTML: jest.fn(),
+    getHTML: vi.fn(() => '<p>Test</p>'),
+    setHTML: vi.fn(),
     _handlers: handlers,
   }
 }
@@ -152,17 +156,17 @@ describe('useAutosave', () => {
   })
 
   it('sets recoveryData, emits autosave:recovered, and calls onRecover when recovery data exists', async () => {
-    const { AutosaveManager } = require('@remyxjs/core')
-    const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
-    AutosaveManager.mockImplementationOnce(() => ({
-      init: jest.fn(),
-      destroy: jest.fn(),
-      save: jest.fn(),
-      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
-      clearRecovery: jest.fn(),
-    }))
 
-    const onRecover = jest.fn()
+    const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
+    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
+      init: vi.fn(),
+      destroy: vi.fn(),
+      save: vi.fn(),
+      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
+      clearRecovery: vi.fn(),
+    }) })
+
+    const onRecover = vi.fn()
     const engine = createMockEngine()
     const { result } = renderHook(() =>
       useAutosave(engine, { enabled: true, onRecover })
@@ -179,16 +183,16 @@ describe('useAutosave', () => {
   })
 
   it('recoverContent calls engine.setHTML, emits content:change, clears recoveryData, and calls clearRecovery', async () => {
-    const { AutosaveManager } = require('@remyxjs/core')
+
     const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
-    const mockClearRecovery = jest.fn()
-    AutosaveManager.mockImplementationOnce(() => ({
-      init: jest.fn(),
-      destroy: jest.fn(),
-      save: jest.fn(),
-      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
+    const mockClearRecovery = vi.fn()
+    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
+      init: vi.fn(),
+      destroy: vi.fn(),
+      save: vi.fn(),
+      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
       clearRecovery: mockClearRecovery,
-    }))
+    }) })
 
     const engine = createMockEngine()
     const { result } = renderHook(() =>
@@ -214,16 +218,16 @@ describe('useAutosave', () => {
   })
 
   it('dismissRecovery clears recoveryData and calls clearRecovery', async () => {
-    const { AutosaveManager } = require('@remyxjs/core')
+
     const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
-    const mockClearRecovery = jest.fn()
-    AutosaveManager.mockImplementationOnce(() => ({
-      init: jest.fn(),
-      destroy: jest.fn(),
-      save: jest.fn(),
-      checkRecovery: jest.fn().mockResolvedValue(recoveryPayload),
+    const mockClearRecovery = vi.fn()
+    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
+      init: vi.fn(),
+      destroy: vi.fn(),
+      save: vi.fn(),
+      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
       clearRecovery: mockClearRecovery,
-    }))
+    }) })
 
     const engine = createMockEngine()
     const { result } = renderHook(() =>
