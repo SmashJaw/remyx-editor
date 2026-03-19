@@ -148,6 +148,8 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 - **Enhanced tables** — sortable columns, multi-column sort, filterable rows, inline formulas, cell formatting, column/row resize, sticky headers, and Excel/Sheets clipboard interop via `TablePlugin`
 - **Plugins** — `createPlugin()` API with hooks for commands, toolbar items, status bar items, and context menus
 - **Config file** — centralized `defineConfig()` with named editor configurations and provider-based sharing
+- **Block-based editing** — block-level toolbar with type conversion, drag-to-reorder, collapsible sections, block grouping, `BlockTemplatePlugin` with built-in templates
+- **Mobile & touch** — touch floating toolbar, swipe indent/outdent, long-press context menu with haptic feedback, pinch-to-zoom, responsive toolbar overflow, virtual keyboard-aware layout
 - **Multi-instance** — unlimited editors per page with full isolation (state, events, DOM, modals), `EditorBus` for inter-editor communication, `SharedResources` for memory-efficient shared schemas and icons
 - **Import/Export** — PDF, DOCX, Markdown, CSV, and HTML
 - **Paste cleaning** — intelligent cleanup from Word, Google Docs, LibreOffice, Pages, and raw markdown

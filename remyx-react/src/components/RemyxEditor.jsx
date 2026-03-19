@@ -10,6 +10,10 @@ import { useAutosave } from '../hooks/useAutosave.js'
 import { usePortalAttachment } from '../hooks/usePortalAttachment.js'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 import { useDragDrop } from '../hooks/useDragDrop.js'
+import { useSwipeGesture } from '../hooks/useSwipeGesture.js'
+import { useLongPress } from '../hooks/useLongPress.js'
+import { usePinchZoom } from '../hooks/usePinchZoom.js'
+import { useVirtualKeyboard } from '../hooks/useVirtualKeyboard.js'
 import { loadGoogleFonts, DEFAULT_FONTS } from '@remyxjs/core'
 import { SelectionContext } from '../config/SelectionContext.js'
 import { Toolbar } from './Toolbar/Toolbar.jsx'
@@ -112,6 +116,31 @@ export default function RemyxEditor(props) {
 
   // Track drag-and-drop state for overlay rendering
   const { isExternalDrag, dragFileTypes } = useDragDrop(engine)
+
+  // Mobile & touch optimization hooks
+  useSwipeGesture(engine, editAreaRef, {
+    onDismissToolbar: () => {
+      // Trigger floating toolbar dismiss by clearing selection
+      if (engine?.element) {
+        window.getSelection()?.removeAllRanges()
+      }
+    },
+  })
+
+  // Long-press context menu on touch devices
+  const handleLongPress = useCallback(({ x, y }) => {
+    if (!engine) return
+    // Simulate a context menu event at the touch position
+    const fakeEvent = { clientX: x, clientY: y, preventDefault: () => {} }
+    engine.eventBus.emit('contextmenu', fakeEvent)
+  }, [engine])
+  useLongPress(editAreaRef, handleLongPress, { enabled: showContextMenu && !readOnly })
+
+  // Pinch-to-zoom on images and tables
+  const { zoomedElement, resetZoom } = usePinchZoom(editAreaRef)
+
+  // Virtual keyboard awareness
+  useVirtualKeyboard(engine, editorRootRef)
 
   // Handle source mode toggle
   useEffect(() => {
@@ -282,6 +311,17 @@ export default function RemyxEditor(props) {
             editorRect={editorRect}
             editAreaRef={editAreaRef}
           />
+        )}
+
+        {zoomedElement && (
+          <button
+            className="rmx-pinch-zoom-reset"
+            onClick={resetZoom}
+            type="button"
+            aria-label="Reset zoom"
+          >
+            Reset Zoom
+          </button>
         )}
 
         <DropZoneOverlay

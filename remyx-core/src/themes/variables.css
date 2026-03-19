@@ -1945,6 +1945,109 @@
   flex-shrink: 0;
 }
 
+/* ====== Floating Toolbar Touch Support ====== */
+.rmx-floating-toolbar-touch .rmx-toolbar-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.rmx-floating-toolbar-grip {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 12px;
+  cursor: grab;
+  color: var(--rmx-text-secondary);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  padding: 2px 0;
+}
+
+.rmx-floating-toolbar-grip:active {
+  cursor: grabbing;
+}
+
+/* ====== Toolbar Overflow Menu ====== */
+.rmx-toolbar-overflow-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.rmx-toolbar-overflow-btn {
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  min-width: 36px;
+}
+
+.rmx-toolbar-overflow-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 6px;
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius);
+  box-shadow: var(--rmx-shadow-float);
+  z-index: 200;
+  min-width: 200px;
+  max-width: 320px;
+  animation: rmx-scale-in 0.12s ease;
+}
+
+/* ====== Touch Drag Ghost Preview ====== */
+.rmx-drag-ghost {
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-primary);
+  border-radius: var(--rmx-radius);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--rmx-text);
+  box-shadow: var(--rmx-shadow-float);
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+/* ====== Touch Drop Indicator ====== */
+.rmx-touch-drop-indicator {
+  height: 3px;
+  background: var(--rmx-primary);
+  border-radius: 2px;
+  margin: 2px 0;
+  pointer-events: none;
+  animation: rmx-fade-in 0.1s ease;
+}
+
+/* ====== Pinch Zoom Reset Button ====== */
+.rmx-pinch-zoom-reset {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: var(--rmx-font-family);
+  color: var(--rmx-primary);
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius);
+  box-shadow: var(--rmx-shadow-float);
+  cursor: pointer;
+  transition: background var(--rmx-transition-fast);
+}
+
+.rmx-pinch-zoom-reset:hover {
+  background: var(--rmx-toolbar-button-hover);
+}
+
 /* ====== Responsive ====== */
 @media (max-width: 600px) {
   .rmx-toolbar-inner {
@@ -1952,9 +2055,9 @@
   }
 
   .rmx-toolbar-btn {
-    min-width: 28px;
-    height: 28px;
-    padding: 3px 5px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 6px;
   }
 
   .rmx-toolbar-dropdown-label {
@@ -1971,6 +2074,67 @@
 
   .rmx-find-input {
     width: 120px;
+  }
+
+  /* Context menu items larger for touch */
+  .rmx-context-menu-item {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+
+  /* Floating toolbar mobile positioning */
+  .rmx-floating-toolbar {
+    padding: 6px 8px;
+    gap: 2px;
+  }
+
+  .rmx-floating-toolbar .rmx-toolbar-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Show the grip handle on mobile */
+  .rmx-floating-toolbar-grip {
+    display: flex;
+  }
+}
+
+/* ====== Touch-specific: Coarse pointer (touchscreens) ====== */
+@media (pointer: coarse) {
+  /* Larger toolbar buttons for touch */
+  .rmx-toolbar-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Larger drag handle for touch */
+  .rmx-block-drag-handle,
+  .rmx-block-drag-handle-touch {
+    width: 44px;
+    height: 44px;
+    left: -44px;
+  }
+
+  .rmx-block-drag-handle svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Always show drag handle on touch (no hover state) */
+  .rmx-block-drag-handle.rmx-visible {
+    opacity: 0.7;
+  }
+
+  /* Context menu larger items */
+  .rmx-context-menu-item {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
+
+  /* Floating toolbar grip visible on touch */
+  .rmx-floating-toolbar-grip {
+    display: flex;
   }
 }
 
@@ -2439,4 +2603,81 @@
   text-align: center;
   color: var(--rmx-text-secondary);
   font-size: 13px;
+}
+
+/* ====== Block Editing: Collapsible Sections ====== */
+.rmx-content details.rmx-collapsible {
+  border: 1px solid var(--rmx-border, #e2e8f0);
+  border-radius: var(--rmx-radius-inner, 4px);
+  padding: 0;
+  margin: 8px 0;
+  transition: border-color var(--rmx-transition-fast, 0.15s);
+}
+
+.rmx-content details.rmx-collapsible > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  background: var(--rmx-statusbar-bg, #f8fafc);
+  border-radius: var(--rmx-radius-inner, 4px);
+  user-select: none;
+  list-style: none;
+}
+
+.rmx-content details.rmx-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.rmx-content details.rmx-collapsible > summary::before {
+  content: '';
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid var(--rmx-text-secondary, #64748b);
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform var(--rmx-transition-fast, 0.15s);
+  flex-shrink: 0;
+}
+
+.rmx-content details.rmx-collapsible[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.rmx-content details.rmx-collapsible > :not(summary) {
+  padding: 8px 12px;
+}
+
+.rmx-content details.rmx-collapsible:hover {
+  border-color: var(--rmx-primary, #6366f1);
+}
+
+/* ====== Block Editing: Block Groups ====== */
+.rmx-content .rmx-block-group {
+  border: 2px dashed var(--rmx-border, #e2e8f0);
+  border-radius: var(--rmx-radius, 8px);
+  padding: 8px;
+  margin: 8px 0;
+  position: relative;
+  transition: border-color var(--rmx-transition-fast, 0.15s);
+}
+
+.rmx-content .rmx-block-group:hover {
+  border-color: var(--rmx-primary, #6366f1);
+}
+
+/* ====== Block Editing: Block Selection ====== */
+.rmx-content .rmx-block-selected {
+  outline: 2px solid var(--rmx-primary, #6366f1);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ====== Block Toolbar ====== */
+.rmx-block-toolbar {
+  pointer-events: auto;
+  animation: rmx-fade-in 0.1s ease;
 }

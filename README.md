@@ -27,17 +27,19 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Internationalization (i18n)** — 120+ externalized strings, `t()` with interpolation, `registerLocale()` for custom translations, partial locale packs with English fallback
 - **Print stylesheet** — Clean printed output with hidden chrome, page-break control, link URLs, orphan/widow handling
 - **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention, iframe domain allowlist (YouTube/Vimeo/Dailymotion), CSP-compatible (zero `execCommand`/`document.write`), SRI hash support for CDN assets
+- **Block-based editing** — Block-level toolbar with type conversion (paragraph, headings, quote, code, lists), drag-to-reorder, move up/down, duplicate, delete, collapsible `<details>` sections, block grouping, and block templates (`BlockTemplatePlugin`)
+- **Mobile & touch** — Touch-aware floating toolbar, swipe indent/outdent, long-press context menu with haptic feedback, pinch-to-zoom on images/tables, responsive toolbar overflow, virtual keyboard-aware layout, 44px touch targets
 - **Multi-editor support** — Full instance isolation, `EditorBus` singleton for inter-editor communication (pub/sub, broadcast, registry), `SharedResources` singleton for memory-efficient shared schemas, toolbar presets, icons, and config across 10+ concurrent editors
-- **Performance** — DOM mutation batching, `requestIdleCallback` scheduling, rAF-throttled handlers, operation coalescing in undo/redo, built-in benchmarking tools
+- **Performance** — DOM mutation batching, `requestIdleCallback` scheduling, rAF-throttled handlers, operation coalescing in undo/redo, `WorkerPool` for background thread offloading, `VirtualScroller` for long-document rendering, compressed diff-based undo history, lazy plugin loading, input batching, built-in benchmarking tools
 - **Tree-shakeable** — Import only the commands and utilities you need
 
 ## Packages
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyxjs/core`](./remyx-core/) | 0.28.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyxjs/react`](./remyx-react/) | 0.28.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
-| [`create-remyx`](./create-remyx/) | 0.28.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
+| [`@remyxjs/core`](./remyx-core/) | 0.29.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./remyx-react/) | 0.29.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
+| [`create-remyx`](./create-remyx/) | 0.29.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 
@@ -245,7 +247,7 @@ engine.executeCommand('heading', 2);
 engine.destroy();
 ```
 
-See the full [@remyxjs/core README](./remyx-core/README.md) for the complete engine API, all 50+ commands, plugin system, selection API, sanitizer, theming, toolbar config, utilities, and framework wrapper guide.
+See the full [@remyxjs/core README](./remyx-core/README.md) for the complete engine API, all 65+ commands, plugin system, selection API, sanitizer, theming, toolbar config, utilities, and framework wrapper guide.
 
 ## Architecture
 

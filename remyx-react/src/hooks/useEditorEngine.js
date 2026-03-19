@@ -17,6 +17,7 @@ import {
   registerMarkdownToggleCommands,
   registerAttachmentCommands,
   registerImportDocumentCommands,
+  registerBlockConvertCommands,
   WordCountPlugin,
   PlaceholderPlugin,
   AutolinkPlugin,
@@ -42,6 +43,7 @@ const COMMAND_REGISTRARS = [
   registerMarkdownToggleCommands,
   registerAttachmentCommands,
   registerImportDocumentCommands,
+  registerBlockConvertCommands,
 ]
 
 export function useEditorEngine(editAreaRef, options, readyTrigger) {

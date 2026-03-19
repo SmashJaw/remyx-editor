@@ -20,6 +20,7 @@ export { registerLinkCommands } from './commands/links.js'
 export { registerImageCommands } from './commands/images.js'
 export { registerTableCommands } from './commands/tables.js'
 export { registerBlockCommands } from './commands/blocks.js'
+export { registerBlockConvertCommands } from './commands/blockConvert.js'
 export { registerFontCommands } from './commands/fontControls.js'
 export { registerMediaCommands } from './commands/media.js'
 export { registerFindReplaceCommands } from './commands/findReplace.js'
@@ -42,7 +43,14 @@ export { AutolinkPlugin } from './plugins/builtins/AutolinkPlugin.js'
 export { PlaceholderPlugin } from './plugins/builtins/PlaceholderPlugin.js'
 export { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize, registerLanguage, unregisterLanguage, runRules } from './plugins/builtins/syntaxHighlight/index.js'
 export { TablePlugin } from './plugins/builtins/tableFeatures/index.js'
+export { BlockTemplatePlugin } from './plugins/builtins/BlockTemplatePlugin.js'
 export { evaluateTableFormulas } from './commands/tables.js'
+
+// Workers
+export { WorkerPool } from './workers/WorkerPool.js'
+
+// Virtualized rendering
+export { VirtualScroller } from './core/VirtualScroller.js'
 
 // Utilities
 export { htmlToMarkdown, markdownToHtml } from './utils/markdownConverter.js'
@@ -55,7 +63,7 @@ export { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpt
 export { isMac, getModKey } from './utils/platform.js'
 export { detectTextDirection, applyAutoDirection, applyAutoDirectionAll, LOGICAL_PROPERTIES } from './utils/rtl.js'
 export { t, setLocale, getLocale, registerLocale, unregisterLocale, getRegisteredLocales } from './i18n/index.js'
-export { batchDOMMutations, scheduleIdleTask, cancelIdleTask, rafThrottle, measurePerformance, benchmark } from './utils/performance.js'
+export { batchDOMMutations, scheduleIdleTask, cancelIdleTask, rafThrottle, measurePerformance, benchmark, createInputBatcher } from './utils/performance.js'
 
 // Theme configuration
 export { createTheme, THEME_VARIABLES } from './utils/themeConfig.js'

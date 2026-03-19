@@ -62,6 +62,34 @@ jobs:
           test -f packages/remyx-react/dist/remyx-react.cjs
           test -f packages/remyx-react/dist/style.css
 
+      - name: Bundle size check
+        run: |
+          MAX_CORE_GZIP=51200   # 50KB
+          MAX_REACT_GZIP=30720  # 30KB
+
+          CORE_SIZE=$(gzip -c packages/remyx-core/dist/remyx-core.js | wc -c | tr -d ' ')
+          REACT_SIZE=$(gzip -c packages/remyx-react/dist/remyx-react.js | wc -c | tr -d ' ')
+
+          CORE_KB=$(echo "scale=1; $CORE_SIZE / 1024" | bc)
+          REACT_KB=$(echo "scale=1; $REACT_SIZE / 1024" | bc)
+
+          echo "remyx-core.js gzipped: ${CORE_KB}KB ($CORE_SIZE bytes)"
+          echo "remyx-react.js gzipped: ${REACT_KB}KB ($REACT_SIZE bytes)"
+
+          FAILED=0
+          if [ "$CORE_SIZE" -gt "$MAX_CORE_GZIP" ]; then
+            echo "::error::remyx-core.js exceeds 50KB gzipped (${CORE_KB}KB)"
+            FAILED=1
+          fi
+          if [ "$REACT_SIZE" -gt "$MAX_REACT_GZIP" ]; then
+            echo "::error::remyx-react.js exceeds 30KB gzipped (${REACT_KB}KB)"
+            FAILED=1
+          fi
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+          echo "Bundle sizes within limits."
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

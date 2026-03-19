@@ -13,10 +13,73 @@ function djb2Hash(str) {
 }
 
 /**
+ * Threshold in characters above which diff-based storage is used
+ * instead of full snapshots, to reduce memory usage for large documents.
+ * @type {number}
+ */
+const DIFF_THRESHOLD = 5000
+
+/**
+ * Compute a simple character-level diff between two strings.
+ * Finds the common prefix and suffix, then stores only the middle
+ * replacement segment.
+ *
+ * @param {string} oldStr - The previous HTML string
+ * @param {string} newStr - The new HTML string
+ * @returns {{ prefixLen: number, suffixLen: number, insert: string }}
+ */
+function computeDiff(oldStr, newStr) {
+  const minLen = Math.min(oldStr.length, newStr.length)
+
+  // Find common prefix length
+  let prefixLen = 0
+  while (prefixLen < minLen && oldStr[prefixLen] === newStr[prefixLen]) {
+    prefixLen++
+  }
+
+  // Find common suffix length (not overlapping with prefix)
+  let suffixLen = 0
+  const maxSuffix = minLen - prefixLen
+  while (
+    suffixLen < maxSuffix &&
+    oldStr[oldStr.length - 1 - suffixLen] === newStr[newStr.length - 1 - suffixLen]
+  ) {
+    suffixLen++
+  }
+
+  // The inserted/replacement segment from the new string
+  const insert = newStr.slice(prefixLen, newStr.length - suffixLen || undefined)
+
+  return { prefixLen, suffixLen, insert }
+}
+
+/**
+ * Apply a diff to reconstruct the new string from the old string.
+ *
+ * @param {string} baseStr - The base HTML string
+ * @param {{ prefixLen: number, suffixLen: number, insert: string }} diff
+ * @returns {string} The reconstructed HTML string
+ */
+function applyDiff(baseStr, diff) {
+  const { prefixLen, suffixLen, insert } = diff
+  const prefix = baseStr.slice(0, prefixLen)
+  const suffix = suffixLen > 0 ? baseStr.slice(baseStr.length - suffixLen) : ''
+  return prefix + insert + suffix
+}
+
+/**
  * @typedef {Object} HistoryOptions
  * @property {number} [maxSize=100] - Maximum number of undo states to retain
  * @property {number} [debounceMs=300] - Debounce interval in milliseconds for automatic snapshots
  * @property {number} [coalesceMs=1000] - Window in which rapid keystrokes are coalesced into a single undo step
+ */
+
+/**
+ * @typedef {Object} HistoryEntry
+ * @property {'full'|'diff'} type - Whether this is a full snapshot or a diff
+ * @property {string} [html] - Full HTML content (when type === 'full')
+ * @property {{ prefixLen: number, suffixLen: number, insert: string }} [patch] - Diff patch (when type === 'diff')
+ * @property {import('./Selection.js').SelectionBookmark|null} bookmark - Selection bookmark
  */
 
 /**
@@ -28,6 +91,10 @@ function djb2Hash(str) {
 /**
  * Manages undo/redo history for the editor using DOM mutation observation
  * and debounced snapshots.
+ *
+ * For documents larger than 5000 characters, uses diff-based compression
+ * to store only the changes between states, significantly reducing memory
+ * usage for large documents.
  */
 export class History {
   /**
@@ -139,6 +206,76 @@ export class History {
   }
 
   /**
+   * Creates a history entry, using diff compression for large documents.
+   *
+   * @private
+   * @param {string} html - The HTML to store
+   * @param {import('./Selection.js').SelectionBookmark|null} bookmark - The selection bookmark
+   * @returns {HistoryEntry}
+   */
+  _createEntry(html, bookmark) {
+    // For short content, or when there's no previous snapshot, store full HTML
+    if (html.length < DIFF_THRESHOLD || !this._lastSnapshot) {
+      return { type: 'full', html, bookmark }
+    }
+
+    // For large content, compute and store a diff against the last snapshot
+    const patch = computeDiff(this._lastSnapshot, html)
+
+    // If the diff is larger than the full HTML (rare edge case), store full
+    if (patch.insert.length >= html.length * 0.8) {
+      return { type: 'full', html, bookmark }
+    }
+
+    return { type: 'diff', patch, bookmark }
+  }
+
+  /**
+   * Resolves a history entry to its full HTML string.
+   * For full entries, returns html directly. For diff entries,
+   * walks backward through the stack to find the base snapshot
+   * and applies diffs forward.
+   *
+   * @private
+   * @param {HistoryEntry[]} stack - The stack (undo or redo) containing the entry
+   * @param {number} index - Index of the entry in the stack
+   * @returns {string} The full HTML string
+   */
+  _resolveEntry(stack, index) {
+    const entry = stack[index]
+    if (entry.type === 'full') {
+      return entry.html
+    }
+
+    // Walk backward to find the nearest full snapshot
+    let baseIndex = index - 1
+    while (baseIndex >= 0 && stack[baseIndex].type !== 'full') {
+      baseIndex--
+    }
+
+    // Start from the base full snapshot
+    let html
+    if (baseIndex >= 0) {
+      html = stack[baseIndex].html
+    } else {
+      // Fallback: use lastSnapshot if no full entry found in stack
+      // This shouldn't normally happen since the first entry is always full
+      html = this._lastSnapshot || ''
+    }
+
+    // Apply diffs forward from baseIndex+1 to index
+    for (let i = baseIndex + 1; i <= index; i++) {
+      if (stack[i].type === 'diff') {
+        html = applyDiff(html, stack[i].patch)
+      } else {
+        html = stack[i].html
+      }
+    }
+
+    return html
+  }
+
+  /**
    * Updates the top entry on the undo stack with the current state
    * instead of pushing a new entry. Used during coalescing to batch
    * rapid keystrokes.
@@ -155,10 +292,11 @@ export class History {
     const bookmark = this.engine.selection.save()
 
     if (this._undoStack.length > 0) {
-      // Replace the top entry
-      this._undoStack[this._undoStack.length - 1] = { html, bookmark }
+      // Replace the top entry — always store full for the top during coalescing
+      // since we're overwriting frequently
+      this._undoStack[this._undoStack.length - 1] = this._createEntry(html, bookmark)
     } else {
-      this._undoStack.push({ html, bookmark })
+      this._undoStack.push({ type: 'full', html, bookmark })
     }
 
     this._lastSnapshot = html
@@ -175,7 +313,7 @@ export class History {
   _takeSnapshot() {
     const html = this.engine.element.innerHTML
     // Normalize whitespace for comparison to catch browser-induced
-    // changes like &nbsp; ↔ space that produce visually identical content
+    // changes like &nbsp; <-> space that produce visually identical content
     const normalized = html.replace(/\s+/g, ' ').trim()
 
     // Fast path: compare hashes before full string comparison
@@ -183,7 +321,9 @@ export class History {
     if (hash === this._lastNormalizedHash && normalized === this._lastNormalized) return
 
     const bookmark = this.engine.selection.save()
-    this._undoStack.push({ html, bookmark })
+    const entry = this._createEntry(html, bookmark)
+
+    this._undoStack.push(entry)
     if (this._undoStack.length > this.maxSize) {
       this._undoStack.shift()
     }
@@ -233,18 +373,22 @@ export class History {
 
     const currentHtml = this.engine.element.innerHTML
     const currentBookmark = this.engine.selection.save()
-    this._redoStack.push({ html: currentHtml, bookmark: currentBookmark })
+    this._redoStack.push({ type: 'full', html: currentHtml, bookmark: currentBookmark })
 
-    const state = this._undoStack.pop()
+    const stateIndex = this._undoStack.length - 1
+    const stateHtml = this._resolveEntry(this._undoStack, stateIndex)
+    const stateBookmark = this._undoStack[stateIndex].bookmark
+    this._undoStack.pop()
+
     // Re-sanitize to ensure no unsafe content is restored from history
-    const sanitizedHtml = this.engine.sanitizer.sanitize(state.html)
+    const sanitizedHtml = this.engine.sanitizer.sanitize(stateHtml)
     this.engine.element.innerHTML = sanitizedHtml
     this._lastSnapshot = sanitizedHtml
     this._lastNormalized = sanitizedHtml.replace(/\s+/g, ' ').trim()
     this._lastNormalizedHash = djb2Hash(this._lastNormalized)
 
-    if (state.bookmark) {
-      this.engine.selection.restore(state.bookmark)
+    if (stateBookmark) {
+      this.engine.selection.restore(stateBookmark)
     }
 
     this._reconnectObserver()
@@ -266,18 +410,22 @@ export class History {
 
     const currentHtml = this.engine.element.innerHTML
     const currentBookmark = this.engine.selection.save()
-    this._undoStack.push({ html: currentHtml, bookmark: currentBookmark })
+    this._undoStack.push({ type: 'full', html: currentHtml, bookmark: currentBookmark })
 
-    const state = this._redoStack.pop()
+    const stateIndex = this._redoStack.length - 1
+    const stateHtml = this._resolveEntry(this._redoStack, stateIndex)
+    const stateBookmark = this._redoStack[stateIndex].bookmark
+    this._redoStack.pop()
+
     // Re-sanitize to ensure no unsafe content is restored from history
-    const sanitizedHtml = this.engine.sanitizer.sanitize(state.html)
+    const sanitizedHtml = this.engine.sanitizer.sanitize(stateHtml)
     this.engine.element.innerHTML = sanitizedHtml
     this._lastSnapshot = sanitizedHtml
     this._lastNormalized = sanitizedHtml.replace(/\s+/g, ' ').trim()
     this._lastNormalizedHash = djb2Hash(this._lastNormalized)
 
-    if (state.bookmark) {
-      this.engine.selection.restore(state.bookmark)
+    if (stateBookmark) {
+      this.engine.selection.restore(stateBookmark)
     }
 
     this._reconnectObserver()

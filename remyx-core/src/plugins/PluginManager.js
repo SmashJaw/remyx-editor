@@ -17,6 +17,7 @@
  * @typedef {Object} PluginDefinition
  * @property {string} name - Unique plugin name
  * @property {boolean} [requiresFullAccess=false] - If true, receives full engine instead of restricted API
+ * @property {boolean} [lazy=false] - If true, plugin is not initialized in initAll() but on first use
  * @property {Function} [init] - Initialization function, receives the plugin API or full engine
  * @property {Function} [destroy] - Cleanup function, receives the plugin API or full engine
  * @property {Array<import('../core/CommandRegistry.js').CommandDefinition>} [commands] - Commands to register
@@ -114,6 +115,11 @@ function createPluginAPI(engine) {
  * If a plugin requires full engine access (e.g., built-in plugins), it can
  * declare `requiresFullAccess: true` in its definition — but third-party
  * plugins should be audited before granting this level of access.
+ *
+ * **Lazy loading:** Plugins can declare `lazy: true` to defer initialization
+ * until first use. Lazy plugins are registered and their commands are
+ * available, but init() is not called until the plugin is explicitly
+ * activated or one of its commands is executed.
  */
 export class PluginManager {
   /**
@@ -124,11 +130,19 @@ export class PluginManager {
     this.engine = engine
     this._plugins = new Map()
     this._pluginAPI = createPluginAPI(engine)
+    /** @private Set of plugin names that have been initialized */
+    this._initialized = new Set()
+    /** @private Map of command name -> plugin name for lazy activation */
+    this._commandPluginMap = new Map()
   }
 
   /**
    * Registers a plugin and its commands. Does nothing if the plugin has no
    * name or is already registered.
+   *
+   * For lazy plugins, commands are wrapped to trigger plugin initialization
+   * on first execution.
+   *
    * @param {PluginDefinition} plugin - The plugin definition to register
    * @returns {void}
    */
@@ -146,7 +160,27 @@ export class PluginManager {
     // Register any commands the plugin provides
     if (plugin.commands) {
       plugin.commands.forEach((cmd) => {
-        this.engine.commands.register(cmd.name, cmd)
+        if (plugin.lazy) {
+          // Track which plugin owns this command for lazy activation
+          this._commandPluginMap.set(cmd.name, plugin.name)
+
+          // Wrap the command execute to auto-init the plugin on first use
+          const originalExecute = cmd.execute
+          const self = this
+          const wrappedCmd = {
+            ...cmd,
+            execute(...args) {
+              self.activatePlugin(plugin.name)
+              // After activation, re-register with original execute
+              // so subsequent calls skip the wrapper
+              self.engine.commands.register(cmd.name, { ...cmd, execute: originalExecute })
+              return originalExecute.apply(this, args)
+            }
+          }
+          this.engine.commands.register(cmd.name, wrappedCmd)
+        } else {
+          this.engine.commands.register(cmd.name, cmd)
+        }
       })
     }
 
@@ -154,7 +188,53 @@ export class PluginManager {
   }
 
   /**
+   * Initializes a single plugin by calling its init function.
+   * Trusted plugins (requiresFullAccess) receive the full engine;
+   * others receive the restricted API facade.
+   *
+   * @private
+   * @param {PluginDefinition} plugin - The plugin to initialize
+   * @returns {void}
+   */
+  _initPlugin(plugin) {
+    if (this._initialized.has(plugin.name)) return
+
+    try {
+      if (plugin.init) {
+        // Built-in or trusted plugins get full engine access;
+        // third-party plugins get the restricted API facade
+        const api = plugin.requiresFullAccess ? this.engine : this._pluginAPI
+        plugin.init(api)
+      }
+      this._initialized.add(plugin.name)
+      this.engine.eventBus.emit('plugin:initialized', { name: plugin.name })
+    } catch (err) {
+      console.error(`Error initializing plugin "${plugin.name}":`, err)
+      this.engine.eventBus.emit('plugin:error', { name: plugin.name, error: err })
+    }
+  }
+
+  /**
+   * Activates a lazy plugin by initializing it. Has no effect if the plugin
+   * is already initialized or does not exist.
+   *
+   * @param {string} name - The plugin name to activate
+   * @returns {void}
+   */
+  activatePlugin(name) {
+    const plugin = this._plugins.get(name)
+    if (!plugin) {
+      console.warn(`Plugin "${name}" not found`)
+      return
+    }
+    if (this._initialized.has(name)) return
+
+    this._initPlugin(plugin)
+  }
+
+  /**
    * Initializes all registered plugins by calling their init functions.
+   * Lazy plugins are skipped and will be initialized on first use.
    * Trusted plugins (requiresFullAccess) receive the full engine;
    * others receive the restricted API facade. Errors are caught, logged,
    * and emitted as plugin:error events.
@@ -162,17 +242,9 @@ export class PluginManager {
    */
   initAll() {
     this._plugins.forEach((plugin) => {
-      try {
-        if (plugin.init) {
-          // Built-in or trusted plugins get full engine access;
-          // third-party plugins get the restricted API facade
-          const api = plugin.requiresFullAccess ? this.engine : this._pluginAPI
-          plugin.init(api)
-        }
-      } catch (err) {
-        console.error(`Error initializing plugin "${plugin.name}":`, err)
-        this.engine.eventBus.emit('plugin:error', { name: plugin.name, error: err })
-      }
+      // Skip lazy plugins — they init on first use
+      if (plugin.lazy) return
+      this._initPlugin(plugin)
     })
   }
 
@@ -185,7 +257,12 @@ export class PluginManager {
   destroyAll() {
     this._plugins.forEach((plugin) => {
       try {
-        if (plugin.destroy) {
+        // For lazy plugins, only call destroy if they were initialized.
+        // For non-lazy plugins, always call destroy (original behavior).
+        const shouldDestroy = plugin.lazy
+          ? this._initialized.has(plugin.name)
+          : true
+        if (shouldDestroy && plugin.destroy) {
           const api = plugin.requiresFullAccess ? this.engine : this._pluginAPI
           plugin.destroy(api)
         }
@@ -195,6 +272,8 @@ export class PluginManager {
       }
     })
     this._plugins.clear()
+    this._initialized.clear()
+    this._commandPluginMap.clear()
   }
 
   /**
@@ -221,5 +300,14 @@ export class PluginManager {
    */
   has(name) {
     return this._plugins.has(name)
+  }
+
+  /**
+   * Checks whether a plugin has been initialized.
+   * @param {string} name - The plugin name
+   * @returns {boolean} True if the plugin has been initialized
+   */
+  isInitialized(name) {
+    return this._initialized.has(name)
   }
 }

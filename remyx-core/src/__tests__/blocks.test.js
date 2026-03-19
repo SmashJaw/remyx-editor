@@ -49,7 +49,7 @@ describe('registerBlockCommands', () => {
   })
 
   it('should register blockquote, codeBlock, and horizontalRule', () => {
-    expect(mockEngine.commands.register).toHaveBeenCalledTimes(3)
+    expect(mockEngine.commands.register).toHaveBeenCalledTimes(14)
     expect(commands.blockquote).toBeDefined()
     expect(commands.codeBlock).toBeDefined()
     expect(commands.horizontalRule).toBeDefined()

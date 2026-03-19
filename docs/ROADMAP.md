@@ -2,8 +2,8 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 0.28.0 (unreleased)
-**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker, code block syntax highlighting with 11 languages, enhanced tables with sorting/filtering/formulas/cell formatting/resize/clipboard interop, security hardening (iframe allowlist, CSP-compatible, SRI), inter-editor communication (`EditorBus`), shared resource singletons (`SharedResources`), RTL/i18n/print support, 235/235 TASKS.md items resolved, 1416 tests passing
+**Current Version:** 0.29.0
+**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave, command palette, code block syntax highlighting, enhanced tables, security hardening, inter-editor communication, RTL/i18n/print, block-based editing with type conversion/templates/grouping, mobile & touch optimization (swipe, long-press, pinch-zoom, responsive overflow, virtual keyboard), WorkerPool, VirtualScroller, compressed undo history, P0 complete, 1416 tests passing
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor. Sections are ordered by priority — security and stability first, then features ranked by user impact.
 
@@ -143,25 +143,25 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 - ~~Terser minification with `drop_console` and `drop_debugger`~~
 - ~~Lazy-loaded modals — all 9 modals deferred via `React.lazy` (~20–30 KB)~~
 - ~~PDF/DOCX opt-in — `mammoth` and `pdfjs-dist` as optional peer deps~~
-- Reduce initial bundle size to < 50 KB gzipped for the core editor
-- Batch DOM mutations with `requestAnimationFrame` for smoother typing
-- Web Worker offloading for expensive operations (sanitization, markdown parsing, document conversion)
+- ~~Reduce initial bundle size to < 50 KB gzipped for the core editor~~ — CI pipeline enforces 50KB core / 30KB react gzipped budget via `gzip -c | wc -c` check
+- ~~Batch DOM mutations with `requestAnimationFrame` for smoother typing~~ — `batchDOMMutations()` utility groups sequential mutations into a single rAF callback
+- ~~Web Worker offloading for expensive operations (sanitization, markdown parsing, document conversion)~~ — `WorkerPool` class with round-robin dispatch, lazy worker spawning, and synchronous fallback when Workers are unavailable
 - Lighthouse performance score target: 95+
-- Idle-time processing: defer non-critical work (word count, readability scores) to `requestIdleCallback`
-- Virtualized rendering for long documents: only mount visible blocks in the DOM
-- Lazy plugin loading: plugins initialize on first use, not on editor mount
-- Compressed undo history: store diffs instead of full snapshots to reduce memory usage
-- Input batching: coalesce rapid keystrokes into single DOM updates to eliminate layout thrash
+- ~~Idle-time processing: defer non-critical work (word count, readability scores) to `requestIdleCallback`~~ — `scheduleIdleTask()` with Safari fallback, `cancelIdleTask()` for cleanup
+- ~~Virtualized rendering for long documents: only mount visible blocks in the DOM~~ — `VirtualScroller` using IntersectionObserver with 500px root margin, collapses off-screen blocks to placeholder divs for documents exceeding threshold (default 200 blocks)
+- ~~Lazy plugin loading: plugins initialize on first use, not on editor mount~~ — `lazy: true` in plugin definitions skips `initAll()`, initializes on first command execution via wrapped handlers; `activatePlugin(name)` for explicit activation
+- ~~Compressed undo history: store diffs instead of full snapshots to reduce memory usage~~ — character-level common-prefix/suffix diffing for documents over 5000 chars; full snapshots for short documents; `_resolveEntry()` walks backward to nearest full snapshot and applies diffs forward
+- ~~Input batching: coalesce rapid keystrokes into single DOM updates to eliminate layout thrash~~ — `createInputBatcher()` with `queue()`, `flush()`, `destroy()` methods using rAF coalescing
 - See [TASKS.md](./TASKS.md) for the full optimization inventory (63 items, 63 resolved, 0 open)
 
 ## Build & DevOps
 
 - ~~Nx monorepo integration — task orchestration, caching, affected commands~~
 - ~~GitHub Actions CI pipeline: build → lint → test on every push/PR~~
-- Automated npm publishing via `nx release` on tagged commits
+- ~~Automated npm publishing via `nx release` on tagged commits~~ — `release.yml` workflow triggered on `v*` tags, runs `npx nx release publish --yes` with `NODE_AUTH_TOKEN`
 - ~~Pre-commit hooks (Husky + lint-staged) for consistent code quality~~
-- Bundle size tracking: fail CI if any package exceeds its size budget
-- Automated dependency updates (Renovate or Dependabot) with auto-merge for passing patch bumps
+- ~~Bundle size tracking: fail CI if any package exceeds its size budget~~ — CI step checks gzipped output of `remyx-core.js` (50KB) and `remyx-react.js` (30KB), fails build on exceed
+- ~~Automated dependency updates (Renovate or Dependabot) with auto-merge for passing patch bumps~~ — `dependabot.yml` with weekly schedules for root, core, react, and GitHub Actions; grouped updates, reviewer assignment, labeled PRs
 
 ---
 
@@ -179,14 +179,16 @@ Features with the highest user demand and broadest impact on the editing experie
 - Configurable transport: WebSocket, WebRTC, or custom
 - `collaborationProvider` prop — bring your own signaling server or use a hosted option
 
-## Block-Based Editing
+## ~~Block-Based Editing~~ ✅ Shipped (v0.28.0)
 
-- Draggable block handles on hover — reorder paragraphs, images, tables, and embeds via drag-and-drop
-- Block-level toolbar: appears on hover/focus with block type, drag handle, and actions menu
-- Block type conversion: turn a paragraph into a heading, quote, callout, or list without retyping
-- Nested blocks: toggle lists, collapsible sections, tabbed content
-- Block grouping: select multiple blocks and move, duplicate, or delete as a unit
-- Block templates: save and reuse custom block compositions (e.g., a "feature card" with image + heading + text)
+- ~~Draggable block handles on hover — reorder paragraphs, images, tables, and embeds via drag-and-drop~~ — `BlockDragHandle` component with pointer event support for cross-device drag
+- ~~Block-level toolbar: appears on hover/focus with block type, drag handle, and actions menu~~ — `BlockToolbar` component with block type badge dropdown, actions menu (Move Up/Down, Duplicate, Delete, Convert To…), rAF-based positioning
+- ~~Block type conversion: turn a paragraph into a heading, quote, callout, or list without retyping~~ — `convertBlock` command supporting paragraph, h1–h6, blockquote, codeBlock, unorderedList, orderedList conversions preserving text content
+- ~~Nested blocks: toggle lists, collapsible sections, tabbed content~~ — `toggleCollapse` command wraps/unwraps blocks in `<details><summary>` structure with CSS indicators
+- ~~Block grouping: select multiple blocks and move, duplicate, or delete as a unit~~ — `selectBlocks`, `clearBlockSelection`, `groupBlocks`, `ungroupBlocks`, `moveGroup`, `duplicateGroup` commands with `rmx-block-selected` / `rmx-block-group` CSS classes
+- ~~Block templates: save and reuse custom block compositions (e.g., a "feature card" with image + heading + text)~~ — `BlockTemplatePlugin` with `registerTemplate`, `insertTemplate`, `getTemplates`, `removeTemplate` APIs; 3 built-in templates (Feature Card, Two-Column, Call to Action)
+- New commands: `convertBlock`, `moveBlockUp`, `moveBlockDown`, `duplicateBlock`, `deleteBlock`, `selectBlocks`, `clearBlockSelection`, `toggleCollapse`, `groupBlocks`, `ungroupBlocks`, `moveGroup`, `duplicateGroup`
+- New exports: `registerBlockConvertCommands`, `BlockTemplatePlugin` from `@remyxjs/core`
 
 ## ~~Enhanced Tables & Spreadsheet Features~~ ✅ Shipped (v0.28.0)
 
@@ -206,15 +208,17 @@ Features with the highest user demand and broadest impact on the editing experie
 - New exports: `TablePlugin`, `evaluateTableFormulas` from `@remyxjs/core`
 - 6 new commands: `toggleHeaderRow`, `sortTable`, `filterTable`, `clearTableFilters`, `formatCell`, `evaluateFormulas`
 
-## Mobile & Touch Optimization
+## ~~Mobile & Touch Optimization~~ ✅ Shipped (v0.28.0)
 
-- Touch-optimized floating toolbar that follows selection without obscuring content
-- Swipe gestures: swipe to indent/outdent, swipe to dismiss toolbar
-- Long-press context menu with haptic feedback integration
-- Pinch-to-zoom on images and tables
-- Mobile-first responsive toolbar: collapses into overflow menu at narrow widths
-- iOS/Android keyboard-aware layout: editor scrolls to keep caret visible above the virtual keyboard
-- Touch-friendly drag handles with larger hit targets
+- ~~Touch-optimized floating toolbar that follows selection without obscuring content~~ — touch selection via `touchend` + `selectionchange` with 300ms delay, above/below positioning, draggable grip handle for repositioning
+- ~~Swipe gestures: swipe to indent/outdent, swipe to dismiss toolbar~~ — `useSwipeGesture` hook with 50px threshold, 30px max vertical deviation, visual translateX feedback, swipe-down dismiss
+- ~~Long-press context menu with haptic feedback integration~~ — `useLongPress` hook with 500ms hold, 10px movement cancellation, `navigator.vibrate(10)` haptic feedback
+- ~~Pinch-to-zoom on images and tables~~ — `usePinchZoom` hook with CSS `transform: scale()` (0.5–3.0 range), applies final dimensions on release, reset-zoom button
+- ~~Mobile-first responsive toolbar: collapses into overflow menu at narrow widths~~ — `ResizeObserver`-based overflow detection, trailing items collapse into "⋯" dropdown, priority-based
+- ~~iOS/Android keyboard-aware layout: editor scrolls to keep caret visible above the virtual keyboard~~ — `useVirtualKeyboard` hook using `visualViewport` API with `window.innerHeight` fallback, adds padding and scrolls caret into view
+- ~~Touch-friendly drag handles with larger hit targets~~ — pointer events replacing mouse events in `BlockDragHandle`, 44×44px targets via `@media (pointer: coarse)`, touch drag with `setPointerCapture` and ghost preview
+- New hooks: `useSwipeGesture`, `useLongPress`, `usePinchZoom`, `useVirtualKeyboard`
+- CSS: 44px touch targets for toolbar/context menu/floating toolbar, `@media (pointer: coarse)` drag handle sizing
 
 ## Comments & Annotations
 

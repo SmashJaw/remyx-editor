@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react'
 import { ToolbarButton } from './ToolbarButton.jsx'
 import { ToolbarDropdown } from './ToolbarDropdown.jsx'
 import { ToolbarColorPicker } from './ToolbarColorPicker.jsx'
@@ -19,6 +19,11 @@ const HEADING_OPTIONS_WITH_STYLES = HEADING_OPTIONS.map(o => ({
 export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme }) {
   const selectionState = useSelectionContext()
   const toolbarConfig = config || DEFAULT_TOOLBAR
+  const toolbarRef = useRef(null)
+  const innerRef = useRef(null)
+  const [overflowIndex, setOverflowIndex] = useState(-1)
+  const [overflowOpen, setOverflowOpen] = useState(false)
+  const overflowMenuRef = useRef(null)
 
   // Memoize font family options — only recompute when fonts array changes
   const fontOptions = useMemo(() =>
@@ -65,6 +70,54 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
     })
     return result
   }, [toolbarConfig])
+
+  // ResizeObserver-based overflow detection
+  useEffect(() => {
+    const toolbar = toolbarRef.current
+    const inner = innerRef.current
+    if (!toolbar || !inner) return
+
+    const checkOverflow = () => {
+      const containerWidth = toolbar.clientWidth
+      const children = Array.from(inner.children)
+      let cutIndex = -1
+
+      // Reserve space for overflow button (approx 36px)
+      const reservedWidth = 40
+      let accumulatedWidth = 0
+
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i]
+        // Skip hidden overflow items
+        if (child.classList.contains('rmx-toolbar-overflow-btn')) continue
+        accumulatedWidth += child.offsetWidth + 1 // 1px gap
+        if (accumulatedWidth > containerWidth - reservedWidth) {
+          cutIndex = i
+          break
+        }
+      }
+
+      setOverflowIndex(cutIndex)
+    }
+
+    const observer = new ResizeObserver(checkOverflow)
+    observer.observe(toolbar)
+    checkOverflow()
+
+    return () => observer.disconnect()
+  }, [items])
+
+  // Close overflow menu on outside click
+  useEffect(() => {
+    if (!overflowOpen) return
+    const handleClick = (e) => {
+      if (overflowMenuRef.current && !overflowMenuRef.current.contains(e.target)) {
+        setOverflowOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handleClick)
+    return () => document.removeEventListener('pointerdown', handleClick)
+  }, [overflowOpen])
 
   if (!engine) return null
 
@@ -259,10 +312,36 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
     )
   }
 
+  // Split items into visible and overflow groups
+  const visibleItems = overflowIndex > 0 ? items.slice(0, overflowIndex) : items
+  const overflowItems = overflowIndex > 0 ? items.slice(overflowIndex) : []
+
   return (
-    <div className="rmx-toolbar" role="toolbar" aria-label="Editor toolbar">
-      <div className="rmx-toolbar-inner">
-        {items.map(renderItem)}
+    <div className="rmx-toolbar" role="toolbar" aria-label="Editor toolbar" ref={toolbarRef}>
+      <div className="rmx-toolbar-inner" ref={innerRef}>
+        {visibleItems.map(renderItem)}
+        {overflowItems.length > 0 && (
+          <div className="rmx-toolbar-overflow-container" style={{ position: 'relative' }}>
+            <button
+              className="rmx-toolbar-btn rmx-toolbar-overflow-btn"
+              onClick={() => setOverflowOpen(prev => !prev)}
+              aria-label="More toolbar options"
+              aria-expanded={overflowOpen}
+              type="button"
+            >
+              &#x22EF;
+            </button>
+            {overflowOpen && (
+              <div
+                ref={overflowMenuRef}
+                className="rmx-toolbar-overflow-menu"
+                role="menu"
+              >
+                {overflowItems.map(renderItem)}
+              </div>
+            )}
+          </div>
+        )}
         {wordCountButton && (
           <>
             <ToolbarSeparator />

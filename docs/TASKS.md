@@ -3,7 +3,7 @@
 # Task Reference — Remyx Editor
 
 **Last updated:** 2026-03-19
-**Version:** 0.28.0 (unreleased)
+**Version:** 0.29.0
 **Status:** ✅ All 235 tasks resolved — 0 open
 
 A single reference for every bug, security fix, cleanup item, optimization, UX improvement, feature request, and code efficiency task across the Remyx Editor monorepo.

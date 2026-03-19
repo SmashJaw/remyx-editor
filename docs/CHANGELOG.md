@@ -8,10 +8,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [Unreleased]
+## [0.29.0] — 2026-03-19
 
 ### Added
 
+- **Block-Based Editing** — Complete block-level editing system:
+  - `BlockToolbar` component with block type badge dropdown, actions menu (Move Up/Down, Duplicate, Delete, Convert To…), rAF-based positioning on hover/focus
+  - `convertBlock` command supporting conversion between paragraph, h1–h6, blockquote, codeBlock, unorderedList, and orderedList while preserving text content
+  - Block operations: `moveBlockUp`, `moveBlockDown`, `duplicateBlock`, `deleteBlock` (with safety — ensures at least one paragraph remains)
+  - Block selection: `selectBlocks`, `clearBlockSelection` with `rmx-block-selected` visual outlines
+  - Collapsible sections: `toggleCollapse` wraps/unwraps blocks in `<details><summary>` with CSS open/closed indicators
+  - Block grouping: `groupBlocks`, `ungroupBlocks`, `moveGroup`, `duplicateGroup` with `rmx-block-group` dashed border styling
+  - `BlockTemplatePlugin` with `registerTemplate`, `insertTemplate`, `getTemplates`, `removeTemplate` APIs; 3 built-in templates (Feature Card, Two-Column, Call to Action)
+  - New exports: `registerBlockConvertCommands`, `BlockTemplatePlugin` from `@remyxjs/core`
+- **Mobile & Touch Optimization** — Full touch-device support:
+  - Touch-aware `FloatingToolbar` with `touchend` + `selectionchange` detection (300ms delay), above/below positioning, draggable grip handle for repositioning, 44×44px touch targets
+  - `useSwipeGesture` hook — swipe right/left on list items and blockquotes for indent/outdent (50px threshold, 30px max vertical deviation, visual translateX feedback); swipe-down dismisses toolbar
+  - `useLongPress` hook — 500ms hold triggers context menu at touch position, 10px movement cancellation, `navigator.vibrate(10)` haptic feedback
+  - `usePinchZoom` hook — two-finger pinch on `<img>` and `<table>` elements with CSS `transform: scale()` (0.5–3.0 range), applies final dimensions on release, reset-zoom button
+  - Responsive toolbar overflow — `ResizeObserver`-based detection collapses trailing items into "⋯" dropdown menu
+  - `useVirtualKeyboard` hook — detects virtual keyboard via `visualViewport` API (with `window.innerHeight` fallback), adds padding and scrolls caret into view above keyboard
+  - Touch-friendly `BlockDragHandle` — pointer events replacing mouse events, 44×44px hit targets via `@media (pointer: coarse)`, touch drag with `setPointerCapture` and ghost preview
+  - CSS: `@media (pointer: coarse)` rules for drag handles, 44px min touch targets for toolbar/context menu/floating toolbar
+- **WorkerPool** — Optional Web Worker pool for offloading expensive operations (sanitization, markdown parsing, document conversion) to background threads. Round-robin dispatch, lazy worker spawning, synchronous fallback.
+- **VirtualScroller** — IntersectionObserver-based virtualized rendering for long documents (200+ blocks), collapses off-screen blocks to placeholder divs with 500px root margin pre-loading.
+- **Compressed undo history** — Character-level diff storage for documents over 5000 chars, reducing memory usage by storing only changed portions instead of full HTML snapshots.
+- **Lazy plugin loading** — Plugins with `lazy: true` skip `initAll()` and initialize on first command execution. `activatePlugin(name)` and `isInitialized(name)` APIs on `PluginManager`.
+- **Input batcher** — `createInputBatcher()` utility coalescing rapid DOM mutations into single `requestAnimationFrame` callbacks.
+- **Bundle size CI gate** — CI pipeline checks gzipped sizes of `remyx-core.js` (50KB) and `remyx-react.js` (30KB), failing the build on exceed.
+- **Automated npm publishing** — `release.yml` GitHub Actions workflow triggered on `v*` tag push via `npx nx release publish`.
+
+---
+
+## [0.28.0] — 2026-03-19
+
+### Added
+
+- **WorkerPool** — Optional Web Worker pool (`WorkerPool` class) for offloading expensive operations (sanitization, markdown parsing, document conversion) to background threads. Round-robin dispatch, lazy worker spawning, synchronous fallback when Workers are unavailable. New export: `WorkerPool` from `@remyxjs/core`.
+- **VirtualScroller** — IntersectionObserver-based virtualized rendering for long documents. Collapses off-screen block elements to placeholder divs for documents exceeding a configurable threshold (default 200 blocks), with 500px root margin for pre-loading. New export: `VirtualScroller` from `@remyxjs/core`.
+- **Compressed undo history** — Character-level diff storage for documents over 5000 chars. `computeDiff()` finds common prefix/suffix and stores only the changed middle; `applyDiff()` reconstructs full HTML. Short documents retain full-snapshot behavior.
+- **Lazy plugin loading** — Plugins with `lazy: true` skip `initAll()` and initialize on first command execution. New `activatePlugin(name)` and `isInitialized(name)` methods on `PluginManager`.
+- **Input batcher** — `createInputBatcher()` utility coalescing rapid DOM mutations into single `requestAnimationFrame` callbacks with `queue()`, `flush()`, and `destroy()` methods.
+- **Bundle size CI gate** — CI pipeline checks gzipped sizes of `remyx-core.js` (50KB limit) and `remyx-react.js` (30KB limit), failing the build on exceed.
+- **Automated npm publishing** — `release.yml` GitHub Actions workflow triggered on `v*` tag push, runs `npx nx release publish --yes` with `NODE_AUTH_TOKEN`.
 - **Enhanced tables & spreadsheet features** — New `TablePlugin` built-in plugin providing column/row resize handles (drag-to-resize with rAF-driven smooth updates), sortable columns (click header to toggle asc/desc, Shift+click for multi-column sort with chained comparators), filterable rows (per-column filter dropdowns with debounced substring matching, non-destructive via `rmx-row-hidden` class), inline cell formulas (recursive-descent parser supporting SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT with A1-notation cell references and circular reference detection), cell formatting (number, currency, percentage, date via `Intl.NumberFormat`/`Intl.DateTimeFormat`), sticky header rows (`position: sticky` on `<thead><th>`), and table-aware clipboard (copy as HTML + TSV, paste from Excel/Google Sheets with auto-expand). Tables now generate `<thead>` with `<th>` cells by default. Google Sheets and Excel HTML cleanup added to paste pipeline. 6 new commands: `toggleHeaderRow`, `sortTable`, `filterTable`, `clearTableFilters`, `formatCell`, `evaluateFormulas`. Sort indicators rendered via CSS `::after` pseudo-elements (▲/▼). New context menu items: Toggle Header Row, Format as Number/Currency/Percentage/Date, Clear Filters. New exports: `TablePlugin`, `evaluateTableFormulas` from `@remyxjs/core`.
 - **Code block syntax highlighting** — Language-specific syntax highlighting for `<pre><code>` blocks using custom lightweight tokenizers (zero external dependencies). Supports 11 languages: JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, and HTML with automatic language detection. New `SyntaxHighlightPlugin` built-in plugin with MutationObserver-based auto-highlighting, debounced to avoid disrupting contenteditable typing. Skips blocks the user is actively editing and re-highlights on blur. Theme-aware token colors via `.rmx-syn-*` CSS classes across all 6 themes. New `setCodeLanguage` and `getCodeLanguage` commands. Language selector dropdown overlay on focused code blocks in `@remyxjs/react`. Markdown round-trip preserves language identifiers (`` ```js ``, `` ```python ``). New exports: `SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` from `@remyxjs/core`.
 - **EditorBus** — Process-wide singleton for inter-editor communication. Register/unregister editors by ID, pub/sub for global events, `broadcast()` to push events into every editor's local event loop, exclude option for the sender. New export: `EditorBus` from `@remyxjs/core`.

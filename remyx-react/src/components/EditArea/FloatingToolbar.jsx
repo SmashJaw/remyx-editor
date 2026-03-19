@@ -11,12 +11,61 @@ const TOOLBAR_FALLBACK_WIDTH = 200
 const TOOLBAR_GAP = 8
 const TOOLBAR_EDGE_PADDING = 4
 
-function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOpenModal }) {
+// Touch selection delay to let browser settle
+const TOUCH_SELECTION_DELAY = 300
+
+function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOpenModal, onDismiss }) {
   const selectionState = useSelectionContext()
   const ref = useRef(null)
   const sizeRef = useRef({ width: 0, height: 0 })
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const [hasFocus, setHasFocus] = useState(false)
+  const [placedBelow, setPlacedBelow] = useState(false)
+
+  // Touch-based drag repositioning state
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const dragStartRef = useRef(null)
+  const isDraggingRef = useRef(false)
+
+  // Touch selection support: listen for touchend + selectionchange with delay
+  const [touchVisible, setTouchVisible] = useState(false)
+  const touchTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (!engine?.element) return
+
+    const el = engine.element
+
+    const onTouchEnd = () => {
+      // Clear any pending timer
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+      // Wait for browser to settle the selection
+      touchTimerRef.current = setTimeout(() => {
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+          setTouchVisible(true)
+        } else {
+          setTouchVisible(false)
+        }
+      }, TOUCH_SELECTION_DELAY)
+    }
+
+    const onSelectionChange = () => {
+      const sel = window.getSelection()
+      if (!sel || sel.isCollapsed) {
+        setTouchVisible(false)
+      }
+    }
+
+    el.addEventListener('touchend', onTouchEnd, { passive: true })
+    document.addEventListener('selectionchange', onSelectionChange)
+
+    return () => {
+      el.removeEventListener('touchend', onTouchEnd)
+      document.removeEventListener('selectionchange', onSelectionChange)
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
+    }
+  }, [engine])
 
   // Cache toolbar dimensions via ResizeObserver to avoid forced reflows
   useEffect(() => {
@@ -32,21 +81,30 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
   }, [])
 
   useEffect(() => {
-    if (!visible || !selectionRect || !editorRect) return
+    if ((!visible && !touchVisible) || !selectionRect || !editorRect) return
 
     const toolbarHeight = sizeRef.current.height || ref.current?.offsetHeight || TOOLBAR_FALLBACK_HEIGHT
     const toolbarWidth = sizeRef.current.width || ref.current?.offsetWidth || TOOLBAR_FALLBACK_WIDTH
 
+    // Default: position ABOVE the selection
     let top = selectionRect.top - editorRect.top - toolbarHeight - TOOLBAR_GAP
     let left = selectionRect.left - editorRect.left + selectionRect.width / 2 - toolbarWidth / 2
+    let below = false
 
-    // Clamp to editor bounds
-    if (top < 0) top = selectionRect.bottom - editorRect.top + TOOLBAR_GAP
+    // If no space above, place BELOW the selection (avoid overlapping highlight)
+    if (top < 0) {
+      top = selectionRect.bottom - editorRect.top + TOOLBAR_GAP
+      below = true
+    }
+
+    // Clamp to editor bounds horizontally
     if (left < 0) left = TOOLBAR_EDGE_PADDING
     if (left + toolbarWidth > editorRect.width) left = editorRect.width - toolbarWidth - TOOLBAR_EDGE_PADDING
 
     setPosition({ top, left })
-  }, [visible, selectionRect, editorRect])
+    setPlacedBelow(below)
+    setDragOffset({ x: 0, y: 0 })
+  }, [visible, touchVisible, selectionRect, editorRect])
 
   // Arrow-key navigation between toolbar buttons
   const handleKeyDown = useCallback((e) => {
@@ -81,18 +139,58 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
   const handleFocusOut = useCallback(() => setHasFocus(false), [])
 
   // Prevent editor from losing focus/selection on mousedown (task 222)
-  const handleMouseDown = useCallback((e) => e.preventDefault(), [])
+  const handlePointerDown = useCallback((e) => e.preventDefault(), [])
 
-  if ((!visible && !hasFocus) || !engine) return null
+  // Drag handle for repositioning toolbar on touch
+  const handleGripPointerDown = useCallback((e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    isDraggingRef.current = true
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: dragOffset.x,
+      offsetY: dragOffset.y,
+    }
+
+    const target = e.currentTarget
+    target.setPointerCapture(e.pointerId)
+
+    const onMove = (moveEvent) => {
+      if (!isDraggingRef.current || !dragStartRef.current) return
+      const dx = moveEvent.clientX - dragStartRef.current.x
+      const dy = moveEvent.clientY - dragStartRef.current.y
+      setDragOffset({
+        x: dragStartRef.current.offsetX + dx,
+        y: dragStartRef.current.offsetY + dy,
+      })
+    }
+
+    const onUp = () => {
+      isDraggingRef.current = false
+      dragStartRef.current = null
+      target.removeEventListener('pointermove', onMove)
+      target.removeEventListener('pointerup', onUp)
+    }
+
+    target.addEventListener('pointermove', onMove)
+    target.addEventListener('pointerup', onUp)
+  }, [dragOffset])
+
+  const isVisible = visible || touchVisible
+  if ((!isVisible && !hasFocus) || !engine) return null
 
   return (
     <div
       ref={ref}
-      className="rmx-floating-toolbar"
-      style={{ top: position.top, left: position.left }}
+      className={`rmx-floating-toolbar rmx-floating-toolbar-touch ${placedBelow ? 'rmx-floating-below' : ''}`}
+      style={{
+        top: position.top + dragOffset.y,
+        left: position.left + dragOffset.x,
+      }}
       role="toolbar"
       aria-label="Formatting toolbar"
-      onMouseDown={handleMouseDown}
+      onPointerDown={handlePointerDown}
       onKeyDown={handleKeyDown}
       onFocus={handleFocusIn}
       onBlur={handleFocusOut}
@@ -120,6 +218,18 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
           />
         )
       })}
+      {/* Draggable grip handle for touch repositioning */}
+      <div
+        className="rmx-floating-toolbar-grip"
+        onPointerDown={handleGripPointerDown}
+        aria-label="Drag to reposition toolbar"
+        role="separator"
+      >
+        <svg width="20" height="6" viewBox="0 0 20 6" fill="currentColor" aria-hidden="true">
+          <rect x="2" y="0" width="16" height="2" rx="1" opacity="0.4" />
+          <rect x="2" y="4" width="16" height="2" rx="1" opacity="0.4" />
+        </svg>
+      </div>
     </div>
   )
 }
@@ -132,4 +242,5 @@ FloatingToolbar.propTypes = {
   engine: PropTypes.object,
   editorRect: PropTypes.object,
   onOpenModal: PropTypes.func,
+  onDismiss: PropTypes.func,
 }

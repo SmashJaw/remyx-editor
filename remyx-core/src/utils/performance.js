@@ -132,3 +132,85 @@ export function benchmark(label, fn, iterations = 100) {
 
   return { label, mean, median, min, max, p95 }
 }
+
+/**
+ * Creates an input batcher that coalesces rapid DOM updates.
+ * Collects mutations during a frame and applies them in a single rAF.
+ *
+ * @param {Function} applyFn - Function that receives an array of batched mutations
+ * @param {Object} [options]
+ * @param {number} [options.flushMs=16] - Flush interval (one frame by default)
+ * @returns {{ queue: Function, flush: Function, destroy: Function }}
+ *
+ * @example
+ * const batcher = createInputBatcher((mutations) => {
+ *   mutations.forEach(m => applyMutation(m))
+ * })
+ * batcher.queue({ type: 'insert', text: 'a' })
+ * batcher.queue({ type: 'insert', text: 'b' })
+ * // Both applied in a single rAF
+ */
+export function createInputBatcher(applyFn, options = {}) {
+  const flushMs = options.flushMs || 16 // one frame
+  let pending = []
+  let timer = null
+
+  return {
+    /**
+     * Queue a mutation to be applied in the next batch.
+     * @param {*} mutation - The mutation data to queue
+     */
+    queue(mutation) {
+      pending.push(mutation)
+      if (!timer) {
+        timer = (typeof requestAnimationFrame === 'function')
+          ? requestAnimationFrame(() => {
+              const batch = pending
+              pending = []
+              timer = null
+              applyFn(batch)
+            })
+          : setTimeout(() => {
+              const batch = pending
+              pending = []
+              timer = null
+              applyFn(batch)
+            }, flushMs)
+      }
+    },
+
+    /**
+     * Immediately flush any pending mutations without waiting for rAF.
+     */
+    flush() {
+      if (timer) {
+        if (typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(timer)
+        } else {
+          clearTimeout(timer)
+        }
+        timer = null
+      }
+      if (pending.length) {
+        const batch = pending
+        pending = []
+        applyFn(batch)
+      }
+    },
+
+    /**
+     * Destroy the batcher, cancelling any pending flush.
+     */
+    destroy() {
+      if (timer) {
+        if (typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(timer)
+        } else {
+          clearTimeout(timer)
+        }
+      }
+      pending = []
+      timer = null
+    }
+  }
+}

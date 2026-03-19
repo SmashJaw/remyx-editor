@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/core",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
   "keywords": ["wysiwyg", "editor", "rich-text", "contenteditable", "html-editor", "text-editor", "sanitizer", "plugins"],
   "author": "Remyx",
