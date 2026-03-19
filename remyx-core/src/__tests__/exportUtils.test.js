@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
 import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '../utils/exportUtils.js'
 
 // Mock the markdownConverter module

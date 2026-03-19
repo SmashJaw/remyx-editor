@@ -1,6 +1,9 @@
 /* ====== Remyx Editor - Base Styles & Design System ====== */
 
 .rmx-editor {
+  /* ---- Layout Containment ---- */
+  contain: layout style;
+
   /* ---- Color Palette ---- */
   --rmx-bg: #ffffff;
   --rmx-text: #1e293b;

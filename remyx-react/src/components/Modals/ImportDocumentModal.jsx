@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { convertDocument, getSupportedExtensions, getSupportedFormatNames } from '@remyxjs/core'
 
@@ -136,4 +137,10 @@ export function ImportDocumentModal({ open, onClose, engine }) {
       </div>
     </ModalOverlay>
   )
+}
+
+ImportDocumentModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { ICON_MAP, ChevronRightIcon } from '../../icons/index.jsx'
 import { TOOLTIP_MAP, SHORTCUT_MAP, MODAL_COMMANDS, getShortcutLabel, getCommandActiveState } from '@remyxjs/core'
+import { useSelectionContext } from '../../config/SelectionContext.js'
 
 /**
  * Navigate focus between sibling menu items within a menu/submenu.
@@ -25,7 +26,9 @@ function focusMenuSibling(container, direction) {
   items[next]?.focus()
 }
 
-function MenuItemInner({ item, engine, selectionState, onOpenModal, onClose }) {
+function MenuItemInner({ item, engine, onOpenModal, onClose }) {
+  const selectionState = useSelectionContext()
+
   // Separator
   if (item === '---') {
     return <div className="rmx-menubar-separator" role="separator" />
@@ -38,7 +41,6 @@ function MenuItemInner({ item, engine, selectionState, onOpenModal, onClose }) {
         label={item.label}
         items={item.items}
         engine={engine}
-        selectionState={selectionState}
         onOpenModal={onOpenModal}
         onClose={onClose}
       />
@@ -119,7 +121,7 @@ function MenuItemInner({ item, engine, selectionState, onOpenModal, onClose }) {
 
 export const MenuItem = React.memo(MenuItemInner)
 
-function SubMenuItem({ label, items, engine, selectionState, onOpenModal, onClose }) {
+function SubMenuItem({ label, items, engine, onOpenModal, onClose }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   const timeoutRef = useRef(null)
@@ -203,7 +205,6 @@ function SubMenuItem({ label, items, engine, selectionState, onOpenModal, onClos
               key={typeof subItem === 'string' ? `${subItem}-${i}` : subItem.label || i}
               item={subItem}
               engine={engine}
-              selectionState={selectionState}
               onOpenModal={onOpenModal}
               onClose={onClose}
             />

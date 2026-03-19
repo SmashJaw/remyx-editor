@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
 import { isMac, getModKey } from '../utils/platform.js'
 
 describe('platform utilities', () => {
@@ -24,47 +24,50 @@ describe('platform utilities', () => {
   })
 
   describe('isMac with mocked navigator.platform', () => {
-    beforeEach(() => {
-      vi.resetModules()
-    })
-
     it('detects Mac platform', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true })
       const { isMac: isMacFresh } = await import('../utils/platform.js')
       expect(isMacFresh()).toBe(true)
     })
 
     it('detects iPad platform', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'iPad', configurable: true })
       const { isMac: isMacFresh } = await import('../utils/platform.js')
       expect(isMacFresh()).toBe(true)
     })
 
     it('detects iPhone platform', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'iPhone', configurable: true })
       const { isMac: isMacFresh } = await import('../utils/platform.js')
       expect(isMacFresh()).toBe(true)
     })
 
     it('returns false for Windows platform', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'Win32', configurable: true })
       const { isMac: isMacFresh } = await import('../utils/platform.js')
       expect(isMacFresh()).toBe(false)
     })
 
     it('returns false for Linux platform', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'Linux x86_64', configurable: true })
       const { isMac: isMacFresh } = await import('../utils/platform.js')
       expect(isMacFresh()).toBe(false)
     })
 
     it('getModKey returns ⌘ on Mac', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true })
       const { getModKey: getModKeyFresh } = await import('../utils/platform.js')
       expect(getModKeyFresh()).toBe('⌘')
     })
 
     it('getModKey returns Ctrl on Windows', async () => {
+      vi.resetModules()
       Object.defineProperty(navigator, 'platform', { value: 'Win32', configurable: true })
       const { getModKey: getModKeyFresh } = await import('../utils/platform.js')
       expect(getModKeyFresh()).toBe('Ctrl')

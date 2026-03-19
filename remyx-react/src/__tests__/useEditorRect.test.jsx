@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 
@@ -14,18 +14,16 @@ describe('useEditorRect', () => {
       unobserve: vi.fn(),
     }
 
-    globalThis.ResizeObserver = class MockResizeObserver {
-      constructor(callback) {
-        observeCallback = callback
-        Object.assign(this, mockResizeObserver)
-      }
-    }
+    global.ResizeObserver = vi.fn(function (callback) {
+      observeCallback = callback
+      Object.assign(this, mockResizeObserver)
+    })
 
-    globalThis.requestAnimationFrame = vi.fn((cb) => {
+    global.requestAnimationFrame = vi.fn((cb) => {
       cb()
       return 1
     })
-    globalThis.cancelAnimationFrame = vi.fn()
+    global.cancelAnimationFrame = vi.fn()
   })
 
   afterEach(() => {
@@ -34,26 +32,21 @@ describe('useEditorRect', () => {
 
   it('returns null when ref.current is null', () => {
     const ref = { current: null }
-    const { result } = renderHook(() => useEditorRect(ref, true))
+    const { result } = renderHook(() => useEditorRect(ref))
 
     expect(result.current).toBeNull()
   })
 
-  it('returns null when not ready', () => {
+  it('returns rect when ref is valid (no ready parameter needed)', () => {
     const el = document.createElement('div')
     el.getBoundingClientRect = vi.fn(() => ({
       top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400,
     }))
     const ref = { current: el }
 
-    const { result } = renderHook(() => useEditorRect(ref, false))
+    const { result } = renderHook(() => useEditorRect(ref))
 
-    // With ready=false, the effect doesn't run on initial render
-    // but it actually runs because the dependency is `ready` and effect runs on mount
-    // Let's check the actual behavior - the effect depends on `ready` value
-    // Since ready=false, useEffect with [ready] dep still runs on mount
-    // Actually the effect runs regardless, it just uses ready as a dep to re-run
-    // The guard is on el being null, not ready
+    // Effect runs on mount with valid ref, no ready guard needed
     expect(result.current).not.toBeNull()
   })
 
@@ -63,7 +56,7 @@ describe('useEditorRect', () => {
     el.getBoundingClientRect = vi.fn(() => mockRect)
     const ref = { current: el }
 
-    const { result } = renderHook(() => useEditorRect(ref, true))
+    const { result } = renderHook(() => useEditorRect(ref))
 
     expect(el.getBoundingClientRect).toHaveBeenCalled()
     expect(result.current).toEqual(mockRect)
@@ -76,8 +69,9 @@ describe('useEditorRect', () => {
     }))
     const ref = { current: el }
 
-    renderHook(() => useEditorRect(ref, true))
+    renderHook(() => useEditorRect(ref))
 
+    expect(global.ResizeObserver).toHaveBeenCalled()
     expect(mockResizeObserver.observe).toHaveBeenCalledWith(el)
   })
 
@@ -88,7 +82,7 @@ describe('useEditorRect', () => {
     }))
     const ref = { current: el }
 
-    const { unmount } = renderHook(() => useEditorRect(ref, true))
+    const { unmount } = renderHook(() => useEditorRect(ref))
 
     unmount()
 
@@ -111,7 +105,7 @@ describe('useEditorRect', () => {
     const origRAF = global.requestAnimationFrame
     global.requestAnimationFrame = (cb) => { cb(); return 0 }
 
-    const { result } = renderHook(() => useEditorRect(ref, true))
+    const { result } = renderHook(() => useEditorRect(ref))
 
     expect(result.current.width).toBe(800)
 
@@ -133,7 +127,7 @@ describe('useEditorRect', () => {
     const ref = { current: el }
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener')
 
-    const { unmount } = renderHook(() => useEditorRect(ref, true))
+    const { unmount } = renderHook(() => useEditorRect(ref))
 
     unmount()
 
@@ -156,7 +150,7 @@ describe('useEditorRect', () => {
     global.requestAnimationFrame = vi.fn((cb) => { cb(); return 42 })
     global.cancelAnimationFrame = vi.fn()
 
-    const { result } = renderHook(() => useEditorRect(ref, true))
+    const { result } = renderHook(() => useEditorRect(ref))
 
     expect(result.current.top).toBe(0)
 
@@ -180,7 +174,7 @@ describe('useEditorRect', () => {
     global.requestAnimationFrame = vi.fn(() => ++rafId)
     global.cancelAnimationFrame = vi.fn()
 
-    const { unmount } = renderHook(() => useEditorRect(ref, true))
+    const { unmount } = renderHook(() => useEditorRect(ref))
 
     // Trigger a scroll to schedule a rAF that hasn't executed yet
     act(() => {
@@ -204,7 +198,7 @@ describe('useEditorRect', () => {
     global.requestAnimationFrame = vi.fn(() => ++rafId)
     global.cancelAnimationFrame = vi.fn()
 
-    renderHook(() => useEditorRect(ref, true))
+    renderHook(() => useEditorRect(ref))
 
     // Fire two scroll events in quick succession
     act(() => {

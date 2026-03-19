@@ -101,6 +101,14 @@ export class DragDrop {
   }
 
   /**
+   * Returns true if a block drag is currently in progress.
+   * @returns {boolean}
+   */
+  isDragging() {
+    return !!this._dragSource
+  }
+
+  /**
    * Get the current drag state for the React layer to render overlays.
    * @returns {{ isDragging: boolean, isExternalDrag: boolean, dropTarget: HTMLElement|null, dropPosition: string|null }}
    */
@@ -603,6 +611,15 @@ export class DragDrop {
         } else {
           return new Promise((resolve) => {
             const reader = new FileReader()
+            reader.onprogress = (ev) => {
+              if (ev.lengthComputable) {
+                this.engine.eventBus.emit('upload:progress', {
+                  loaded: ev.loaded,
+                  total: ev.total,
+                  percent: Math.round((ev.loaded / ev.total) * 100),
+                })
+              }
+            }
             reader.onload = (ev) => {
               this.engine.commands.execute('insertImage', { src: ev.target.result, alt: file.name })
               resolve()

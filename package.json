@@ -12,9 +12,6 @@
     "build:core": "cd remyx-core && npm run build",
     "build:react": "cd remyx-react && npm run build",
     "build:all": "npx nx run-many --target=build",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "release": "npx nx release",
     "release:dry-run": "npx nx release --dry-run",
     "release:version": "npx nx release version",
@@ -22,14 +19,6 @@
   },
   "devDependencies": {
     "@nx/js": "^22.5.4",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@testing-library/user-event": "^14.6.1",
-    "@vitest/coverage-v8": "^4.1.0",
-    "jsdom": "^29.0.0",
-    "nx": "22.5.4",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "vitest": "^4.1.0"
+    "nx": "22.5.4"
   }
 }

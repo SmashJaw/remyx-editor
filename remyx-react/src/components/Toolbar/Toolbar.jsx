@@ -4,6 +4,7 @@ import { ToolbarDropdown } from './ToolbarDropdown.jsx'
 import { ToolbarColorPicker } from './ToolbarColorPicker.jsx'
 import { ToolbarSeparator } from './ToolbarSeparator.jsx'
 import { DEFAULT_TOOLBAR, DEFAULT_FONTS, DEFAULT_FONT_SIZES, HEADING_OPTIONS, BUTTON_COMMANDS, TOOLTIP_MAP, getShortcutLabel, getCommandActiveState } from '@remyxjs/core'
+import { useSelectionContext } from '../../config/SelectionContext.js'
 
 // Heading dropdown font size formula: base size minus level * step
 const HEADING_BASE_FONT_SIZE = 22
@@ -15,7 +16,8 @@ const HEADING_OPTIONS_WITH_STYLES = HEADING_OPTIONS.map(o => ({
   style: o.tag !== 'p' ? { fontSize: `${HEADING_BASE_FONT_SIZE - (parseInt(o.tag?.[1]) || 0) * HEADING_FONT_SIZE_STEP}px`, fontWeight: 'bold' } : {},
 }))
 
-export const Toolbar = React.memo(function Toolbar({ config, engine, selectionState, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme }) {
+export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme }) {
+  const selectionState = useSelectionContext()
   const toolbarConfig = config || DEFAULT_TOOLBAR
 
   // Memoize font family options — only recompute when fonts array changes

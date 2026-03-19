@@ -21,6 +21,9 @@ const DANGEROUS_REMOVE_TAGS = new Set([
  * Sanitizes HTML content by removing disallowed tags, attributes, and styles.
  * Prevents XSS through event handler attributes, javascript: URLs, and CSS injection.
  */
+// LRU cache max size for sanitize results
+const SANITIZE_CACHE_MAX = 50
+
 export class Sanitizer {
   /**
    * Creates a new Sanitizer instance.
@@ -29,6 +32,7 @@ export class Sanitizer {
   constructor(options = {}) {
     this.allowedTags = options.allowedTags || ALLOWED_TAGS
     this.allowedStyles = options.allowedStyles || ALLOWED_STYLES
+    this._cache = new Map()
   }
 
   /**
@@ -36,15 +40,35 @@ export class Sanitizer {
    * attributes, event handlers, javascript: URLs, and dangerous CSS values.
    * Dangerous tags (script, style, svg, etc.) are removed with all children;
    * other disallowed tags are unwrapped (children preserved).
+   * Results are cached in a simple LRU cache (max 50 entries).
    * @param {string} html - The HTML string to sanitize
    * @returns {string} The sanitized HTML string, or empty string if input is falsy
    */
   sanitize(html) {
     if (!html) return ''
+
+    // Check LRU cache
+    if (this._cache.has(html)) {
+      const cached = this._cache.get(html)
+      // Move to end (most recently used)
+      this._cache.delete(html)
+      this._cache.set(html, cached)
+      return cached
+    }
+
     const parser = new DOMParser()
     const doc = parser.parseFromString(`<body>${html}</body>`, 'text/html')
     this._cleanNode(doc.body)
-    return doc.body.innerHTML
+    const result = doc.body.innerHTML
+
+    // Store in cache, evict oldest if over limit
+    if (this._cache.size >= SANITIZE_CACHE_MAX) {
+      const firstKey = this._cache.keys().next().value
+      this._cache.delete(firstKey)
+    }
+    this._cache.set(html, result)
+
+    return result
   }
 
   /**

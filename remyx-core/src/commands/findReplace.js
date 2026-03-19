@@ -45,10 +45,12 @@ export function registerFindReplaceCommands(engine) {
         const mark = document.createElement('mark')
         mark.className = 'rmx-find-highlight'
         range.surroundContents(mark)
-        matches.unshift(mark)
+        matches.push(mark)
       }
     }
 
+    // Reverse to restore document order (collected in reverse for DOM safety)
+    matches.reverse()
     return matches
   }
 

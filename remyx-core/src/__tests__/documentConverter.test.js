@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
 import { getExtension, readAsText, readAsArrayBuffer, escapeHtml } from '../utils/documentConverter/shared.js'
 
 // Mock all dynamic converter imports

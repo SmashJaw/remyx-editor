@@ -189,7 +189,7 @@ export default defineConfig({
 })
 ```
 
-#### ~~1d. `packages/remyx-core/src/index.js`~~ ✅ (80 exports)
+#### ~~1d. `packages/remyx-core/src/index.js`~~ ✅ (94 exports)
 
 ```js
 // Core engine
@@ -251,7 +251,7 @@ export { defineConfig } from './config/defineConfig.js'
 - ~~Run `cd packages/remyx-core && npm run build`~~ → builds in 1.6s
 - ~~Confirm `dist/remyx-core.js`, `dist/remyx-core.cjs`, and `dist/style.css` are generated~~ → 168 KB ES, 128 KB CJS, 25 KB CSS
 - ~~Confirm no React imports in any file (grep for `from 'react'`)~~ → zero React imports
-- ~~Confirm all exports resolve~~ → 80 named exports verified via dynamic import
+- ~~Confirm all exports resolve~~ → 94 named exports verified via dynamic import
 
 ---
 
@@ -1071,7 +1071,7 @@ export default defineConfig({
 ## Execution Order & Dependencies
 
 ```
-Step 1  → @remyxjs/core             ✅ DONE — 49 files, 80 exports, builds clean
+Step 1  → @remyxjs/core             ✅ DONE — 62 files, 94 exports, builds clean
 Step 2  → @remyxjs/react + TS defs  ✅ DONE — 36 modules, 91 KB ES + 62 KB CJS, all imports via @remyxjs/core
 Step 3  → remyx-editor removed    ✅ DONE — deleted entirely, consumers use @remyxjs/react directly
 ─── Above this line = shipped ───

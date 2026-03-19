@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
 import { registerLinkCommands } from '../commands/links.js'
 
 describe('registerLinkCommands', () => {

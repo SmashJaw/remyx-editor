@@ -7,18 +7,32 @@ export class EventBus {
    */
   constructor() {
     this._listeners = new Map()
+    this._keyedHandlers = new Map() // Maps "event:key" to handler for keyed subscriptions
   }
 
   /**
    * Subscribes a handler to an event.
    * @param {string} event - The event name to listen for
    * @param {Function} handler - The callback function to invoke when the event fires
+   * @param {Object} [options] - Optional configuration
+   * @param {string} [options.key] - If provided, replaces any existing handler with the same key
    * @returns {Function} An unsubscribe function that removes this listener when called
    */
-  on(event, handler) {
+  on(event, handler, options) {
     if (!this._listeners.has(event)) {
       this._listeners.set(event, new Set())
     }
+
+    // Keyed handler: replace existing handler with same key
+    if (options?.key) {
+      const compositeKey = `${event}:${options.key}`
+      const existing = this._keyedHandlers.get(compositeKey)
+      if (existing) {
+        this.off(event, existing)
+      }
+      this._keyedHandlers.set(compositeKey, handler)
+    }
+
     this._listeners.get(event).add(handler)
     return () => this.off(event, handler)
   }
@@ -68,6 +82,10 @@ export class EventBus {
           handler(data)
         } catch (err) {
           console.error(`EventBus error in "${event}" handler:`, err)
+          // Forward handler errors to 'error' event (with recursion guard)
+          if (event !== 'error') {
+            this.emit('error', { event, error: err, data })
+          }
         }
       })
     }

@@ -41,6 +41,13 @@ function shallowEqual(a, b, keys) {
   return true
 }
 
+/**
+ * WeakMap cache for DOM lookups keyed by range startContainer.
+ * Avoids redundant closest/querySelector calls for the same focused element.
+ * Cleared when content changes.
+ */
+const _domLookupCache = new WeakMap()
+
 export function useSelection(engine) {
   const [formatState, setFormatState] = useState(DEFAULT_FORMAT)
   const [uiState, setUiState] = useState(DEFAULT_UI)
@@ -72,21 +79,32 @@ export function useSelection(engine) {
       }
     }
 
-    // DOM queries for focused image/table/codeblock
+    // DOM queries for focused image/table/codeblock (with WeakMap cache)
     let focusedImage = null
     let focusedTable = null
     let focusedCodeBlock = null
     if (sel && sel.focusNode) {
       const node = sel.focusNode.nodeType === Node.TEXT_NODE ? sel.focusNode.parentElement : sel.focusNode
       if (node) {
-        const img = node.tagName === 'IMG' ? node : node.querySelector?.(':scope > img')
-        if (img) focusedImage = img
+        // Check WeakMap cache keyed by the focus node
+        const cacheKey = sel.focusNode
+        let cached = _domLookupCache.get(cacheKey)
+        if (cached) {
+          focusedImage = cached.image
+          focusedTable = cached.table
+          focusedCodeBlock = cached.codeBlock
+        } else {
+          const img = node.tagName === 'IMG' ? node : node.querySelector?.(':scope > img')
+          if (img) focusedImage = img
 
-        const table = node.closest?.('table')
-        if (table) focusedTable = table
+          const table = node.closest?.('table')
+          if (table) focusedTable = table
 
-        const pre = node.closest?.('pre')
-        if (pre) focusedCodeBlock = pre
+          const pre = node.closest?.('pre')
+          if (pre) focusedCodeBlock = pre
+
+          _domLookupCache.set(cacheKey, { image: focusedImage, table: focusedTable, codeBlock: focusedCodeBlock })
+        }
       }
     }
 
@@ -126,11 +144,12 @@ export function useSelection(engine) {
     if (!engine) return
     const clearCache = () => {
       cachedFocusRef.current = { image: null, table: null, codeBlock: null }
+      // Note: WeakMap entries for detached DOM nodes are automatically GC'd
     }
     const unsub = engine.eventBus.on('content:change', clearCache)
     return unsub
   }, [engine])
 
-  // Return combined object for backward compatibility
-  return { ...formatState, ...uiState }
+  // Return split object with formatState and uiState as separate sub-objects
+  return { formatState, uiState }
 }

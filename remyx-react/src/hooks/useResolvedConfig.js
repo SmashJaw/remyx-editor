@@ -86,7 +86,7 @@ export function useResolvedConfig(props) {
       .filter(group => group.length > 0)
   }, [menuBarConfig, toolbar, props.toolbar])
 
-  return {
+  return useMemo(() => ({
     attachTo,
     value,
     defaultValue,
@@ -122,5 +122,12 @@ export function useResolvedConfig(props) {
     errorFallback,
     showCommandPalette,
     autosaveConfig,
-  }
+  }), [
+    attachTo, value, defaultValue, onChange, toolbar, theme, placeholder,
+    height, minHeight, maxHeight, readOnly, plugins, onReady, onFocus, onBlur,
+    className, style, uploadHandler, outputFormat, showFloatingToolbar,
+    showContextMenu, fonts, googleFonts, statusBar, customTheme, toolbarItemTheme,
+    sanitize, shortcuts, baseHeadingLevel, menuBarConfig, effectiveToolbar,
+    onError, errorFallback, showCommandPalette, autosaveConfig,
+  ])
 }

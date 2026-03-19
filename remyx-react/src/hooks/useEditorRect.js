@@ -5,13 +5,13 @@ import { useState, useEffect, useRef } from 'react'
  * Uses ResizeObserver instead of window resize events for precision,
  * and requestAnimationFrame to throttle scroll updates.
  */
-export function useEditorRect(editorRootRef, ready) {
+export function useEditorRect(editorRootRef) {
   const [editorRect, setEditorRect] = useState(null)
   const rafRef = useRef(null)
 
   useEffect(() => {
     const el = editorRootRef.current
-    if (!el) return
+    if (!el) return // Early return guard if ref is not yet valid
 
     const updateRect = () => {
       const rect = el.getBoundingClientRect()
@@ -40,7 +40,7 @@ export function useEditorRect(editorRootRef, ready) {
       window.removeEventListener('scroll', handleScroll, true)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [editorRootRef, ready])
+  }, [editorRootRef])
 
   return editorRect
 }

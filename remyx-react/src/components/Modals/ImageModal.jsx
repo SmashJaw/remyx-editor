@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
 // Allowlist-based URL validation for image sources.
@@ -146,4 +147,10 @@ export function ImageModal({ open, onClose, engine }) {
       </form>
     </ModalOverlay>
   )
+}
+
+ImageModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

@@ -26,13 +26,17 @@ function createPrompt() {
   return { ask, close }
 }
 
+// ── Version (read from package.json) ────────────────────────────
+
+const __pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
+
 // ── Main ────────────────────────────────────────────────────────
 
 async function main() {
   const projectArg = argv[2]
 
   console.log()
-  console.log(bold(cyan('  create-remyx-app')) + dim(' v0.27.0'))
+  console.log(bold(cyan('  create-remyx-app')) + dim(' v' + __pkg.version))
   console.log()
 
   const { ask, close } = createPrompt()
@@ -144,6 +148,15 @@ async function main() {
 // ── Helpers ──────────────────────────────────────────────────────
 
 function buildPackageJson(name, useTypeScript, includeDocs) {
+  // Read versions from this package's own package.json to avoid hardcoding
+  const ownPeer = __pkg.peerDependencies || {}
+  const ownDev = __pkg.devDependencies || {}
+  const coreVersion = ownDev['@remyxjs/core'] || ownPeer['@remyxjs/core'] || __pkg.version
+  const reactVersion = ownDev['react'] || ownPeer['react'] || '>=18.0.0'
+  const reactDomVersion = ownDev['react-dom'] || ownPeer['react-dom'] || '>=18.0.0'
+  const viteVersion = ownDev['vite'] || '>=7.0.0'
+  const pluginReactVersion = ownDev['@vitejs/plugin-react'] || '>=5.0.0'
+
   const pkg = {
     name,
     private: true,
@@ -155,26 +168,26 @@ function buildPackageJson(name, useTypeScript, includeDocs) {
       preview: 'vite preview',
     },
     dependencies: {
-      '@remyxjs/core': '^0.27.0',
-      '@remyxjs/react': '^0.27.0',
-      react: '^19.2.0',
-      'react-dom': '^19.2.0',
+      '@remyxjs/core': '^' + coreVersion,
+      '@remyxjs/react': '^' + coreVersion,
+      react: '^' + reactVersion,
+      'react-dom': '^' + reactDomVersion,
     },
     devDependencies: {
-      '@vitejs/plugin-react': '^5.1.1',
-      vite: '^7.3.1',
+      '@vitejs/plugin-react': '^' + pluginReactVersion,
+      vite: '^' + viteVersion,
     },
   }
 
   if (useTypeScript) {
     pkg.devDependencies['typescript'] = '^5.8.0'
-    pkg.devDependencies['@types/react'] = '^19.2.7'
-    pkg.devDependencies['@types/react-dom'] = '^19.2.3'
+    pkg.devDependencies['@types/react'] = '^19.0.0'
+    pkg.devDependencies['@types/react-dom'] = '^19.0.0'
   }
 
   if (includeDocs) {
     // These are peer/optional deps of @remyxjs/core for document import
-    pkg.dependencies['pdfjs-dist'] = '^5.5.207'
+    pkg.dependencies['pdfjs-dist'] = '^5.0.0'
     pkg.dependencies['mammoth'] = '^1.11.0'
   }
 
@@ -191,15 +204,19 @@ function copyDir(src, dest, opts = {}) {
   for (const entry of readdirSync(src)) {
     const srcPath = join(src, entry)
     const destPath = join(dest, entry)
-    if (statSync(srcPath).isDirectory()) {
-      copyDir(srcPath, destPath, opts)
-    } else if (opts.theme && /\.(jsx|tsx)$/.test(entry)) {
-      // Inject selected theme into React source files
-      let content = readFileSync(srcPath, 'utf-8')
-      content = content.replace('theme="light"', `theme="${opts.theme}"`)
-      writeFileSync(destPath, content)
-    } else {
-      writeFileSync(destPath, readFileSync(srcPath))
+    try {
+      if (statSync(srcPath).isDirectory()) {
+        copyDir(srcPath, destPath, opts)
+      } else if (opts.theme && opts.theme !== 'light' && /\.(jsx|tsx)$/.test(entry)) {
+        // Inject selected theme into React source files (only replace JSX prop value)
+        let content = readFileSync(srcPath, 'utf-8')
+        content = content.replace(/theme="light"(?=[\s/>])/g, `theme="${opts.theme}"`)
+        writeFileSync(destPath, content)
+      } else {
+        writeFileSync(destPath, readFileSync(srcPath))
+      }
+    } catch (err) {
+      throw new Error(`Failed to copy "${srcPath}" to "${destPath}": ${err.message}`)
     }
   }
 }

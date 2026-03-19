@@ -12,7 +12,7 @@
 | Source files (core JS) | 62 |
 | Source files (core CSS) | 7 |
 | Source files (react JSX/JS) | 50 |
-| Test files | 49 |
+| Test files | 52 |
 
 ---
 
@@ -95,12 +95,12 @@ All times are wall-clock averages over 3 runs.
 
 | Metric | Value |
 |---|---|
-| Test suites | 49 |
-| Total tests | 862+ |
-| Cold run (no cache) | **1.8s** (wall: 3.2s) |
-| Warm run (cached) | **1.5s** (wall: 2.4s) |
-| Tests per second | ~453 (cold) / ~543 (warm) |
-| Parallelism | ~7x (Jest workers) |
+| Test suites | 52 |
+| Total tests | 1314 |
+| Cold run (no cache) | **2.1s** (wall: 2.2s) |
+| Warm run (cached) | **1.8s** (wall: 2.0s) |
+| Tests per second | ~625 (cold) / ~730 (warm) |
+| Runner | Vitest 4.1 (jsdom) |
 
 ---
 
@@ -133,7 +133,7 @@ All times are wall-clock averages over 3 runs.
 
 4. **PDF vendor dominance**: The demo app's 2.5 MB dist is inflated by pdf.js (~1.6 MB). The editor's own code is ~380 KB minified (114.78 KB gzipped).
 
-5. **Fast test suite**: 862 tests run in under 2 seconds with Jest 30's parallel workers utilizing all cores.
+5. **Fast test suite**: 1314 tests run in ~2 seconds with Vitest 4.1's parallel workers utilizing all cores.
 
 6. **Lint issues**: 23 ESLint errors remain — primarily react-hooks rule violations (setState in effects, refs during render) from newer plugin rules.
 

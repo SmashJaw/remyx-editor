@@ -2,8 +2,8 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 0.27.0
-**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker
+**Current Version:** 0.28.0 (unreleased)
+**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker, code block syntax highlighting with 11 languages
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor. Sections are ordered by priority — security and stability first, then features ranked by user impact.
 
@@ -13,7 +13,7 @@ A living document outlining planned features, improvements, and long-term direct
 
 ## ~~Multi-Package Architecture~~ ✅ Shipped (v0.23.4)
 
-- ~~Extract framework-agnostic core into `@remyxjs/core`~~ — 49 files, 80 exports, zero framework deps
+- ~~Extract framework-agnostic core into `@remyxjs/core`~~ — 62 files, 94 exports, zero framework deps
 - ~~Create `@remyxjs/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
 - ~~Standalone `remyx-editor` package~~ — removed; consumers use `@remyxjs/react` directly
 - ~~npm workspaces monorepo setup~~
@@ -95,7 +95,7 @@ A living document outlining planned features, improvements, and long-term direct
 
 These items protect users from XSS, data loss, and crashes. They should be addressed before any new feature work.
 
-## Security Hardening — ✅ Mostly Shipped (v0.24.0), remaining items open
+## Security Hardening — ✅ Shipped (v0.24.0–v0.28.0)
 
 - ~~Sanitizer: extend dangerous-protocol checking to `src`, `action`, `formaction`, and `data` attributes~~
 - Sanitizer: domain allowlist for iframe `src` (YouTube, Vimeo, Dailymotion only)
@@ -105,25 +105,25 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 - ~~Markdown parser: set `html: false` to block raw HTML injection~~
 - ~~URL protocol validation on `insertLink`, `insertImage`, and `window.open` calls~~
 - ~~Data URI validation: block `image/svg+xml` data URIs~~
-- Block external SVG URL insertion (`.svg` URLs can contain embedded scripts)
-- Percent-encoded protocol bypass hardening in modal URL validators
-- SourceModal re-sanitization before applying user-edited HTML
-- CloudProvider endpoint URL validation to prevent injection
-- Export PDF iframe `sandbox` attribute
-- URL validation via `URL` constructor instead of regex where possible
+- ~~Block external SVG URL insertion (`.svg` URLs can contain embedded scripts)~~
+- ~~Percent-encoded protocol bypass hardening in modal URL validators~~
+- ~~SourceModal re-sanitization before applying user-edited HTML~~
+- ~~CloudProvider endpoint URL validation to prevent injection~~
+- ~~Export PDF iframe `sandbox` attribute~~
+- ~~URL validation via `URL` constructor instead of regex where possible~~
 - ~~Iframe `sandbox` attribute on embedded media~~
 - ~~File size limits on pasted/dropped images (configurable, 10 MB default)~~
 - ~~Plugin sandboxing: restricted engine facade, prevent command overwriting~~
 - CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies
 - Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)
 - ~~Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal~~
-- See [TASKS.md](./TASKS.md) for the full audit report (42 security items, 33 resolved, 9 open)
+- See [TASKS.md](./TASKS.md) for the full audit report (42 security items, 42 resolved, 0 open)
 
 ## Quality Improvements
 
-- ~~Comprehensive unit test suite (Jest) for engine, commands, sanitizer, and converters~~ — 1251 tests across 49 files
+- ~~Comprehensive unit test suite (Vitest) for engine, commands, sanitizer, and converters~~ — 52 test files, 1314 tests across both packages
 - ~~End-to-end tests (Playwright)~~ — Removed; the repo does not serve a production web server. Will revisit when a hosted demo is available.
-- XSS-specific test coverage for all modal components (LinkModal, ImageModal, SourceModal, etc.)
+- ~~XSS-specific test coverage for all modal components (LinkModal, ImageModal, SourceModal, etc.)~~
 - Visual regression tests for theme and layout stability
 - ~~Accessibility: WAI-ARIA menu pattern, focus trapping, skip navigation, `baseHeadingLevel`~~
 - RTL (right-to-left) language support with `dir="rtl"` auto-detection
@@ -153,7 +153,7 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 - Lazy plugin loading: plugins initialize on first use, not on editor mount
 - Compressed undo history: store diffs instead of full snapshots to reduce memory usage
 - Input batching: coalesce rapid keystrokes into single DOM updates to eliminate layout thrash
-- See [TASKS.md](./TASKS.md) for the full optimization inventory (59 items, 21 complete)
+- See [TASKS.md](./TASKS.md) for the full optimization inventory (59 items, 59 resolved, 0 open)
 
 ## Build & DevOps
 

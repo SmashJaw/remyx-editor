@@ -3,18 +3,12 @@ import { createPlugin } from '../createPlugin.js'
 // Maximum length for a URL match to prevent ReDoS on extremely long strings
 const MAX_URL_LENGTH = 2048
 
-// Matches URLs with an explicit protocol: http://example.com, https://example.com/path
-// Uses possessive-style matching via atomic groups to prevent catastrophic backtracking
-const PROTOCOL_URL_REGEX = /https?:\/\/[^\s<]{1,2000}[^\s<.,:;"')\]!?]/g
-
-// Matches www. prefixed domains: www.example.com, www.example.com/path
-// Bounded repetition to prevent backtracking on long inputs
-const WWW_REGEX = /www\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,20})+(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?/g
-
-// Matches bare domain names: example.com, sub.example.co.uk, docs.github.io/path
-// Requires at least one dot and a valid TLD (2+ alpha chars)
-// Bounded repetition on label groups to prevent ReDoS
-const DOMAIN_REGEX = /(?<![a-zA-Z0-9@/:.])(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?\.){1,10}[a-zA-Z]{2,20}(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?/g
+// Combined regex that matches all three URL patterns in a single pass:
+// 1. Protocol URLs: https://example.com/path
+// 2. www. prefixed: www.example.com/path
+// 3. Bare domains: example.com/path
+// Uses alternation groups to eliminate redundant text scans
+const COMBINED_URL_REGEX = /(?:https?:\/\/[^\s<]{1,2000}[^\s<.,:;"')\]!?])|(?:www\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,20})+(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?)|(?:(?<![a-zA-Z0-9@/:.])(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,62}[a-zA-Z0-9])?\.){1,10}[a-zA-Z]{2,20}(?:\/[^\s<]{0,2000}[^\s<.,:;"')\]!?])?)/g
 
 // Pre-compiled regexes for checking if a match is part of a larger URL
 const PROTOCOL_BEFORE_REGEX = /https?:\/\/$/
@@ -110,42 +104,35 @@ function findLastURLMatch(text) {
 
   let best = null
 
-  // 1) Protocol URLs — highest priority (https://example.com)
-  for (const m of text.matchAll(PROTOCOL_URL_REGEX)) {
+  // Single pass using combined regex with alternation groups
+  for (const m of text.matchAll(COMBINED_URL_REGEX)) {
     const url = m[0]
-    best = { url, href: url, startIdx: m.index, endIdx: m.index + url.length }
-  }
+    const isProtocol = url.startsWith('http://') || url.startsWith('https://')
+    const isWww = !isProtocol && url.startsWith('www.')
+    const isBare = !isProtocol && !isWww
 
-  // 2) www. domains (www.example.com)
-  for (const m of text.matchAll(WWW_REGEX)) {
-    const url = m[0]
-    const candidate = { url, href: 'https://' + url, startIdx: m.index, endIdx: m.index + url.length }
-    // Only use if it starts after or at the same position as current best
-    if (!best || candidate.startIdx >= best.startIdx) {
+    let href = url
+    let candidate = null
+
+    if (isProtocol) {
+      candidate = { url, href: url, startIdx: m.index, endIdx: m.index + url.length }
+    } else if (isWww) {
       // Make sure this isn't part of a protocol URL already matched
       const before = text.slice(Math.max(0, m.index - 8), m.index)
-      if (!PROTOCOL_BEFORE_REGEX.test(before)) {
-        best = candidate
-      }
-    }
-  }
-
-  // 3) Bare domains (example.com, sub.example.io/path)
-  for (const m of text.matchAll(DOMAIN_REGEX)) {
-    const url = m[0]
-    const tld = extractTLD(url)
-
-    // Only auto-link if the TLD is a known one (avoids false positives)
-    if (!COMMON_TLDS.has(tld)) continue
-
-    const candidate = { url, href: 'https://' + url, startIdx: m.index, endIdx: m.index + url.length }
-
-    if (!best || candidate.startIdx >= best.startIdx) {
+      if (PROTOCOL_BEFORE_REGEX.test(before)) continue
+      candidate = { url, href: 'https://' + url, startIdx: m.index, endIdx: m.index + url.length }
+    } else if (isBare) {
+      const tld = extractTLD(url)
+      // Only auto-link if the TLD is a known one (avoids false positives)
+      if (!COMMON_TLDS.has(tld)) continue
       // Make sure this isn't part of a www. or protocol URL already matched
       const before = text.slice(Math.max(0, m.index - 12), m.index)
-      if (!PROTOCOL_OR_WWW_BEFORE_REGEX.test(before) && !/www\.$/.test(before)) {
-        best = candidate
-      }
+      if (PROTOCOL_OR_WWW_BEFORE_REGEX.test(before) || /www\.$/.test(before)) continue
+      candidate = { url, href: 'https://' + url, startIdx: m.index, endIdx: m.index + url.length }
+    }
+
+    if (candidate && (!best || candidate.startIdx >= best.startIdx)) {
+      best = candidate
     }
   }
 

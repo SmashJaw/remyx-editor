@@ -66,7 +66,7 @@ packages/remyx-core/src/
   core/             EditorEngine, CommandRegistry, Selection, History, Sanitizer,
                     EventBus, KeyboardManager, Clipboard, DragDrop, AutosaveManager
   commands/         One file per command group (formatting, lists, tables, slashCommands, etc.)
-  plugins/          Plugin system (createPlugin, PluginManager, built-in plugins incl.
+  plugins/          Plugin system (createPlugin, PluginManager, 4 built-in plugins incl.
                     syntaxHighlight/)
   autosave/         Storage providers (LocalStorage, SessionStorage, FileSystem, Cloud, Custom)
   utils/            DOM helpers, paste cleaning, theme config, toolbar config,
@@ -74,7 +74,7 @@ packages/remyx-core/src/
   constants/        Command names, keybindings, defaults, sanitization schema
   config/           defineConfig helper
   themes/           CSS theme files (variables, light, dark, ocean, forest, sunset, rose)
-  index.js          Public API re-exports (~90 named exports)
+  index.js          Public API re-exports (~94 named exports)
 ```
 
 ### @remyxjs/react
@@ -128,7 +128,7 @@ Always build `@remyxjs/core` before `@remyxjs/react`, since React depends on Cor
 
 ### Testing
 
-Jest is the unit test runner, configured at the repo root. Run all test commands from the **repo root** (not `packages/`).
+Vitest is the unit test runner, configured at the repo root via `vitest.config.js`. Run all test commands from the **repo root** (not `packages/`).
 
 ```bash
 # Run all unit tests
@@ -145,14 +145,14 @@ npm run test:coverage
 
 | Directory | Runner | Description |
 |---|---|---|
-| `packages/remyx-core/src/__tests__/` | Jest | Core engine, commands, plugins, utilities |
-| `packages/remyx-react/src/__tests__/` | Jest | React hooks, components, config provider |
+| `packages/remyx-core/src/__tests__/` | Vitest | Core engine, commands, plugins, utilities |
+| `packages/remyx-react/src/__tests__/` | Vitest | React hooks, components, config provider |
 
 #### Writing tests
 
 - One test file per module: `ModuleName.test.js` (or `.test.jsx` for React)
 - Use `describe` / `it` nesting with `"should ..."` naming
-- Use `jest.fn()` and `jest.spyOn()` for mocks
+- Use `vi.fn()` and `vi.spyOn()` for mocks (import `vi` from `vitest`)
 - Use `@testing-library/react` for component and hook tests
 - Clean up DOM in `afterEach` when appending to `document.body`
 

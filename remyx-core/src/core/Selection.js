@@ -44,6 +44,17 @@ export class Selection {
    */
   constructor(editorElement) {
     this.editor = editorElement
+    this._cachedRange = null
+    this._cacheGeneration = 0
+  }
+
+  /**
+   * Invalidates the cached range. Call this when the selection may have changed
+   * (e.g. after a command execution or DOM mutation).
+   */
+  invalidateCache() {
+    this._cacheGeneration++
+    this._cachedRange = null
   }
 
   /**
@@ -59,10 +70,25 @@ export class Selection {
    * @returns {Range|null} The current selection range within the editor, or null
    */
   getRange() {
+    // Return cached range if still valid within same synchronous cycle
+    if (this._cachedRange !== null) {
+      return this._cachedRange
+    }
     const sel = this.getSelection()
-    if (!sel || sel.rangeCount === 0) return null
+    if (!sel || sel.rangeCount === 0) {
+      this._cachedRange = null
+      return null
+    }
     const range = sel.getRangeAt(0)
-    if (!this.isWithinEditor(range.commonAncestorContainer)) return null
+    if (!this.isWithinEditor(range.commonAncestorContainer)) {
+      this._cachedRange = null
+      return null
+    }
+    this._cachedRange = range
+    // Schedule cache invalidation at end of current synchronous cycle
+    if (this._cacheGeneration === this._cacheGeneration) {
+      Promise.resolve().then(() => { this._cachedRange = null })
+    }
     return range
   }
 
@@ -73,6 +99,7 @@ export class Selection {
    * @returns {void}
    */
   setRange(range) {
+    this._cachedRange = null
     try {
       const sel = this.getSelection()
       sel.removeAllRanges()

@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
 const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
@@ -154,4 +155,10 @@ export function AttachmentModal({ open, onClose, engine }) {
       </form>
     </ModalOverlay>
   )
+}
+
+AttachmentModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

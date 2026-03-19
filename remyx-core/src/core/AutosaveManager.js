@@ -13,6 +13,13 @@
 
 import { createStorageProvider } from '../autosave/providers.js'
 
+/**
+ * Module-level registry of active AutosaveManager instances, keyed by config.key.
+ * Prevents duplicate managers for the same storage key.
+ * @type {Map<string, AutosaveManager>}
+ */
+const _managerRegistry = new Map()
+
 export class AutosaveManager {
   /**
    * @param {import('./EditorEngine.js').EditorEngine} engine
@@ -27,6 +34,14 @@ export class AutosaveManager {
     this.engine = engine
     this.provider = createStorageProvider(options.provider)
     this.key = options.key || 'rmx-default'
+
+    // Deduplication: destroy existing manager for the same key
+    const existing = _managerRegistry.get(this.key)
+    if (existing) {
+      console.warn(`[Remyx] AutosaveManager for key "${this.key}" already exists. Destroying old instance.`)
+      existing.destroy()
+    }
+    _managerRegistry.set(this.key, this)
     this.interval = options.interval ?? 30000
     this.debounceMs = options.debounce ?? 2000
     this.enabled = options.enabled !== false
@@ -96,6 +111,11 @@ export class AutosaveManager {
     if (this._beforeUnloadHandler && typeof window !== 'undefined') {
       window.removeEventListener('beforeunload', this._beforeUnloadHandler)
       this._beforeUnloadHandler = null
+    }
+
+    // Remove from registry
+    if (_managerRegistry.get(this.key) === this) {
+      _managerRegistry.delete(this.key)
     }
 
     // Final save attempt (fire-and-forget), then mark as destroyed

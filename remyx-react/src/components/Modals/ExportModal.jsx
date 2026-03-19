@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyxjs/core'
 
@@ -44,4 +45,10 @@ export function ExportModal({ open, onClose, engine }) {
       </div>
     </ModalOverlay>
   )
+}
+
+ExportModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

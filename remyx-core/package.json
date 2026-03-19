@@ -24,7 +24,14 @@
       "import": "./dist/remyx-core.js",
       "require": "./dist/remyx-core.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/style.css",
+    "./themes/variables.css": "./dist/themes/variables.css",
+    "./themes/light.css": "./dist/themes/light.css",
+    "./themes/dark.css": "./dist/themes/dark.css",
+    "./themes/ocean.css": "./dist/themes/ocean.css",
+    "./themes/forest.css": "./dist/themes/forest.css",
+    "./themes/sunset.css": "./dist/themes/sunset.css",
+    "./themes/rose.css": "./dist/themes/rose.css"
   },
   "files": ["dist"],
   "publishConfig": {

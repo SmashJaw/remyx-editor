@@ -226,7 +226,7 @@ See the full [@remyxjs/core README](./remyx-core/README.md) for the complete eng
 ```
 packages/
   create-remyx/   → create-remyx        Reserved for future CLI wizard
-  remyx-core/     → @remyxjs/core         80+ exports, 0 framework deps
+  remyx-core/     → @remyxjs/core         90+ exports, 0 framework deps
   remyx-react/    → @remyxjs/react        React components + hooks + TS types + scaffolding CLI
   docs/           Documentation, changelogs, roadmap, benchmarks
 ```
@@ -254,7 +254,7 @@ npm run build:all
 npm run build:core
 npm run build:react
 
-# Run tests (1251 unit tests)
+# Run tests (1314 unit tests via Vitest)
 npm test
 
 # Run tests in watch mode

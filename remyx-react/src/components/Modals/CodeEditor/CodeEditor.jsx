@@ -1,18 +1,31 @@
-import { useRef, useMemo, useCallback } from 'react'
+import { useRef, useMemo, useCallback, useState, useEffect } from 'react'
 import { highlightHTML } from './highlightHTML.js'
 import { highlightMarkdown } from './highlightMarkdown.js'
 import './CodeEditor.css'
+
+const HIGHLIGHT_DEBOUNCE_MS = 150
 
 export function CodeEditor({ value, onChange, language = 'html' }) {
   const textareaRef = useRef(null)
   const preRef = useRef(null)
   const gutterRef = useRef(null)
+  const highlightTimerRef = useRef(null)
 
-  // Tokenize the source for highlighting
+  // Debounced value for highlighting — delays expensive tokenization
+  const [debouncedValue, setDebouncedValue] = useState(value || '')
+
+  useEffect(() => {
+    highlightTimerRef.current = setTimeout(() => {
+      setDebouncedValue(value || '')
+    }, HIGHLIGHT_DEBOUNCE_MS)
+    return () => clearTimeout(highlightTimerRef.current)
+  }, [value])
+
+  // Tokenize the debounced source for highlighting
   const highlighted = useMemo(() => {
     const highlighter = language === 'markdown' ? highlightMarkdown : highlightHTML
-    return highlighter(value || '')
-  }, [value, language])
+    return highlighter(debouncedValue)
+  }, [debouncedValue, language])
 
   // Count lines for the gutter
   const lineCount = useMemo(() => {
@@ -39,9 +52,10 @@ export function CodeEditor({ value, onChange, language = 'html' }) {
       const ta = e.target
       const start = ta.selectionStart
       const end = ta.selectionEnd
-      // Use execCommand to preserve undo stack where supported
-      if (document.execCommand) {
-        document.execCommand('insertText', false, '  ')
+      // Use setRangeText to insert text while preserving undo stack
+      if (typeof ta.setRangeText === 'function') {
+        ta.setRangeText('  ', start, end, 'end')
+        ta.dispatchEvent(new Event('input', { bubbles: true }))
       } else {
         const newValue = value.substring(0, start) + '  ' + value.substring(end)
         onChange(newValue)

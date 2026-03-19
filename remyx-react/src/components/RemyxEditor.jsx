@@ -11,7 +11,7 @@ import { usePortalAttachment } from '../hooks/usePortalAttachment.js'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 import { useDragDrop } from '../hooks/useDragDrop.js'
 import { loadGoogleFonts, DEFAULT_FONTS } from '@remyxjs/core'
-import { MenuBar } from './MenuBar/MenuBar.jsx'
+import { SelectionContext } from '../config/SelectionContext.js'
 import { Toolbar } from './Toolbar/Toolbar.jsx'
 import { EditArea } from './EditArea/EditArea.jsx'
 import { FloatingToolbar } from './EditArea/FloatingToolbar.jsx'
@@ -22,9 +22,11 @@ import { DropZoneOverlay } from './EditArea/DropZoneOverlay.jsx'
 import { BlockDragHandle } from './EditArea/BlockDragHandle.jsx'
 import { StatusBar, WordCountButton } from './StatusBar/StatusBar.jsx'
 import { RecoveryBanner } from './RecoveryBanner/RecoveryBanner.jsx'
-import { ContextMenu } from './ContextMenu/ContextMenu.jsx'
 import { EditorErrorBoundary } from './ErrorBoundary.jsx'
 
+// Lazy-loaded components — only loaded when needed
+const MenuBar = React.lazy(() => import('./MenuBar/MenuBar.jsx').then(m => ({ default: m.MenuBar })))
+const ContextMenu = React.lazy(() => import('./ContextMenu/ContextMenu.jsx').then(m => ({ default: m.ContextMenu })))
 
 // Lazy-loaded modal components — only loaded when opened
 const CommandPalette = React.lazy(() => import('./CommandPalette/CommandPalette.jsx').then(m => ({ default: m.CommandPalette })))
@@ -93,13 +95,13 @@ export default function RemyxEditor(props) {
     baseHeadingLevel,
   }, portalContainer)
 
-  const selectionState = useSelection(engine)
+  const { formatState, uiState } = useSelection(engine)
   const { modals, openModal, closeModal } = useModal()
   const { contextMenu, hideContextMenu } = useContextMenu(engine, editAreaRef)
   const { saveStatus, recoveryData, recoverContent, dismissRecovery } = useAutosave(engine, autosaveConfig)
 
   // Track editor rect for positioning overlays (ResizeObserver + rAF throttled)
-  const editorRect = useEditorRect(editorRootRef, ready)
+  const editorRect = useEditorRect(editorRootRef)
 
   // Expose engine on the DOM element for E2E testing and external integrations
   useEffect(() => {
@@ -185,6 +187,7 @@ export default function RemyxEditor(props) {
   )
 
   const editorTree = (
+    <SelectionContext.Provider value={formatState}>
     <div
       ref={editorRootRef}
       className={`rmx-editor rmx-theme-${/^[a-zA-Z0-9_-]+$/.test(theme) ? theme : 'light'} ${className || ''}`}
@@ -195,18 +198,18 @@ export default function RemyxEditor(props) {
       </a>
 
       {menuBarConfig && (
-        <MenuBar
-          config={menuBarConfig}
-          engine={engine}
-          selectionState={selectionState}
-          onOpenModal={handleOpenModal}
-        />
+        <Suspense fallback={null}>
+          <MenuBar
+            config={menuBarConfig}
+            engine={engine}
+            onOpenModal={handleOpenModal}
+          />
+        </Suspense>
       )}
 
       <Toolbar
         config={effectiveToolbar || toolbar}
         engine={engine}
-        selectionState={selectionState}
         onOpenModal={handleOpenModal}
         fonts={mergedFonts}
         statusBarMode={statusBar}
@@ -241,34 +244,33 @@ export default function RemyxEditor(props) {
 
         {showFloatingToolbar && (
           <FloatingToolbar
-            visible={selectionState.hasSelection}
-            selectionRect={selectionState.selectionRect}
+            visible={uiState.hasSelection}
+            selectionRect={uiState.selectionRect}
             engine={engine}
-            selectionState={selectionState}
             editorRect={editorRect}
             onOpenModal={handleOpenModal}
           />
         )}
 
-        {selectionState.focusedImage && (
+        {uiState.focusedImage && (
           <ImageResizeHandles
-            image={selectionState.focusedImage}
+            image={uiState.focusedImage}
             engine={engine}
             editorRect={editorRect}
           />
         )}
 
-        {selectionState.focusedTable && (
+        {uiState.focusedTable && (
           <TableControls
-            table={selectionState.focusedTable}
+            table={uiState.focusedTable}
             engine={engine}
             editorRect={editorRect}
           />
         )}
 
-        {selectionState.focusedCodeBlock && (
+        {uiState.focusedCodeBlock && (
           <CodeBlockControls
-            codeBlock={selectionState.focusedCodeBlock}
+            codeBlock={uiState.focusedCodeBlock}
             engine={engine}
             editorRect={editorRect}
           />
@@ -307,11 +309,13 @@ export default function RemyxEditor(props) {
       )}
 
       {showContextMenu && (
-        <ContextMenu
-          contextMenu={contextMenu}
-          onHide={hideContextMenu}
-          onOpenModal={handleOpenModal}
-        />
+        <Suspense fallback={null}>
+          <ContextMenu
+            contextMenu={contextMenu}
+            onHide={hideContextMenu}
+            onOpenModal={handleOpenModal}
+          />
+        </Suspense>
       )}
 
       <Suspense fallback={null}>
@@ -388,6 +392,7 @@ export default function RemyxEditor(props) {
         )}
       </Suspense>
     </div>
+    </SelectionContext.Provider>
   )
 
   const wrappedTree = (

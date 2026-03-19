@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
 import { createPlugin } from '../plugins/createPlugin.js'
 
 describe('createPlugin', () => {

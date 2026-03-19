@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 
 export function FindReplacePanel({ open, onClose, engine }) {
   const [findText, setFindText] = useState('')
@@ -23,7 +24,11 @@ export function FindReplacePanel({ open, onClose, engine }) {
 
   const handleFind = () => {
     if (!findText.trim()) return
-    engine.executeCommand('find', { text: findText, caseSensitive })
+    try {
+      engine.executeCommand('find', { text: findText, caseSensitive })
+    } catch (err) {
+      console.error('Find command failed:', err)
+    }
   }
 
   if (!open) return null
@@ -80,4 +85,10 @@ export function FindReplacePanel({ open, onClose, engine }) {
       </div>
     </div>
   )
+}
+
+FindReplacePanel.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

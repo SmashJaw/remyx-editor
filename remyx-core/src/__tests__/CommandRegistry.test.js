@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
+
 import { CommandRegistry } from '../core/CommandRegistry.js'
 
 describe('CommandRegistry', () => {

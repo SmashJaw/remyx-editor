@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
+
 import { Clipboard } from '../core/Clipboard.js'
 
 vi.mock('../utils/pasteClean.js', () => ({
@@ -229,29 +230,26 @@ describe('Clipboard', () => {
       const event = createPasteEventWithFiles([imageFile])
 
       // Mock FileReader
-      let readerInstance
-      const readAsDataURLSpy = vi.fn()
-      const OriginalFileReader = globalThis.FileReader
-      globalThis.FileReader = class MockFileReader {
-        constructor() {
-          this.readAsDataURL = readAsDataURLSpy
-          this.onload = null
-          this.onerror = null
-          readerInstance = this
-        }
+      const mockReader = {
+        readAsDataURL: vi.fn(),
+        onload: null,
+        onprogress: null,
       }
+      vi.spyOn(global, 'FileReader').mockImplementation(function () {
+        return mockReader
+      })
 
       element.dispatchEvent(event)
-      expect(readAsDataURLSpy).toHaveBeenCalledWith(imageFile)
+      expect(mockReader.readAsDataURL).toHaveBeenCalledWith(imageFile)
 
       // Simulate reader load
-      readerInstance.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
+      mockReader.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
         src: 'data:image/jpeg;base64,abc',
         alt: 'photo.jpg',
       })
 
-      globalThis.FileReader = OriginalFileReader
+      global.FileReader.mockRestore()
     })
 
     it('should not handle image paste if file exceeds max size', () => {
@@ -451,7 +449,6 @@ describe('Clipboard', () => {
       const event = createPasteEventWithFiles([txtFile])
       element.dispatchEvent(event)
 
-      // Wait for serialized promise chain
       await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()

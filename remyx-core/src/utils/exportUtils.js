@@ -1,6 +1,9 @@
 import { htmlToMarkdown } from './markdownConverter.js'
 import { Sanitizer } from '../core/Sanitizer.js'
 
+// Module-level singleton to avoid creating a new Sanitizer on every export call
+const _sanitizer = new Sanitizer()
+
 function triggerDownload(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -26,8 +29,7 @@ export function exportAsPDF(html, title = 'Document') {
   document.body.appendChild(iframe)
 
   // Re-sanitize HTML and escape title to prevent XSS in export iframe
-  const sanitizer = new Sanitizer()
-  const safeHtml = sanitizer.sanitize(html)
+  const safeHtml = _sanitizer.sanitize(html)
   const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
   const doc = iframe.contentDocument || iframe.contentWindow.document

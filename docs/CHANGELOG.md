@@ -14,16 +14,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **Code block syntax highlighting** — Language-specific syntax highlighting for `<pre><code>` blocks using custom lightweight tokenizers (zero external dependencies). Supports 11 languages: JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, and HTML with automatic language detection. New `SyntaxHighlightPlugin` built-in plugin with MutationObserver-based auto-highlighting, debounced to avoid disrupting contenteditable typing. Skips blocks the user is actively editing and re-highlights on blur. Theme-aware token colors via `.rmx-syn-*` CSS classes across all 6 themes. New `setCodeLanguage` and `getCodeLanguage` commands. Language selector dropdown overlay on focused code blocks in `@remyxjs/react`. Markdown round-trip preserves language identifiers (`` ```js ``, `` ```python ``). New exports: `SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` from `@remyxjs/core`.
 - **Source mode sanitization notification** — `SourceModal` now emits a `source:sanitized` event when the sanitizer strips unsafe content from user-edited HTML, so consumers can surface a warning.
+- **SelectionContext** — New `SelectionContext` and `useSelectionContext()` hook in `@remyxjs/react`. Replaces prop drilling of `selectionState` through 6+ child components. Selection state is now split into `formatState` and `uiState` sub-objects for granular re-render control.
+- **Sanitizer LRU cache** — `Sanitizer.sanitize()` now caches up to 50 recent results by HTML string key, avoiding redundant DOMParser/tree-walk cycles on identical content (e.g., undo/redo).
+- **History snapshot hashing** — `History._takeSnapshot()` now computes a lightweight djb2 hash before comparing full normalized strings, reducing garbage from frequent `===` on long HTML.
+- **Selection range caching** — `Selection.getRange()` caches `window.getSelection()`/`getRangeAt(0)` in `_cachedRange`, invalidated per selection change cycle, eliminating redundant calls from chained methods.
+- **EventBus keyed handlers** — `EventBus.on()` now accepts an optional `{ key }` option. When a key is provided, any existing handler with the same key is replaced, preventing logical duplicates from re-renders.
+- **EventBus error propagation** — `EventBus.emit()` now emits an `error` event (with recursion guard) when a handler throws, in addition to the existing `console.error`.
+- **DragDrop `isDragging()` method** — New public API method returning `!!this._dragSource`, replacing direct access to the private `_dragSource` property.
+- **Autosave deduplication** — Module-level `_managerRegistry` Map in `AutosaveManager` prevents duplicate managers for the same storage key across multiple editor instances.
+- **FileReader progress events** — `DragDrop` and `Clipboard` now emit `upload:progress` events via EventBus with `{ loaded, total, percent }` during FileReader-based image drops.
+- **PropTypes on all modals and ContextMenu** — Added `prop-types` as a devDependency and PropTypes declarations to all 9 modal components and the ContextMenu component.
+- **Per-theme CSS exports** — Individual theme CSS files are now available as sub-path imports: `@remyxjs/core/themes/dark.css`, `@remyxjs/core/themes/ocean.css`, etc. The aggregate `@remyxjs/core/style.css` remains for backward compatibility.
+- **XSS test coverage for modals** — New `modal-xss.test.jsx` with tests verifying `javascript:` URL rejection, percent-encoded bypass prevention, and SVG data URI blocking across all modal URL validators.
+- **React hook test coverage** — New `hooks.test.jsx` covering previously untested hooks.
+- **React component test coverage** — New `components.test.jsx` with rendering tests for previously untested components.
 
 ### Removed
 
 - **Playwright e2e test suite** — Removed `playwright.config.js`, `e2e/` directory (8 spec files), and `@playwright/test` dependency. The root repo does not serve a production web server; e2e tests will be revisited when needed.
 - **Duplicate config files in `packages/`** — Removed `babel.config.js`, `eslint.config.js`, `jest.config.js`, and `tsconfig.json` from `packages/`. All tooling (lint, test, typecheck) now runs from the repo root only.
 - **Redundant `packages/` devDependencies** — Stripped `packages/package.json` to only Nx and build/release scripts. Testing, linting, and type-checking deps live at the repo root.
+- **Jest test framework** — Replaced Jest + babel-jest + jest-environment-jsdom with Vitest. Removed `jest.config.js`, `babel.config.js`, and all Jest dependencies. All 52 test files migrated to Vitest APIs (`vi.fn()`, `vi.spyOn()`, etc.).
+- **Deprecated `create-remyx` bin entry** — Removed the `"bin"` field from `create-remyx/package.json` since the package is reserved for a future CLI wizard.
 
 ### Changed
 
 - **CONTRIBUTING.md** — Updated development workflow to clarify that lint, test, and typecheck commands run from the repo root, while build commands run from `packages/`.
+- **Test framework migrated to Vitest** — All 52 test files (1314 tests) now use Vitest with `vitest.config.js` at the root. Test scripts updated: `npm test` runs `vitest run`, `npm run test:watch` runs `vitest`, `npm run test:coverage` runs `vitest run --coverage`.
+- **`useSelection` returns split state** — Returns `{ formatState, uiState }` instead of a flat spread, enabling granular consumer subscriptions via `SelectionContext`.
+- **`useResolvedConfig` return memoized** — The return object is now wrapped in `useMemo` to prevent unnecessary child re-renders.
+- **`RemyxConfigProvider` context value stabilized** — Context value is now wrapped in `useMemo` to prevent full-tree re-renders when the parent re-renders.
+- **MenuBar and ContextMenu lazy-loaded** — Converted from eager imports to `React.lazy()` + `Suspense`, matching the existing lazy-loading pattern used for modals.
+- **CodeEditor highlighting debounced** — Syntax highlighting in `CodeEditor` is now debounced by 150ms to avoid re-tokenizing on every keystroke.
+- **TablePickerModal uses event delegation** — Replaced 100 individual cell `onMouseEnter`/`onClick` handlers with event delegation on the grid container using `data-row`/`data-col` attributes.
+- **StatusBar shallow comparison** — `wordcount:update` handler now compares values before calling `setCounts` to avoid unnecessary re-renders.
+- **`useEditorRect` deps simplified** — Removed `ready` from `useEffect` dependency array; uses early return guard instead.
+- **AutolinkPlugin combined regex** — Three separate regex passes consolidated into a single combined regex with alternation groups.
+- **Autosave init blocked until recovery** — `manager.init()` now runs inside the recovery check's `.then()` callback, preventing autosave from overwriting recoverable content.
+- **CLI reads versions dynamically** — `create-remyx-app` reads version strings and dependency versions from its own `package.json` instead of hardcoding them.
+- **CLI `copyDir` error handling** — File copy operations are now wrapped in try-catch with descriptive error messages including the file path.
+- **CLI theme injection narrowed** — `theme="light"` replacement uses regex with JSX attribute lookahead (`/theme="light"(?=[\s/>])/`) and skips when theme is `light`.
+- **FloatingToolbar magic numbers extracted** — Positioning constants (`TOOLBAR_FALLBACK_HEIGHT`, `TOOLBAR_FALLBACK_WIDTH`, `TOOLBAR_GAP`, `TOOLBAR_EDGE_PADDING`) extracted to named constants.
+- **CodeEditor tab insertion modernized** — Replaced deprecated `document.execCommand('insertText')` with `textarea.setRangeText()` for Tab key handling.
+- **FindReplace O(n²) fixed** — `matches.unshift(mark)` replaced with `matches.push(mark)` + `matches.reverse()` after the loop.
+- **Table cell merge optimized** — `firstCell.innerHTML += '<br>' + cell.innerHTML` per-iteration concatenation replaced with fragment collection and single join.
+- **CSS containment** — Added `contain: layout style;` to `.rmx-editor` for faster style recalculation.
+- **Vite optimizeDeps** — Root `vite.config.js` now includes `optimizeDeps.include` for `react`, `react-dom`, `marked`, `turndown`, `turndown-plugin-gfm`.
 
 ### Fixed
 
@@ -41,6 +77,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **ContextMenu command error** — `item.command()` callbacks are now wrapped in try-catch to prevent uncaught errors from breaking the menu.
 - **FindReplace stale mark references** — Added `pruneStaleMatches()` that filters by `isConnected` before highlight, replace, and replaceAll operations.
 - **Export iframe double-cleanup** — PDF export now uses a shared `cleaned` guard to prevent the `onafterprint` and timeout callbacks from racing to remove the iframe.
+- **Modal error handling consistency** — `TablePickerModal` and `FindReplacePanel` now have try-catch + error state matching the pattern used by other modals.
+- **PDF export sanitizer per-call instantiation** — `exportAsPDF` now uses a module-level `Sanitizer` singleton instead of creating a new instance per call.
 
 ### Security
 

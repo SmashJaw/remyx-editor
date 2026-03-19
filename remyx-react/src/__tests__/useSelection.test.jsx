@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSelection } from '../hooks/useSelection.js'
 
@@ -38,27 +38,27 @@ describe('useSelection', () => {
   it('returns default format state when no engine is provided', () => {
     const { result } = renderHook(() => useSelection(null))
 
-    expect(result.current.bold).toBe(false)
-    expect(result.current.italic).toBe(false)
-    expect(result.current.underline).toBe(false)
-    expect(result.current.strikethrough).toBe(false)
-    expect(result.current.heading).toBeNull()
-    expect(result.current.alignment).toBe('left')
-    expect(result.current.orderedList).toBe(false)
-    expect(result.current.unorderedList).toBe(false)
-    expect(result.current.blockquote).toBe(false)
-    expect(result.current.link).toBeNull()
-    expect(result.current.fontFamily).toBeNull()
-    expect(result.current.fontSize).toBeNull()
+    expect(result.current.formatState.bold).toBe(false)
+    expect(result.current.formatState.italic).toBe(false)
+    expect(result.current.formatState.underline).toBe(false)
+    expect(result.current.formatState.strikethrough).toBe(false)
+    expect(result.current.formatState.heading).toBeNull()
+    expect(result.current.formatState.alignment).toBe('left')
+    expect(result.current.formatState.orderedList).toBe(false)
+    expect(result.current.formatState.unorderedList).toBe(false)
+    expect(result.current.formatState.blockquote).toBe(false)
+    expect(result.current.formatState.link).toBeNull()
+    expect(result.current.formatState.fontFamily).toBeNull()
+    expect(result.current.formatState.fontSize).toBeNull()
   })
 
   it('returns default UI state initially', () => {
     const { result } = renderHook(() => useSelection(null))
 
-    expect(result.current.hasSelection).toBe(false)
-    expect(result.current.selectionRect).toBeNull()
-    expect(result.current.focusedImage).toBeNull()
-    expect(result.current.focusedTable).toBeNull()
+    expect(result.current.uiState.hasSelection).toBe(false)
+    expect(result.current.uiState.selectionRect).toBeNull()
+    expect(result.current.uiState.focusedImage).toBeNull()
+    expect(result.current.uiState.focusedTable).toBeNull()
   })
 
   it('subscribes to selection:change on engine eventBus', () => {
@@ -90,12 +90,12 @@ describe('useSelection', () => {
       })
     })
 
-    expect(result.current.bold).toBe(true)
-    expect(result.current.italic).toBe(true)
-    expect(result.current.heading).toBe('h2')
+    expect(result.current.formatState.bold).toBe(true)
+    expect(result.current.formatState.italic).toBe(true)
+    expect(result.current.formatState.heading).toBe('h2')
     // Others should remain default
-    expect(result.current.underline).toBe(false)
-    expect(result.current.strikethrough).toBe(false)
+    expect(result.current.formatState.underline).toBe(false)
+    expect(result.current.formatState.strikethrough).toBe(false)
   })
 
   it('detects hasSelection from window.getSelection', () => {
@@ -115,14 +115,13 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: false })
     })
 
-    expect(result.current.hasSelection).toBe(true)
-    expect(result.current.selectionRect).toBeTruthy()
+    expect(result.current.uiState.hasSelection).toBe(true)
+    expect(result.current.uiState.selectionRect).toBeTruthy()
   })
 
   it('unsubscribes on unmount', () => {
     const unsubSelection = vi.fn()
     const unsubContent = vi.fn()
-    let callCount = 0
     mockEngine.eventBus.on = vi.fn((event, handler) => {
       if (event === 'selection:change') {
         selectionChangeHandler = handler
@@ -166,8 +165,8 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: false })
     })
 
-    expect(result.current.hasSelection).toBe(true)
-    expect(result.current.selectionRect).toBeNull()
+    expect(result.current.uiState.hasSelection).toBe(true)
+    expect(result.current.uiState.selectionRect).toBeNull()
   })
 
   it('sets focusedImage when focus is on an IMG element', () => {
@@ -187,7 +186,7 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: false })
     })
 
-    expect(result.current.focusedImage).toBe(imgEl)
+    expect(result.current.uiState.focusedImage).toBe(imgEl)
   })
 
   it('sets focusedImage when focus is on a parent containing a direct child img', () => {
@@ -209,7 +208,7 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: false })
     })
 
-    expect(result.current.focusedImage).toBe(imgEl)
+    expect(result.current.uiState.focusedImage).toBe(imgEl)
   })
 
   it('sets focusedTable when focus is inside a TABLE element', () => {
@@ -236,7 +235,7 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: false })
     })
 
-    expect(result.current.focusedTable).toBe(table)
+    expect(result.current.uiState.focusedTable).toBe(table)
 
     document.body.removeChild(table)
   })
@@ -257,7 +256,7 @@ describe('useSelection', () => {
     act(() => {
       selectionChangeHandler({ bold: false })
     })
-    expect(result.current.focusedImage).toBe(img1)
+    expect(result.current.uiState.focusedImage).toBe(img1)
 
     // Change focused element to a different image
     window.getSelection = vi.fn(() => ({
@@ -270,7 +269,7 @@ describe('useSelection', () => {
     act(() => {
       selectionChangeHandler({ bold: false })
     })
-    expect(result.current.focusedImage).toBe(img2)
+    expect(result.current.uiState.focusedImage).toBe(img2)
   })
 
   it('content:change event clears cached DOM references', () => {
@@ -299,7 +298,7 @@ describe('useSelection', () => {
     act(() => {
       selectionChangeHandler({ bold: false })
     })
-    expect(result.current.focusedImage).toBe(img)
+    expect(result.current.uiState.focusedImage).toBe(img)
 
     // Fire content:change to clear cached references
     act(() => {
@@ -317,7 +316,7 @@ describe('useSelection', () => {
     act(() => {
       selectionChangeHandler({ bold: false })
     })
-    expect(result.current.focusedImage).toBeNull()
+    expect(result.current.uiState.focusedImage).toBeNull()
   })
 
   it('shallowEqual prevents unnecessary format state updates when values are the same', () => {
@@ -327,7 +326,7 @@ describe('useSelection', () => {
       selectionChangeHandler({ bold: true, italic: false })
     })
 
-    const firstFormatState = result.current
+    const firstFormatState = result.current.formatState
 
     // Emit the same format values again
     act(() => {
@@ -336,8 +335,8 @@ describe('useSelection', () => {
 
     // The object reference should be the same (no re-render with new object)
     // We check that the values remain the same
-    expect(result.current.bold).toBe(true)
-    expect(result.current.italic).toBe(false)
+    expect(result.current.formatState.bold).toBe(true)
+    expect(result.current.formatState.italic).toBe(false)
   })
 
   it('handles focusNode being a text node inside an element', () => {
@@ -366,7 +365,7 @@ describe('useSelection', () => {
     })
 
     // Should walk up to parentElement (td), then find table via closest
-    expect(result.current.focusedTable).toBe(table)
+    expect(result.current.uiState.focusedTable).toBe(table)
 
     document.body.removeChild(table)
   })

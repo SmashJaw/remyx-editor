@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
 import { WordCountPlugin } from '../plugins/builtins/WordCountPlugin.js'
 
 describe('WordCountPlugin', () => {
@@ -177,12 +177,11 @@ describe('WordCountPlugin', () => {
 
     it('should disconnect MutationObserver and set it to null on destroy', () => {
       const disconnectSpy = vi.fn()
-      const originalMutationObserver = globalThis.MutationObserver
-      globalThis.MutationObserver = class {
-        constructor() { }
-        observe() { }
-        disconnect() { disconnectSpy() }
-      }
+      const originalMutationObserver = global.MutationObserver
+      global.MutationObserver = vi.fn(function () {
+        this.observe = vi.fn()
+        this.disconnect = disconnectSpy
+      })
 
       const freshPlugin = WordCountPlugin()
       const engine = createMockEngine('test')
@@ -195,17 +194,17 @@ describe('WordCountPlugin', () => {
       // Calling destroy again should not throw (observer is null after first destroy)
       expect(() => freshPlugin.destroy()).not.toThrow()
 
-      globalThis.MutationObserver = originalMutationObserver
+      global.MutationObserver = originalMutationObserver
     })
 
     it('should clear a pending debounce timer on destroy', () => {
-      const originalMutationObserver = globalThis.MutationObserver
+      const originalMutationObserver = global.MutationObserver
       let mutationCallback
-      globalThis.MutationObserver = class {
-        constructor(cb) { mutationCallback = cb }
-        observe() { }
-        disconnect() { }
-      }
+      global.MutationObserver = vi.fn(function (cb) {
+        mutationCallback = cb
+        this.observe = vi.fn()
+        this.disconnect = vi.fn()
+      })
 
       const freshPlugin = WordCountPlugin()
       const engine = createMockEngine('test')
@@ -223,7 +222,7 @@ describe('WordCountPlugin', () => {
       vi.advanceTimersByTime(100)
 
       clearSpy.mockRestore()
-      globalThis.MutationObserver = originalMutationObserver
+      global.MutationObserver = originalMutationObserver
     })
   })
 })

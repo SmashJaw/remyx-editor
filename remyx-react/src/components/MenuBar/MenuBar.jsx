@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { MenuItem } from './MenuItem.jsx'
+import { useSelectionContext } from '../../config/SelectionContext.js'
 
-function MenuBarInner({ config, engine, selectionState, onOpenModal }) {
+function MenuBarInner({ config, engine, onOpenModal }) {
+  const selectionState = useSelectionContext()
   const [openMenu, setOpenMenu] = useState(null)
   const [hoverMode, setHoverMode] = useState(false)
   const barRef = useRef(null)
@@ -142,7 +144,6 @@ function MenuBarInner({ config, engine, selectionState, onOpenModal }) {
                   key={typeof item === 'string' ? `${item}-${i}` : item.label || item.command || i}
                   item={item}
                   engine={engine}
-                  selectionState={selectionState}
                   onOpenModal={onOpenModal}
                   onClose={handleCloseMenu}
                 />

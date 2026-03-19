@@ -162,6 +162,15 @@ export class Clipboard {
       })
     } else {
       const reader = new FileReader()
+      reader.onprogress = (e) => {
+        if (e.lengthComputable) {
+          this.engine.eventBus.emit('upload:progress', {
+            loaded: e.loaded,
+            total: e.total,
+            percent: Math.round((e.loaded / e.total) * 100),
+          })
+        }
+      }
       reader.onload = (e) => {
         const src = e.target.result
         this.engine.commands.execute('insertImage', { src, alt: file.name })

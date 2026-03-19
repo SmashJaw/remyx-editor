@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import { formatHTML } from '../utils/formatHTML.js'
 
 describe('formatHTML', () => {

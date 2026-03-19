@@ -1,4 +1,18 @@
 /**
+ * Lightweight djb2 hash function for fast string comparison.
+ * Returns a 32-bit integer hash.
+ * @param {string} str
+ * @returns {number}
+ */
+function djb2Hash(str) {
+  let hash = 5381
+  for (let i = 0, len = str.length; i < len; i++) {
+    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0
+  }
+  return hash
+}
+
+/**
  * @typedef {Object} HistoryOptions
  * @property {number} [maxSize=100] - Maximum number of undo states to retain
  * @property {number} [debounceMs=300] - Debounce interval in milliseconds for automatic snapshots
@@ -31,6 +45,7 @@ export class History {
     this._isPerformingUndoRedo = false
     this._lastSnapshot = null
     this._lastNormalized = null
+    this._lastNormalizedHash = null
   }
 
   /**
@@ -106,7 +121,10 @@ export class History {
     // Normalize whitespace for comparison to catch browser-induced
     // changes like &nbsp; ↔ space that produce visually identical content
     const normalized = html.replace(/\s+/g, ' ').trim()
-    if (normalized === this._lastNormalized) return
+
+    // Fast path: compare hashes before full string comparison
+    const hash = djb2Hash(normalized)
+    if (hash === this._lastNormalizedHash && normalized === this._lastNormalized) return
 
     const bookmark = this.engine.selection.save()
     this._undoStack.push({ html, bookmark })
@@ -116,6 +134,7 @@ export class History {
     this._redoStack = []
     this._lastSnapshot = html
     this._lastNormalized = normalized
+    this._lastNormalizedHash = hash
   }
 
   /**
@@ -166,6 +185,7 @@ export class History {
     this.engine.element.innerHTML = sanitizedHtml
     this._lastSnapshot = sanitizedHtml
     this._lastNormalized = sanitizedHtml.replace(/\s+/g, ' ').trim()
+    this._lastNormalizedHash = djb2Hash(this._lastNormalized)
 
     if (state.bookmark) {
       this.engine.selection.restore(state.bookmark)
@@ -198,6 +218,7 @@ export class History {
     this.engine.element.innerHTML = sanitizedHtml
     this._lastSnapshot = sanitizedHtml
     this._lastNormalized = sanitizedHtml.replace(/\s+/g, ' ').trim()
+    this._lastNormalizedHash = djb2Hash(this._lastNormalized)
 
     if (state.bookmark) {
       this.engine.selection.restore(state.bookmark)
@@ -234,5 +255,6 @@ export class History {
     this._redoStack = []
     this._lastSnapshot = null
     this._lastNormalized = null
+    this._lastNormalizedHash = null
   }
 }

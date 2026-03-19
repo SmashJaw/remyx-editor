@@ -17,7 +17,7 @@ export function BlockDragHandle({ engine, editorRect, editAreaRef }) {
     if (!engine || !editAreaRef.current) return
 
     // Don't show handle during active drags
-    if (engine.dragDrop._dragSource) {
+    if (engine.dragDrop.isDragging()) {
       setHoveredBlock(null)
       return
     }

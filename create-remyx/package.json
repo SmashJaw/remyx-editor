@@ -3,9 +3,6 @@
   "version": "0.27.0",
   "type": "module",
   "description": "Remyx CLI (to be repurposed)",
-  "bin": {
-    "create-remyx": "./index.js"
-  },
   "files": [
     "index.js"
   ],

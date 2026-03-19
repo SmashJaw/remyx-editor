@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 function ContextMenuInner({ contextMenu, onHide, onOpenModal }) {
   if (!contextMenu.visible) return null
@@ -43,3 +44,14 @@ function ContextMenuInner({ contextMenu, onHide, onOpenModal }) {
 }
 
 export const ContextMenu = React.memo(ContextMenuInner)
+
+ContextMenu.propTypes = {
+  contextMenu: PropTypes.shape({
+    visible: PropTypes.bool,
+    x: PropTypes.number,
+    y: PropTypes.number,
+    items: PropTypes.array,
+  }).isRequired,
+  onHide: PropTypes.func.isRequired,
+  onOpenModal: PropTypes.func,
+}

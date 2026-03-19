@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
 
 vi.mock('../utils/markdownConverter.js', () => ({
   htmlToMarkdown: vi.fn((html) => `# Markdown from ${html}`),

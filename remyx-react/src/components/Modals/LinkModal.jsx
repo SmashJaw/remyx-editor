@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 
 // Allowlist-based protocol validation — safer than a blacklist because new
@@ -96,4 +97,11 @@ export function LinkModal({ open, onClose, engine, data }) {
       </form>
     </ModalOverlay>
   )
+}
+
+LinkModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
+  data: PropTypes.object,
 }

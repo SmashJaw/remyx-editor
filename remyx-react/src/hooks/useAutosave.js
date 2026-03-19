@@ -61,7 +61,7 @@ export function useAutosave(engine, config) {
       }),
     ]
 
-    // Check for recovery data
+    // Check for recovery data, then start autosaving after recovery check completes
     const currentContent = engine.getHTML()
     manager.checkRecovery(currentContent).then((data) => {
       if (data) {
@@ -69,11 +69,12 @@ export function useAutosave(engine, config) {
         engine.eventBus.emit('autosave:recovered', data)
         onRecoverRef.current?.(data)
       }
+      manager.init()
     }).catch((err) => {
       console.warn('[Remyx] Recovery check failed:', err)
+      // Still init autosave even if recovery check fails
+      manager.init()
     })
-
-    manager.init()
 
     return () => {
       unsubs.forEach((u) => u())

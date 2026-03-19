@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { vi } from 'vitest'
+
 import { PluginManager } from '../plugins/PluginManager.js'
 
 describe('PluginManager', () => {

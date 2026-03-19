@@ -1,9 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { ToolbarButton } from '../Toolbar/ToolbarButton.jsx'
+import { useSelectionContext } from '../../config/SelectionContext.js'
 
 const FLOATING_COMMANDS = ['bold', 'italic', 'underline', 'strikethrough', 'link']
 
-function FloatingToolbarInner({ visible, selectionRect, engine, selectionState, editorRect, onOpenModal }) {
+// Positioning constants
+const TOOLBAR_FALLBACK_HEIGHT = 40
+const TOOLBAR_FALLBACK_WIDTH = 200
+const TOOLBAR_GAP = 8
+const TOOLBAR_EDGE_PADDING = 4
+
+function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOpenModal }) {
+  const selectionState = useSelectionContext()
   const ref = useRef(null)
   const sizeRef = useRef({ width: 0, height: 0 })
   const [position, setPosition] = useState({ top: 0, left: 0 })
@@ -24,16 +32,16 @@ function FloatingToolbarInner({ visible, selectionRect, engine, selectionState, 
   useEffect(() => {
     if (!visible || !selectionRect || !editorRect) return
 
-    const toolbarHeight = sizeRef.current.height || ref.current?.offsetHeight || 40
-    const toolbarWidth = sizeRef.current.width || ref.current?.offsetWidth || 200
+    const toolbarHeight = sizeRef.current.height || ref.current?.offsetHeight || TOOLBAR_FALLBACK_HEIGHT
+    const toolbarWidth = sizeRef.current.width || ref.current?.offsetWidth || TOOLBAR_FALLBACK_WIDTH
 
-    let top = selectionRect.top - editorRect.top - toolbarHeight - 8
+    let top = selectionRect.top - editorRect.top - toolbarHeight - TOOLBAR_GAP
     let left = selectionRect.left - editorRect.left + selectionRect.width / 2 - toolbarWidth / 2
 
     // Clamp to editor bounds
-    if (top < 0) top = selectionRect.bottom - editorRect.top + 8
-    if (left < 0) left = 4
-    if (left + toolbarWidth > editorRect.width) left = editorRect.width - toolbarWidth - 4
+    if (top < 0) top = selectionRect.bottom - editorRect.top + TOOLBAR_GAP
+    if (left < 0) left = TOOLBAR_EDGE_PADDING
+    if (left + toolbarWidth > editorRect.width) left = editorRect.width - toolbarWidth - TOOLBAR_EDGE_PADDING
 
     setPosition({ top, left })
   }, [visible, selectionRect, editorRect])

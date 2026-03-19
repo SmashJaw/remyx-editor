@@ -1,16 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { ICON_MAP } from '../../icons/index.jsx'
 import { SaveStatus } from '../SaveStatus/SaveStatus.jsx'
 
 function StatusBarInner({ engine, position = 'bottom', saveStatus, showSaveStatus }) {
   const [counts, setCounts] = useState({ wordCount: 0, charCount: 0 })
 
+  // Shallow comparison before setting counts to avoid unnecessary re-renders
+  const updateCounts = useCallback((newCounts) => {
+    setCounts(prev => {
+      if (prev.wordCount === newCounts.wordCount && prev.charCount === newCounts.charCount) {
+        return prev
+      }
+      return newCounts
+    })
+  }, [])
+
   useEffect(() => {
     if (!engine) return
-    if (engine._wordCount) setCounts(engine._wordCount)
-    const unsub = engine.eventBus.on('wordcount:update', setCounts)
+    if (engine._wordCount) updateCounts(engine._wordCount)
+    const unsub = engine.eventBus.on('wordcount:update', updateCounts)
     return unsub
-  }, [engine])
+  }, [engine, updateCounts])
 
   const className = `rmx-statusbar${position === 'top' ? ' rmx-statusbar-top' : ''}`
 
@@ -40,12 +50,22 @@ function WordCountButtonInner({ engine }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
 
+  // Shallow comparison before setting counts to avoid unnecessary re-renders
+  const updateCounts = useCallback((newCounts) => {
+    setCounts(prev => {
+      if (prev.wordCount === newCounts.wordCount && prev.charCount === newCounts.charCount) {
+        return prev
+      }
+      return newCounts
+    })
+  }, [])
+
   useEffect(() => {
     if (!engine) return
-    if (engine._wordCount) setCounts(engine._wordCount)
-    const unsub = engine.eventBus.on('wordcount:update', setCounts)
+    if (engine._wordCount) updateCounts(engine._wordCount)
+    const unsub = engine.eventBus.on('wordcount:update', updateCounts)
     return unsub
-  }, [engine])
+  }, [engine, updateCounts])
 
   // Close popover on outside click
   useEffect(() => {

@@ -1,18 +1,17 @@
-import { describe, it, expect, vi } from 'vitest'
+import { vi } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useAutosave } from '../hooks/useAutosave.js'
 
 // Mock the AutosaveManager — avoid importing all of @remyxjs/core which pulls in CSS
-vi.mock('@remyxjs/core', () => {
-  const MockAutosaveManager = vi.fn(function () {
+vi.mock('@remyxjs/core', () => ({
+  AutosaveManager: vi.fn().mockImplementation(function () {
     this.init = vi.fn()
     this.destroy = vi.fn()
     this.save = vi.fn()
     this.checkRecovery = vi.fn().mockResolvedValue(null)
     this.clearRecovery = vi.fn()
-  })
-  return { AutosaveManager: MockAutosaveManager }
-})
+  }),
+}))
 
 import { AutosaveManager } from '@remyxjs/core'
 
@@ -156,15 +155,14 @@ describe('useAutosave', () => {
   })
 
   it('sets recoveryData, emits autosave:recovered, and calls onRecover when recovery data exists', async () => {
-
     const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
-    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
-      init: vi.fn(),
-      destroy: vi.fn(),
-      save: vi.fn(),
-      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
-      clearRecovery: vi.fn(),
-    }) })
+    AutosaveManager.mockImplementationOnce(function () {
+      this.init = vi.fn()
+      this.destroy = vi.fn()
+      this.save = vi.fn()
+      this.checkRecovery = vi.fn().mockResolvedValue(recoveryPayload)
+      this.clearRecovery = vi.fn()
+    })
 
     const onRecover = vi.fn()
     const engine = createMockEngine()
@@ -183,16 +181,15 @@ describe('useAutosave', () => {
   })
 
   it('recoverContent calls engine.setHTML, emits content:change, clears recoveryData, and calls clearRecovery', async () => {
-
     const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
     const mockClearRecovery = vi.fn()
-    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
-      init: vi.fn(),
-      destroy: vi.fn(),
-      save: vi.fn(),
-      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
-      clearRecovery: mockClearRecovery,
-    }) })
+    AutosaveManager.mockImplementationOnce(function () {
+      this.init = vi.fn()
+      this.destroy = vi.fn()
+      this.save = vi.fn()
+      this.checkRecovery = vi.fn().mockResolvedValue(recoveryPayload)
+      this.clearRecovery = mockClearRecovery
+    })
 
     const engine = createMockEngine()
     const { result } = renderHook(() =>
@@ -218,16 +215,15 @@ describe('useAutosave', () => {
   })
 
   it('dismissRecovery clears recoveryData and calls clearRecovery', async () => {
-
     const recoveryPayload = { recoveredContent: '<p>Recovered</p>', timestamp: 12345 }
     const mockClearRecovery = vi.fn()
-    AutosaveManager.mockImplementationOnce(function () { Object.assign(this, {
-      init: vi.fn(),
-      destroy: vi.fn(),
-      save: vi.fn(),
-      checkRecovery: vi.fn().mockResolvedValue(recoveryPayload),
-      clearRecovery: mockClearRecovery,
-    }) })
+    AutosaveManager.mockImplementationOnce(function () {
+      this.init = vi.fn()
+      this.destroy = vi.fn()
+      this.save = vi.fn()
+      this.checkRecovery = vi.fn().mockResolvedValue(recoveryPayload)
+      this.clearRecovery = mockClearRecovery
+    })
 
     const engine = createMockEngine()
     const { result } = renderHook(() =>

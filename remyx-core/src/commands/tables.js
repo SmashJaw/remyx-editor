@@ -144,13 +144,17 @@ export function registerTableCommands(engine) {
       const rowSpan = rows.size
       const colSpan = cols.size
 
-      // Move content from all cells to the first cell
+      // Collect content from all cells, then apply once to avoid repeated innerHTML concat
+      const fragments = []
       cells.slice(1).forEach((cell) => {
         if (cell.textContent.trim()) {
-          firstCell.innerHTML += '<br>' + cell.innerHTML
+          fragments.push(cell.innerHTML)
         }
         cell.remove()
       })
+      if (fragments.length > 0) {
+        firstCell.innerHTML += '<br>' + fragments.join('<br>')
+      }
 
       if (rowSpan > 1) firstCell.rowSpan = rowSpan
       if (colSpan > 1) firstCell.colSpan = colSpan

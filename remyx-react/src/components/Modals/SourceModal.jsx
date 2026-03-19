@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { CodeEditor } from './CodeEditor/CodeEditor.jsx'
 import { htmlToMarkdown, markdownToHtml, formatHTML } from '@remyxjs/core'
@@ -45,4 +46,10 @@ export function SourceModal({ open, onClose, engine }) {
       </div>
     </ModalOverlay>
   )
+}
+
+SourceModal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  engine: PropTypes.object,
 }

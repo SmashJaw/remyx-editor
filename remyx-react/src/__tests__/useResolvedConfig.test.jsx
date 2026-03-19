@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { vi } from 'vitest'
 import React from 'react'
 import { renderHook } from '@testing-library/react'
 import { useResolvedConfig, DEFAULT_EDITOR_HEIGHT } from '../hooks/useResolvedConfig.js'

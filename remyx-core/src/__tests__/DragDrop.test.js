@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { vi } from 'vitest'
+
 import { DragDrop } from '../core/DragDrop.js'
 
 vi.mock('../utils/pasteClean.js', () => ({
@@ -374,10 +375,9 @@ describe('DragDrop', () => {
       const event = createDropEventWithFiles([imageFile])
       element.dispatchEvent(event)
 
-      // Wait for serialized promise chain to execute
-      await Promise.resolve()
       await Promise.resolve()
       expect(uploadHandler).toHaveBeenCalledWith(imageFile)
+      await Promise.resolve()
       await Promise.resolve()
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
         src: 'https://example.com/img.png',
@@ -392,31 +392,23 @@ describe('DragDrop', () => {
       const imageFile = new File(['data'], 'photo.jpg', { type: 'image/jpeg' })
       const event = createDropEventWithFiles([imageFile])
 
-      let readerInstance
-      const readAsDataURLSpy = vi.fn()
-      const OriginalFileReader = globalThis.FileReader
-      globalThis.FileReader = class MockFileReader {
-        constructor() {
-          this.readAsDataURL = readAsDataURLSpy
-          this.onload = null
-          this.onerror = null
-          readerInstance = this
-        }
-      }
+      const mockReader = { readAsDataURL: vi.fn(), onload: null, onprogress: null, onerror: null }
+      vi.spyOn(global, 'FileReader').mockImplementation(function () { return mockReader })
 
       element.dispatchEvent(event)
-      // Wait for serialized promise chain
-      await Promise.resolve()
-      await Promise.resolve()
-      expect(readAsDataURLSpy).toHaveBeenCalledWith(imageFile)
 
-      readerInstance.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
+      // FileReader is created inside a serialized promise chain, await a tick
+      await Promise.resolve()
+
+      expect(mockReader.readAsDataURL).toHaveBeenCalledWith(imageFile)
+
+      mockReader.onload({ target: { result: 'data:image/jpeg;base64,abc' } })
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertImage', {
         src: 'data:image/jpeg;base64,abc',
         alt: 'photo.jpg',
       })
 
-      globalThis.FileReader = OriginalFileReader
+      global.FileReader.mockRestore()
     })
 
     it('should skip image files that exceed max size', () => {
@@ -518,7 +510,6 @@ describe('DragDrop', () => {
       event.clientY = 100
       element.dispatchEvent(event)
 
-      // Wait for serialized promise chain
       await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
@@ -1183,11 +1174,9 @@ describe('DragDrop', () => {
       dragDrop._handleFileDrop({ clientX: 100, clientY: 100 }, [file])
 
       expect(mockEngine.history.snapshot).toHaveBeenCalled()
-      // Wait for serialized promise chain
-      await Promise.resolve()
+
       await Promise.resolve()
       expect(mockEngine.options.uploadHandler).toHaveBeenCalledWith(file)
-
       await Promise.resolve()
 
       expect(mockEngine.commands.execute).toHaveBeenCalledWith('insertAttachment', {
@@ -1206,7 +1195,6 @@ describe('DragDrop', () => {
 
       dragDrop._handleFileDrop({ clientX: 0, clientY: 0 }, [file])
 
-      // Wait for serialized promise chain
       await Promise.resolve()
       await Promise.resolve()
       await Promise.resolve()
@@ -1231,8 +1219,14 @@ describe('DragDrop', () => {
 
       dragDrop._handleFileDrop({ clientX: 0, clientY: 0 }, [file1, file2])
 
-      // Wait for serialized promise chain (each file goes through chain.then(() => upload.then(...)))
-      for (let i = 0; i < 10; i++) await Promise.resolve()
+      // Serialized chain: tick 1 calls first upload, tick 2 resolves it,
+      // tick 3 calls second upload, tick 4 resolves it
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
 
       expect(mockEngine.options.uploadHandler).toHaveBeenCalledTimes(2)
 
