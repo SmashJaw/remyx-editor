@@ -45,9 +45,9 @@
   },
   "devDependencies": {
     "@remyxjs/core": "0.28.0",
-    "@vitejs/plugin-react": "5.1.1",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "@vitejs/plugin-react": "6.0.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
     "terser": "5.37.0",
     "vite": "7.3.1"
   },
