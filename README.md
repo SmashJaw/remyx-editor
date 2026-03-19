@@ -22,6 +22,7 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Keyboard shortcuts** — 17+ default shortcuts, customizable via API
 - **Accessibility** — Skip navigation, focus trapping in modals, ARIA roles, keyboard-navigable toolbar
 - **Code block syntax highlighting** — 11 languages (JS/TS, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, HTML) with auto-detection, theme-aware token colors, and language selector dropdown
+- **Enhanced tables** — Sortable columns, multi-column sort, filterable rows, inline formulas (SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT), cell formatting (number, currency, percentage, date), column/row resize handles, sticky header rows, and copy/paste interop with Excel and Google Sheets
 - **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention
 - **Tree-shakeable** — Import only the commands and utilities you need
 
@@ -29,9 +30,9 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyxjs/core`](./remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyxjs/react`](./remyx-react/) | 0.27.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
-| [`create-remyx`](./create-remyx/) | 0.27.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
+| [`@remyxjs/core`](./remyx-core/) | 0.28.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./remyx-react/) | 0.28.0 | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
+| [`create-remyx`](./create-remyx/) | 0.28.0 | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 

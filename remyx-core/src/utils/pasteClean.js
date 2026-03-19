@@ -36,6 +36,7 @@ export function cleanPastedHTML(html) {
   // ── Detect paste source ──
   const isWord = /mso-|class="Mso|<o:p|<w:/.test(html)
   const isGoogleDocs = /docs-internal|id="h\.[a-z0-9]+"/.test(html)
+  const isGoogleSheets = /google-sheets-html-origin/.test(html)
   const isLibreOffice = /<text:|<office:|class="P\d+"/.test(html)
   const isApplePages = /apple-content-edited|class="[sp]\d+"/.test(html)
 
@@ -89,6 +90,23 @@ export function cleanPastedHTML(html) {
     cleaned = cleaned.replace(/\s*class="P\d+"/gi, '')
     cleaned = cleaned.replace(/\s*class="T\d+"/gi, '')
     cleaned = cleaned.replace(/\s*class="Table\d+"/gi, '')
+  }
+
+  // ── Google Sheets cleanup (only if Google Sheets detected) ──
+  if (isGoogleSheets) {
+    cleaned = cleaned.replace(/<google-sheets-html-origin[\s\S]*?\/>/gi, '')
+    cleaned = cleaned.replace(/<\/?google-sheets-html-origin[^>]*>/gi, '')
+    cleaned = cleaned.replace(/<col[^>]*>/gi, '')
+    cleaned = cleaned.replace(/<\/?colgroup[^>]*>/gi, '')
+  }
+
+  // ── Excel cleanup (Excel tables use mso- styles like Word) ──
+  if (isWord && /<table/i.test(html)) {
+    // Strip Excel-specific xmlns attributes
+    cleaned = cleaned.replace(/\s*xmlns:[a-z]="[^"]*"/gi, '')
+    // Remove <col> and <colgroup> tags from Excel tables
+    cleaned = cleaned.replace(/<col[^>]*>/gi, '')
+    cleaned = cleaned.replace(/<\/?colgroup[^>]*>/gi, '')
   }
 
   // ── Apple Pages / iWork cleanup (only if Apple Pages detected) ──

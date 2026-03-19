@@ -6,8 +6,9 @@ export const ALLOWED_TAGS = {
   a: ['href', 'target', 'rel', 'title', 'class', 'data-attachment', 'data-filename', 'data-filesize'],
   img: ['src', 'alt', 'width', 'height', 'style', 'class'],
   ul: ['class'], ol: ['class', 'start', 'type'], li: ['class'],
-  table: ['class'], thead: [], tbody: [], tr: [],
-  th: ['colspan', 'rowspan', 'class', 'style'], td: ['colspan', 'rowspan', 'class', 'style'],
+  table: ['class', 'data-sort-state'], thead: [], tbody: [], tr: ['class'],
+  th: ['colspan', 'rowspan', 'class', 'style', 'data-sort-dir', 'data-sort-priority', 'data-filter-value', 'data-cell-format', 'data-raw-value', 'data-formula'],
+  td: ['colspan', 'rowspan', 'class', 'style', 'data-cell-format', 'data-raw-value', 'data-formula', 'data-col-width'],
   blockquote: ['class'],
   pre: ['class', 'data-language'], code: ['class', 'data-language'],
   hr: [],
@@ -24,5 +25,5 @@ export const ALLOWED_STYLES = [
   'color', 'background-color', 'font-family', 'font-size',
   'text-align', 'text-decoration', 'font-weight', 'font-style',
   'width', 'height', 'max-width', 'float', 'margin', 'margin-left', 'margin-right',
-  'display', 'padding', 'border',
+  'display', 'padding', 'border', 'min-width',
 ]

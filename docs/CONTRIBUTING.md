@@ -51,9 +51,9 @@ Remyx Editor is a monorepo managed with **npm workspaces**. All publishable pack
 ```
 remyx/
   packages/
-    remyx-core/        @remyxjs/core      0.27.0  Framework-agnostic editor engine
-    remyx-react/       @remyxjs/react     0.27.0  React components and hooks
-    create-remyx/      create-remyx     0.27.0  Reserved for future CLI tool
+    remyx-core/        @remyxjs/core      0.28.0  Framework-agnostic editor engine
+    remyx-react/       @remyxjs/react     0.28.0  React components and hooks
+    create-remyx/      create-remyx     0.28.0  Reserved for future CLI tool
     docs/              (not published)           Documentation, changelog, roadmap
 ```
 
@@ -66,8 +66,8 @@ packages/remyx-core/src/
   core/             EditorEngine, CommandRegistry, Selection, History, Sanitizer,
                     EventBus, KeyboardManager, Clipboard, DragDrop, AutosaveManager
   commands/         One file per command group (formatting, lists, tables, slashCommands, etc.)
-  plugins/          Plugin system (createPlugin, PluginManager, 4 built-in plugins incl.
-                    syntaxHighlight/)
+  plugins/          Plugin system (createPlugin, PluginManager, 5 built-in plugins incl.
+                    syntaxHighlight/, tableFeatures/)
   autosave/         Storage providers (LocalStorage, SessionStorage, FileSystem, Cloud, Custom)
   utils/            DOM helpers, paste cleaning, theme config, toolbar config,
                     documentConverter/ (per-format modules), export utilities

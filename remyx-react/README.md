@@ -8,8 +8,8 @@ A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remy
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyxjs/core`](../remyx-core/) | 0.27.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyxjs/react`](./) | 0.27.0 | React components, hooks, and TypeScript declarations |
+| [`@remyxjs/core`](../remyx-core/) | 0.28.0 | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./) | 0.28.0 | React components, hooks, and TypeScript declarations |
 
 Use `@remyxjs/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
 
@@ -137,7 +137,7 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 
 ## Features
 
-- **Rich text editing** — bold, italic, underline, strikethrough, subscript, superscript, headings, lists, blockquotes, code blocks, tables, and horizontal rules
+- **Rich text editing** — bold, italic, underline, strikethrough, subscript, superscript, headings, lists, blockquotes, code blocks, tables (with sorting, filtering, formulas, cell formatting, resize handles, and clipboard interop), and horizontal rules
 - **Toolbar** — fully configurable with presets, helper functions, and per-item theming
 - **Menu bar** — application-style menus (File, Edit, View, Insert, Format) with submenus and auto-deduplication
 - **Markdown** — bidirectional HTML/Markdown conversion, toggle between modes, and auto-detection on paste
@@ -829,18 +829,19 @@ function CustomEditor() {
 
 ### Built-in Plugins
 
-Four built-in plugins are available:
+Five built-in plugins are available:
 
 - **WordCountPlugin** — word/character counts in the status bar
 - **PlaceholderPlugin** — placeholder text when empty
 - **AutolinkPlugin** — auto-converts typed URLs to links
 - **SyntaxHighlightPlugin** — automatic syntax highlighting for code blocks with language detection, theme-aware colors, and `setCodeLanguage`/`getCodeLanguage` commands. When active, a language selector dropdown appears on focused code blocks.
+- **TablePlugin** — enhanced table features including column/row resize handles, click-to-sort on header cells (single + multi-column with Shift), per-column filter dropdowns, inline cell formulas (SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT), cell formatting (number, currency, percentage, date), and sticky header rows. Adds 6 new commands: `toggleHeaderRow`, `sortTable`, `filterTable`, `clearTableFilters`, `formatCell`, `evaluateFormulas`. Context menu adds Toggle Header Row, Format Cell options, and Clear Filters when right-clicking in a table.
 
 ```jsx
-import { SyntaxHighlightPlugin } from '@remyxjs/react';
+import { SyntaxHighlightPlugin, TablePlugin } from '@remyxjs/react';
 
 <RemyxEditor
-  plugins={[SyntaxHighlightPlugin()]}
+  plugins={[SyntaxHighlightPlugin(), TablePlugin()]}
 />
 ```
 
@@ -1598,7 +1599,7 @@ engine.destroy();
 
 | Package | Version |
 | --- | --- |
-| `@remyxjs/core` | >= 0.27.0 |
+| `@remyxjs/core` | >= 0.28.0 |
 | `react` | >= 18.0.0 |
 | `react-dom` | >= 18.0.0 |
 

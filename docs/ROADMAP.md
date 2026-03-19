@@ -189,20 +189,23 @@ Features with the highest user demand and broadest impact on the editing experie
 - Block grouping: select multiple blocks and move, duplicate, or delete as a unit
 - Block templates: save and reuse custom block compositions (e.g., a "feature card" with image + heading + text)
 
-## Enhanced Tables & Spreadsheet Features
+## ~~Enhanced Tables & Spreadsheet Features~~ ✅ Shipped (v0.28.0)
 
-- Inline cell formulas (`=SUM(A1:A5)`, `=AVERAGE(B2:B8)`) with a lightweight expression engine
-- Column and row resize handles with drag support
-- Cell merging and splitting
-- Sortable columns (click header to sort ascending/descending)
-- Multi-column sort: hold Shift + click to add secondary/tertiary sort keys
-- Sort data types: alphabetical, numeric, date, and custom comparator via `tableSortComparator` prop
-- Sort indicator icons in header cells showing current sort direction
-- Persistent sort state: sorting reorders the underlying content so it survives serialization and export
-- Filterable rows with a compact filter UI per column
-- Cell formatting: number, currency, percentage, date
-- Copy/paste between Remyx tables and external spreadsheets (Excel, Google Sheets)
-- Freeze header row on scroll for large tables
+- ~~Inline cell formulas (`=SUM(A1:A5)`, `=AVERAGE(B2:B8)`) with a lightweight expression engine~~ — zero-dependency recursive-descent parser with 7 built-in functions (SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT), A1-notation cell references, range expansion, arithmetic operators, comparison operators, and circular reference detection
+- ~~Column and row resize handles with drag support~~ — invisible 6px drag handles at column/row borders, rAF-driven smooth updates, min-width enforcement, history snapshot on mouseup
+- ~~Cell merging and splitting~~
+- ~~Sortable columns (click header to sort ascending/descending)~~ — `sortTable` command with physical DOM reorder
+- ~~Multi-column sort: hold Shift + click to add secondary/tertiary sort keys~~ — chained comparator with `data-sort-priority` attributes
+- ~~Sort data types: alphabetical, numeric, date, and custom comparator via `tableSortComparator` prop~~ — auto-detection from column values, locale-aware string comparison
+- ~~Sort indicator icons in header cells showing current sort direction~~ — CSS `::after` pseudo-elements (▲/▼) on `data-sort-dir` attribute
+- ~~Persistent sort state: sorting reorders the underlying content so it survives serialization and export~~
+- ~~Filterable rows with a compact filter UI per column~~ — non-destructive (hidden via `rmx-row-hidden` class), per-column filter dropdowns with debounced input, AND logic across columns
+- ~~Cell formatting: number, currency, percentage, date~~ — `formatCell` command using `Intl.NumberFormat` / `Intl.DateTimeFormat`, raw value preserved in `data-raw-value`
+- ~~Copy/paste between Remyx tables and external spreadsheets (Excel, Google Sheets)~~ — table-aware copy (HTML + TSV), paste detection (TSV and HTML tables), auto-expand grid, Google Sheets / Excel cleanup in paste pipeline
+- ~~Freeze header row on scroll for large tables~~ — `position: sticky` on `<thead><th>`, `toggleHeaderRow` command, `insertTable` now generates `<thead>` by default
+- New `TablePlugin` built-in plugin with MutationObserver-based table detection, delegated sort click handlers, formula focus/blur handlers, resize handle injection, and filter UI management
+- New exports: `TablePlugin`, `evaluateTableFormulas` from `@remyxjs/core`
+- 6 new commands: `toggleHeaderRow`, `sortTable`, `filterTable`, `clearTableFilters`, `formatCell`, `evaluateFormulas`
 
 ## Mobile & Touch Optimization
 

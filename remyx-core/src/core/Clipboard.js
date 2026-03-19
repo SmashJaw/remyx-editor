@@ -83,6 +83,32 @@ export class Clipboard {
       return
     }
 
+    // Table-aware paste: if caret is in a table cell and clipboard has TSV or table HTML
+    const caretCell = this._getCaretCell()
+    if (caretCell) {
+      const table = caretCell.closest('table')
+      if (table) {
+        // Try TSV paste first
+        if (text && this._looksLikeTSV(text)) {
+          this._pasteIntoTable(table, caretCell, text)
+          this.engine.eventBus.emit('paste', { html, text })
+          this.engine.eventBus.emit('content:change')
+          return
+        }
+        // Try HTML table paste
+        if (html && /<table/i.test(html)) {
+          const cleaned = cleanPastedHTML(html)
+          const tsvFromHtml = this._htmlTableToTSV(cleaned)
+          if (tsvFromHtml) {
+            this._pasteIntoTable(table, caretCell, tsvFromHtml)
+            this.engine.eventBus.emit('paste', { html, text })
+            this.engine.eventBus.emit('content:change')
+            return
+          }
+        }
+      }
+    }
+
     if (html) {
       // Rich text paste — clean source-specific markup, then sanitize
       html = cleanPastedHTML(html)
@@ -122,8 +148,54 @@ export class Clipboard {
     }
   }
 
-  _handleCopy() {
-    // Let browser handle default copy behavior
+  _handleCopy(e) {
+    // Table-aware copy: if selection is within a table, generate clean HTML + TSV
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+
+    const anchor = sel.anchorNode?.nodeType === Node.TEXT_NODE
+      ? sel.anchorNode.parentElement : sel.anchorNode
+    const focus = sel.focusNode?.nodeType === Node.TEXT_NODE
+      ? sel.focusNode.parentElement : sel.focusNode
+
+    const anchorTable = anchor?.closest?.('table.rmx-table')
+    const focusTable = focus?.closest?.('table.rmx-table')
+
+    if (anchorTable && focusTable && anchorTable === focusTable) {
+      // Selection is within a single table — produce TSV + clean HTML
+      const table = anchorTable
+      const rows = table.querySelectorAll('thead tr, tbody tr')
+      const tsvLines = []
+      let htmlRows = ''
+
+      for (const row of rows) {
+        if (row.classList.contains('rmx-row-hidden')) continue
+        const cells = row.querySelectorAll('td, th')
+        const tsvCells = []
+        let htmlCells = ''
+        for (const cell of cells) {
+          const text = cell.textContent.trim()
+          // Escape TSV: if text contains tab or newline, quote it
+          if (text.includes('\t') || text.includes('\n') || text.includes('"')) {
+            tsvCells.push('"' + text.replace(/"/g, '""') + '"')
+          } else {
+            tsvCells.push(text)
+          }
+          const tag = cell.tagName.toLowerCase()
+          htmlCells += `<${tag}>${cell.innerHTML}</${tag}>`
+        }
+        tsvLines.push(tsvCells.join('\t'))
+        htmlRows += `<tr>${htmlCells}</tr>`
+      }
+
+      const tsv = tsvLines.join('\n')
+      const html = `<table><tbody>${htmlRows}</tbody></table>`
+
+      e.preventDefault()
+      e.clipboardData.setData('text/plain', tsv)
+      e.clipboardData.setData('text/html', html)
+    }
+    // Otherwise let browser handle default copy
   }
 
   _handleCut() {
@@ -148,6 +220,91 @@ export class Clipboard {
       return true
     }
     return false
+  }
+
+  _getCaretCell() {
+    const sel = window.getSelection()
+    if (!sel || !sel.anchorNode) return null
+    const node = sel.anchorNode.nodeType === Node.TEXT_NODE
+      ? sel.anchorNode.parentElement : sel.anchorNode
+    return node?.closest?.('td, th') || null
+  }
+
+  _looksLikeTSV(text) {
+    if (!text.includes('\t')) return false
+    const lines = text.trim().split('\n')
+    if (lines.length < 1) return false
+    // Check if at least first line has tabs
+    return lines[0].includes('\t')
+  }
+
+  _htmlTableToTSV(html) {
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, 'text/html')
+    const table = doc.querySelector('table')
+    if (!table) return null
+    const lines = []
+    const rows = table.querySelectorAll('tr')
+    for (const row of rows) {
+      const cells = row.querySelectorAll('td, th')
+      lines.push(Array.from(cells).map(c => c.textContent.trim()).join('\t'))
+    }
+    return lines.join('\n')
+  }
+
+  _pasteIntoTable(table, startCell, tsv) {
+    const tbody = table.querySelector('tbody') || table
+    const rows = tsv.trim().split('\n').map(line => line.split('\t'))
+    const allRows = Array.from(table.querySelectorAll('tbody tr'))
+    const startRow = startCell.closest('tr')
+    let startRowIdx = allRows.indexOf(startRow)
+    if (startRowIdx < 0) startRowIdx = 0
+    let startColIdx = 0
+    let prev = startCell.previousElementSibling
+    while (prev) {
+      startColIdx += prev.colSpan || 1
+      prev = prev.previousElementSibling
+    }
+
+    for (let r = 0; r < rows.length; r++) {
+      const rowIdx = startRowIdx + r
+      // Add rows if needed
+      while (allRows.length <= rowIdx) {
+        const firstRow = allRows[0] || startRow
+        const colCount = firstRow ? firstRow.cells.length : rows[0].length
+        const newRow = document.createElement('tr')
+        for (let c = 0; c < colCount; c++) {
+          const td = document.createElement('td')
+          td.innerHTML = '<br>'
+          newRow.appendChild(td)
+        }
+        tbody.appendChild(newRow)
+        allRows.push(newRow)
+      }
+
+      const tr = allRows[rowIdx]
+      for (let c = 0; c < rows[r].length; c++) {
+        const colIdx = startColIdx + c
+        // Add columns if needed
+        while (tr.cells.length <= colIdx) {
+          const td = document.createElement('td')
+          td.innerHTML = '<br>'
+          tr.appendChild(td)
+          // Also add to other rows for consistency
+          allRows.forEach((otherRow, idx) => {
+            if (idx !== rowIdx && otherRow.cells.length <= colIdx) {
+              const otherTd = document.createElement('td')
+              otherTd.innerHTML = '<br>'
+              otherRow.appendChild(otherTd)
+            }
+          })
+        }
+        const cell = tr.cells[colIdx]
+        if (cell) {
+          cell.textContent = rows[r][c]
+        }
+      }
+    }
   }
 
   _handleImagePaste(file) {

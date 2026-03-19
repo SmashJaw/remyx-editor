@@ -244,7 +244,7 @@ Each register function adds commands to the engine. Call only the ones you need 
 | `registerListCommands` | orderedList, unorderedList, taskList, indent, outdent |
 | `registerLinkCommands` | insertLink, editLink, removeLink |
 | `registerImageCommands` | insertImage, resizeImage, alignImage, removeImage |
-| `registerTableCommands` | insertTable, addRowBefore, addRowAfter, addColBefore, addColAfter, deleteRow, deleteCol |
+| `registerTableCommands` | insertTable, addRowBefore, addRowAfter, addColBefore, addColAfter, deleteRow, deleteCol, deleteTable, mergeCells, splitCell, toggleHeaderRow, sortTable, filterTable, clearTableFilters, formatCell, evaluateFormulas |
 | `registerBlockCommands` | blockquote, codeBlock, horizontalRule |
 | `registerFontCommands` | fontFamily, fontSize, foreColor, backColor |
 | `registerMediaCommands` | embedMedia, removeEmbed |
@@ -364,7 +364,7 @@ engine.executeCommand('removeImage', { element: imgElement });
 ```js
 registerTableCommands(engine);
 
-// Insert a 4x3 table
+// Insert a 4x3 table (first row is <thead> with <th> cells)
 engine.executeCommand('insertTable', { rows: 4, cols: 3 });
 
 // Row operations
@@ -376,7 +376,51 @@ engine.executeCommand('deleteRow');
 engine.executeCommand('addColBefore');
 engine.executeCommand('addColAfter');
 engine.executeCommand('deleteCol');
+
+// Toggle header row (convert first row to/from <thead>)
+engine.executeCommand('toggleHeaderRow');
+
+// Sort by column (physically reorders rows, sets data-sort-dir on <th>)
+engine.executeCommand('sortTable', { columnIndex: 0, direction: 'asc' });
+engine.executeCommand('sortTable', { columnIndex: 0, direction: 'desc', dataType: 'numeric' });
+
+// Multi-column sort
+engine.executeCommand('sortTable', {
+  keys: [
+    { columnIndex: 0, direction: 'asc' },
+    { columnIndex: 1, direction: 'desc', dataType: 'numeric' },
+  ],
+});
+
+// Filter rows (non-destructive, hides non-matching rows)
+engine.executeCommand('filterTable', { columnIndex: 0, filterValue: 'search term' });
+engine.executeCommand('clearTableFilters');
+
+// Cell formatting (stores raw value in data-raw-value, displays formatted)
+engine.executeCommand('formatCell', { format: 'number' });
+engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'EUR' } });
+engine.executeCommand('formatCell', { format: 'percentage' });
+engine.executeCommand('formatCell', { format: 'date', options: { dateStyle: 'long' } });
+
+// Formula evaluation (cells with data-formula attribute)
+engine.executeCommand('evaluateFormulas');
+
+// Merge and split
+engine.executeCommand('mergeCells', { cells: [cell1, cell2] });
+engine.executeCommand('splitCell');
 ```
+
+#### Formulas
+
+Cells starting with `=` are treated as formulas. The formula is stored in a `data-formula` attribute and the computed result is displayed as the cell's text content.
+
+**Supported functions:** `SUM`, `AVERAGE`, `COUNT`, `MIN`, `MAX`, `IF`, `CONCAT`
+
+**Cell references:** A1 notation (e.g., `A1`, `B3`, `AA1`), ranges (e.g., `A1:A5`, `B2:D4`)
+
+**Operators:** `+`, `-`, `*`, `/`, `>`, `<`, `>=`, `<=`, `==`
+
+**Examples:** `=SUM(A1:A5)`, `=AVERAGE(B2:B8)`, `=A1+B1*2`, `=IF(A1>10, "high", "low")`
 
 ### Blocks
 
@@ -781,6 +825,25 @@ const tokens = tokenize('const x = 42', 'javascript');
 ```
 
 **Supported languages:** JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash/Shell, Rust, Go, Java, HTML/XML. Language aliases are supported (e.g., `js`, `ts`, `tsx`, `py`, `sh`, `rs`, `golang`).
+
+**TablePlugin** — Enhanced table features including column/row resize handles, click-to-sort on header cells (single + multi-column with Shift), filterable rows with per-column dropdown UI, inline cell formulas with a recursive-descent expression engine, cell formatting (number, currency, percentage, date), and sticky header rows. Uses MutationObserver to auto-detect tables and attach functionality.
+
+```js
+import { TablePlugin, evaluateTableFormulas } from '@remyxjs/core';
+
+// Register the plugin
+engine.plugins.register(TablePlugin());
+
+// The plugin automatically:
+// - Attaches resize handles to table column/row borders
+// - Makes <th> cells clickable for sorting (Shift+click for multi-sort)
+// - Injects filter buttons into header cells
+// - Evaluates formulas on cell blur (cells starting with '=')
+// - Re-evaluates all formulas on content change (debounced)
+
+// Programmatically evaluate all formulas in a table
+evaluateTableFormulas(tableElement);
+```
 
 **Token types:** `comment`, `keyword`, `string`, `number`, `function`, `operator`, `punctuation`, `builtin`, `property`, `regex`, `decorator`, `type`, `tag`, `attr-name`, `attr-value`, `entity`.
 

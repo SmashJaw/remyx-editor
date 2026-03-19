@@ -46,7 +46,7 @@ describe('registerTableCommands', () => {
     document.body.innerHTML = ''
   })
 
-  it('should register all 10 table commands', () => {
+  it('should register all table commands', () => {
     expect(commands.insertTable).toBeDefined()
     expect(commands.addRowBefore).toBeDefined()
     expect(commands.addRowAfter).toBeDefined()
@@ -57,23 +57,36 @@ describe('registerTableCommands', () => {
     expect(commands.deleteTable).toBeDefined()
     expect(commands.mergeCells).toBeDefined()
     expect(commands.splitCell).toBeDefined()
+    expect(commands.toggleHeaderRow).toBeDefined()
+    expect(commands.sortTable).toBeDefined()
+    expect(commands.filterTable).toBeDefined()
+    expect(commands.clearTableFilters).toBeDefined()
+    expect(commands.formatCell).toBeDefined()
+    expect(commands.evaluateFormulas).toBeDefined()
   })
 
-  it('should insert a 3x3 table by default', () => {
+  it('should insert a 3x3 table with thead by default', () => {
     commands.insertTable.execute(mockEngine)
     const html = mockEngine.selection.insertHTML.mock.calls[0][0]
     expect(html).toContain('<table class="rmx-table">')
+    expect(html).toContain('<thead>')
     expect(html).toContain('<tbody>')
-    // Count td elements - should be 9 (3x3)
+    // Header row has 3 th cells
+    const thCount = (html.match(/<th>/g) || []).length
+    expect(thCount).toBe(3)
+    // Body has 2 rows x 3 cols = 6 td cells
     const tdCount = (html.match(/<td>/g) || []).length
-    expect(tdCount).toBe(9)
+    expect(tdCount).toBe(6)
   })
 
   it('should insert table with custom dimensions', () => {
     commands.insertTable.execute(mockEngine, { rows: 2, cols: 4 })
     const html = mockEngine.selection.insertHTML.mock.calls[0][0]
+    // 1 header row with 4 th + 1 body row with 4 td
+    const thCount = (html.match(/<th>/g) || []).length
+    expect(thCount).toBe(4)
     const tdCount = (html.match(/<td>/g) || []).length
-    expect(tdCount).toBe(8) // 2x4
+    expect(tdCount).toBe(4)
   })
 
   it('should add row before current row', () => {
@@ -401,9 +414,350 @@ describe('registerTableCommands', () => {
     expect(tbody.rows[1].cells.length).toBe(2)
   })
 
-  // Helper function
+  // ── toggleHeaderRow tests ──
+
+  it('should create thead from first tbody row', () => {
+    const table = createTestTable()
+    const firstRow = table.querySelector('tbody tr')
+    firstRow.cells[0].textContent = 'Header1'
+    firstRow.cells[1].textContent = 'Header2'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.toggleHeaderRow.execute(mockEngine)
+
+    expect(table.querySelector('thead')).not.toBeNull()
+    const ths = table.querySelectorAll('thead th')
+    expect(ths.length).toBe(2)
+    expect(ths[0].textContent).toBe('Header1')
+    expect(ths[1].textContent).toBe('Header2')
+    expect(table.querySelector('tbody').rows.length).toBe(1) // one row left in tbody
+  })
+
+  it('should remove thead and convert back to tbody', () => {
+    const table = createTestTableWithHead()
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.toggleHeaderRow.execute(mockEngine)
+
+    expect(table.querySelector('thead')).toBeNull()
+    expect(table.querySelector('tbody').rows.length).toBe(3) // header row moved back
+    expect(table.querySelector('tbody tr td')).not.toBeNull() // converted to td
+  })
+
+  // ── sortTable tests ──
+
+  it('should sort table rows alphabetically ascending', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = 'Banana'
+    tbody.rows[1].cells[0].textContent = 'Apple'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.sortTable.execute(mockEngine, { columnIndex: 0, direction: 'asc' })
+
+    expect(tbody.rows[0].cells[0].textContent).toBe('Apple')
+    expect(tbody.rows[1].cells[0].textContent).toBe('Banana')
+  })
+
+  it('should sort table rows descending', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = 'Apple'
+    tbody.rows[1].cells[0].textContent = 'Banana'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.sortTable.execute(mockEngine, { columnIndex: 0, direction: 'desc' })
+
+    expect(tbody.rows[0].cells[0].textContent).toBe('Banana')
+    expect(tbody.rows[1].cells[0].textContent).toBe('Apple')
+  })
+
+  it('should sort numerically when dataType is numeric', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = '10'
+    tbody.rows[1].cells[0].textContent = '2'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.sortTable.execute(mockEngine, { columnIndex: 0, direction: 'asc', dataType: 'numeric' })
+
+    expect(tbody.rows[0].cells[0].textContent).toBe('2')
+    expect(tbody.rows[1].cells[0].textContent).toBe('10')
+  })
+
+  it('should set data-sort-dir attribute on sorted header', () => {
+    const table = createTestTableWithHead()
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.sortTable.execute(mockEngine, { columnIndex: 0, direction: 'asc' })
+
+    const ths = table.querySelectorAll('thead th')
+    expect(ths[0].getAttribute('data-sort-dir')).toBe('asc')
+    expect(ths[1].getAttribute('data-sort-dir')).toBeNull()
+  })
+
+  it('should support multi-column sort via keys', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = 'A'
+    tbody.rows[0].cells[1].textContent = '2'
+    tbody.rows[1].cells[0].textContent = 'A'
+    tbody.rows[1].cells[1].textContent = '1'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.sortTable.execute(mockEngine, {
+      keys: [
+        { columnIndex: 0, direction: 'asc' },
+        { columnIndex: 1, direction: 'asc', dataType: 'numeric' },
+      ],
+    })
+
+    // Both rows have 'A' in col 0, so sorted by col 1 numerically
+    expect(tbody.rows[0].cells[1].textContent).toBe('1')
+    expect(tbody.rows[1].cells[1].textContent).toBe('2')
+  })
+
+  // ── filterTable tests ──
+
+  it('should hide rows that do not match filter', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = 'Apple'
+    tbody.rows[1].cells[0].textContent = 'Banana'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.filterTable.execute(mockEngine, { columnIndex: 0, filterValue: 'Apple' })
+
+    expect(tbody.rows[0].classList.contains('rmx-row-hidden')).toBe(false)
+    expect(tbody.rows[1].classList.contains('rmx-row-hidden')).toBe(true)
+  })
+
+  it('should clear all filters', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = 'Apple'
+    tbody.rows[1].cells[0].textContent = 'Banana'
+    tbody.rows[1].classList.add('rmx-row-hidden')
+
+    const ths = table.querySelectorAll('thead th')
+    ths[0].setAttribute('data-filter-value', 'Apple')
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.clearTableFilters.execute(mockEngine)
+
+    expect(ths[0].getAttribute('data-filter-value')).toBeNull()
+    expect(tbody.rows[1].classList.contains('rmx-row-hidden')).toBe(false)
+  })
+
+  // ── formatCell tests ──
+
+  it('should format cell as number', () => {
+    const table = createTestTable()
+    const td = table.querySelector('td')
+    td.textContent = '1234.5'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      return null
+    })
+
+    commands.formatCell.execute(mockEngine, { format: 'number' })
+
+    expect(td.getAttribute('data-cell-format')).toBe('number')
+    expect(td.getAttribute('data-raw-value')).toBe('1234.5')
+    // Formatted output should contain the number (locale-dependent)
+    expect(td.textContent).toContain('1')
+  })
+
+  it('should format cell as percentage', () => {
+    const table = createTestTable()
+    const td = table.querySelector('td')
+    td.textContent = '0.75'
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'td') return td
+      return null
+    })
+
+    commands.formatCell.execute(mockEngine, { format: 'percentage' })
+
+    expect(td.getAttribute('data-cell-format')).toBe('percentage')
+    expect(td.textContent).toBe('75.0%')
+  })
+
+  // ── evaluateFormulas tests ──
+
+  it('should evaluate SUM formula', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = '10'
+    tbody.rows[1].cells[0].textContent = '20'
+
+    // Add a third row with a formula
+    const tr = document.createElement('tr')
+    const td = document.createElement('td')
+    td.setAttribute('data-formula', 'SUM(A2:A3)')
+    td.textContent = ''
+    tr.appendChild(td)
+    const td2 = document.createElement('td')
+    td2.innerHTML = '<br>'
+    tr.appendChild(td2)
+    tbody.appendChild(tr)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.evaluateFormulas.execute(mockEngine)
+
+    expect(td.textContent).toBe('30')
+  })
+
+  it('should evaluate AVERAGE formula', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = '10'
+    tbody.rows[1].cells[0].textContent = '20'
+
+    const tr = document.createElement('tr')
+    const td = document.createElement('td')
+    td.setAttribute('data-formula', 'AVERAGE(A2:A3)')
+    tr.appendChild(td)
+    const td2 = document.createElement('td')
+    td2.innerHTML = '<br>'
+    tr.appendChild(td2)
+    tbody.appendChild(tr)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.evaluateFormulas.execute(mockEngine)
+
+    expect(td.textContent).toBe('15')
+  })
+
+  it('should evaluate cell reference arithmetic', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = '5'
+    tbody.rows[0].cells[1].textContent = '3'
+
+    const tr = document.createElement('tr')
+    const td = document.createElement('td')
+    td.setAttribute('data-formula', 'A2+B2')
+    tr.appendChild(td)
+    const td2 = document.createElement('td')
+    td2.innerHTML = '<br>'
+    tr.appendChild(td2)
+    tbody.appendChild(tr)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.evaluateFormulas.execute(mockEngine)
+
+    expect(td.textContent).toBe('8')
+  })
+
+  it('should handle MIN and MAX formulas', () => {
+    const table = createTestTableWithHead()
+    const tbody = table.querySelector('tbody')
+    tbody.rows[0].cells[0].textContent = '5'
+    tbody.rows[1].cells[0].textContent = '15'
+
+    const tr = document.createElement('tr')
+    const tdMin = document.createElement('td')
+    tdMin.setAttribute('data-formula', 'MIN(A2:A3)')
+    tr.appendChild(tdMin)
+    const tdMax = document.createElement('td')
+    tdMax.setAttribute('data-formula', 'MAX(A2:A3)')
+    tr.appendChild(tdMax)
+    tbody.appendChild(tr)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'table') return table
+      return null
+    })
+
+    commands.evaluateFormulas.execute(mockEngine)
+
+    expect(tdMin.textContent).toBe('5')
+    expect(tdMax.textContent).toBe('15')
+  })
+
+  // Helper functions
   function createTestTable() {
     const table = document.createElement('table')
+    table.className = 'rmx-table'
+    const tbody = document.createElement('tbody')
+    for (let r = 0; r < 2; r++) {
+      const tr = document.createElement('tr')
+      for (let c = 0; c < 2; c++) {
+        const td = document.createElement('td')
+        td.innerHTML = '<br>'
+        tr.appendChild(td)
+      }
+      tbody.appendChild(tr)
+    }
+    table.appendChild(tbody)
+    mockEngine.element.appendChild(table)
+    return table
+  }
+
+  function createTestTableWithHead() {
+    const table = document.createElement('table')
+    table.className = 'rmx-table'
+    const thead = document.createElement('thead')
+    const headerRow = document.createElement('tr')
+    for (let c = 0; c < 2; c++) {
+      const th = document.createElement('th')
+      th.textContent = 'Col' + (c + 1)
+      headerRow.appendChild(th)
+    }
+    thead.appendChild(headerRow)
+    table.appendChild(thead)
+
     const tbody = document.createElement('tbody')
     for (let r = 0; r < 2; r++) {
       const tr = document.createElement('tr')

@@ -840,6 +840,151 @@
   outline-offset: -2px;
 }
 
+/* Sticky header row */
+.rmx-content table.rmx-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Sortable columns */
+.rmx-content table.rmx-table th.rmx-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.rmx-content table.rmx-table th.rmx-sortable:hover {
+  background: var(--rmx-toolbar-button-hover);
+}
+
+.rmx-content table.rmx-table th[data-sort-dir]::after {
+  margin-left: 4px;
+  font-size: 0.75em;
+  opacity: 0.7;
+}
+
+.rmx-content table.rmx-table th[data-sort-dir="asc"]::after {
+  content: "\25B2";
+}
+
+.rmx-content table.rmx-table th[data-sort-dir="desc"]::after {
+  content: "\25BC";
+}
+
+.rmx-content table.rmx-table th[data-sort-priority]::before {
+  content: attr(data-sort-priority);
+  font-size: 0.6em;
+  vertical-align: super;
+  margin-right: 2px;
+  opacity: 0.5;
+}
+
+/* Column resize handles */
+.rmx-col-resize-handle {
+  position: absolute;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 3;
+  transition: background 0.15s;
+}
+
+.rmx-col-resize-handle:hover {
+  background: var(--rmx-primary);
+  opacity: 0.4;
+}
+
+.rmx-row-resize-handle {
+  position: absolute;
+  cursor: row-resize;
+  background: transparent;
+  z-index: 3;
+  transition: background 0.15s;
+}
+
+.rmx-row-resize-handle:hover {
+  background: var(--rmx-primary);
+  opacity: 0.4;
+}
+
+.rmx-table-resizing {
+  user-select: none;
+}
+
+/* Filter UI */
+.rmx-filter-btn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 9px;
+  opacity: 0.4;
+  padding: 2px;
+  line-height: 1;
+  transition: opacity var(--rmx-transition-fast);
+}
+
+.rmx-filter-btn:hover,
+.rmx-filter-btn.rmx-filter-active {
+  opacity: 1;
+  color: var(--rmx-primary);
+}
+
+.rmx-filter-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  background: var(--rmx-modal-bg);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius-inner);
+  box-shadow: var(--rmx-shadow-md);
+  padding: 6px;
+  display: flex;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.rmx-filter-input {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 12px;
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius-inner);
+  background: var(--rmx-bg);
+  color: var(--rmx-text);
+  outline: none;
+}
+
+.rmx-filter-input:focus {
+  border-color: var(--rmx-primary);
+}
+
+.rmx-filter-clear-btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  background: var(--rmx-toolbar-button-hover);
+  border: 1px solid var(--rmx-border);
+  border-radius: var(--rmx-radius-inner);
+  cursor: pointer;
+  color: var(--rmx-text-secondary);
+}
+
+.rmx-filter-clear-btn:hover {
+  color: var(--rmx-text);
+}
+
+/* Hidden rows (filtered out) */
+.rmx-row-hidden {
+  display: none;
+}
+
+/* Formula cells */
+.rmx-content table.rmx-table td[data-formula],
+.rmx-content table.rmx-table th[data-formula] {
+  background: rgba(99, 102, 241, 0.04);
+}
+
 /* Embeds */
 .rmx-content .rmx-embed-wrapper {
   position: relative;
