@@ -195,6 +195,10 @@ Features with the highest user demand and broadest impact on the editing experie
 - Column and row resize handles with drag support
 - Cell merging and splitting
 - Sortable columns (click header to sort ascending/descending)
+- Multi-column sort: hold Shift + click to add secondary/tertiary sort keys
+- Sort data types: alphabetical, numeric, date, and custom comparator via `tableSortComparator` prop
+- Sort indicator icons in header cells showing current sort direction
+- Persistent sort state: sorting reorders the underlying content so it survives serialization and export
 - Filterable rows with a compact filter UI per column
 - Cell formatting: number, currency, percentage, date
 - Copy/paste between Remyx tables and external spreadsheets (Excel, Google Sheets)
