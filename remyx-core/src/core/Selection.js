@@ -292,7 +292,8 @@ export class Selection {
   }
 
   /**
-   * Inserts HTML at the current selection using document.execCommand.
+   * Inserts HTML at the current selection using Range-based DOM manipulation.
+   * CSP-compatible — does not use document.execCommand.
    * Automatically sanitizes input through the editor's Sanitizer if available
    * to prevent XSS. Falls back to unsanitized insertion only if no sanitizer
    * is configured (e.g. in unit tests with standalone Selection instances).
@@ -301,7 +302,23 @@ export class Selection {
    */
   insertHTML(html) {
     const safeHtml = this._sanitizer ? this._sanitizer.sanitize(html) : html
-    document.execCommand('insertHTML', false, safeHtml)
+    const sel = this.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    const range = sel.getRangeAt(0)
+    range.deleteContents()
+    const template = document.createElement('template')
+    template.innerHTML = safeHtml
+    const fragment = template.content
+    const lastChild = fragment.lastChild
+    range.insertNode(fragment)
+    // Move cursor after the inserted content
+    if (lastChild) {
+      const newRange = document.createRange()
+      newRange.setStartAfter(lastChild)
+      newRange.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(newRange)
+    }
   }
 
   /**

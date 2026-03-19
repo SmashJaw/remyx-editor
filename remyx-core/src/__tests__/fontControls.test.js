@@ -7,9 +7,6 @@ describe('registerFontCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
-    document.queryCommandValue = vi.fn().mockReturnValue('')
-    document.queryCommandState = vi.fn().mockReturnValue(false)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -57,76 +54,127 @@ describe('registerFontCommands', () => {
     expect(commands.backColor).toBeDefined()
   })
 
-  it('should execute fontFamily with fontName', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should wrap selection in span with fontFamily style', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
     commands.fontFamily.execute(mockEngine, 'Arial')
-    expect(spy).toHaveBeenCalledWith('fontName', false, 'Arial')
-    spy.mockRestore()
+    const span = mockEngine.element.querySelector('span')
+    expect(span).not.toBeNull()
+    expect(span.style.fontFamily).toBe('Arial')
   })
 
-  it('should not execute fontFamily when no family', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should not execute fontFamily when no family provided', () => {
     commands.fontFamily.execute(mockEngine, '')
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
+    // No span should be created
+    expect(mockEngine.element.querySelector('span')).toBeNull()
   })
 
-  it('should execute foreColor', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should wrap selection in span with color style for foreColor', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
     commands.foreColor.execute(mockEngine, '#ff0000')
-    expect(spy).toHaveBeenCalledWith('foreColor', false, '#ff0000')
-    spy.mockRestore()
+    const span = mockEngine.element.querySelector('span')
+    expect(span).not.toBeNull()
+    expect(span.style.color).toBe('rgb(255, 0, 0)')
   })
 
   it('should not execute foreColor when no color', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.foreColor.execute(mockEngine, '')
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
+    expect(mockEngine.element.querySelector('span')).toBeNull()
   })
 
-  it('should execute backColor with hiliteColor', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should wrap selection in span with backgroundColor for backColor', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
     commands.backColor.execute(mockEngine, '#00ff00')
-    expect(spy).toHaveBeenCalledWith('hiliteColor', false, '#00ff00')
-    spy.mockRestore()
+    const span = mockEngine.element.querySelector('span')
+    expect(span).not.toBeNull()
+    expect(span.style.backgroundColor).toBe('rgb(0, 255, 0)')
   })
 
   it('should not execute backColor when no color', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
     commands.backColor.execute(mockEngine, '')
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
+    expect(mockEngine.element.querySelector('span')).toBeNull()
   })
 
-  it('should fall back to backColor when hiliteColor throws', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockImplementation((cmd) => {
-      if (cmd === 'hiliteColor') throw new Error('not supported')
-      return true
-    })
-    commands.backColor.execute(mockEngine, '#00ff00')
-    expect(spy).toHaveBeenCalledWith('backColor', false, '#00ff00')
-    spy.mockRestore()
+  it('should update existing span style when parent is already a styled span', () => {
+    const span = document.createElement('span')
+    span.style.fontFamily = 'Courier'
+    span.textContent = 'text'
+    mockEngine.element.appendChild(span)
+
+    const textNode = span.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 4)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(span)
+
+    commands.fontFamily.execute(mockEngine, 'Arial')
+    expect(span.style.fontFamily).toBe('Arial')
   })
 
-  it('should use queryCommandValue for fontFamily isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockReturnValue('Arial')
-    expect(commands.fontFamily.isActive(mockEngine)).toBe('Arial')
-    spy.mockRestore()
+  it('should return computed fontFamily for fontFamily isActive', () => {
+    const span = document.createElement('span')
+    span.style.fontFamily = 'Arial'
+    span.textContent = 'text'
+    mockEngine.element.appendChild(span)
+
+    mockEngine.selection.getParentElement.mockReturnValue(span)
+    const result = commands.fontFamily.isActive(mockEngine)
+    expect(result).toBeTruthy()
   })
 
-  it('should return false for fontFamily isActive when no value', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockReturnValue('')
+  it('should return false for fontFamily isActive when no parent element', () => {
+    mockEngine.selection.getParentElement.mockReturnValue(null)
     expect(commands.fontFamily.isActive(mockEngine)).toBe(false)
-    spy.mockRestore()
-  })
-
-  it('should return false for fontFamily isActive when queryCommandValue throws', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockImplementation(() => {
-      throw new Error('not supported')
-    })
-    expect(commands.fontFamily.isActive(mockEngine)).toBe(false)
-    spy.mockRestore()
   })
 
   it('should handle fontSize with range selection', () => {
@@ -155,17 +203,17 @@ describe('registerFontCommands', () => {
     span.textContent = 'text'
     mockEngine.element.appendChild(span)
 
+    const textNode = span.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 4)
+
     const sel = window.getSelection()
     sel.removeAllRanges()
+    sel.addRange(range)
 
     mockEngine.selection.getSelection.mockReturnValue(sel)
     mockEngine.selection.getParentElement.mockReturnValue(span)
-
-    // Create a non-collapsed range to pass the collapsed check
-    Object.defineProperty(sel, 'rangeCount', { value: 1, configurable: true })
-    const range = document.createRange()
-    range.selectNodeContents(span)
-    vi.spyOn(sel, 'getRangeAt').mockReturnValue(range)
 
     commands.fontSize.execute(mockEngine, '24px')
     expect(span.style.fontSize).toBe('24px')
@@ -237,31 +285,35 @@ describe('registerFontCommands', () => {
     expect(span.style.fontSize).toBe('18px')
   })
 
-  it('should return a value for foreColor isActive when queryCommandValue returns a color', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockReturnValue('rgb(255, 0, 0)')
-    expect(commands.foreColor.isActive()).toBe('rgb(255, 0, 0)')
-    spy.mockRestore()
+  it('should return computed color for foreColor isActive', () => {
+    const span = document.createElement('span')
+    span.style.color = 'rgb(255, 0, 0)'
+    span.textContent = 'text'
+    mockEngine.element.appendChild(span)
+
+    mockEngine.selection.getParentElement.mockReturnValue(span)
+    const result = commands.foreColor.isActive(mockEngine)
+    expect(result).toBeTruthy()
   })
 
-  it('should return false for foreColor isActive when queryCommandValue throws', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockImplementation(() => {
-      throw new Error('not supported')
-    })
-    expect(commands.foreColor.isActive()).toBe(false)
-    spy.mockRestore()
+  it('should return false for foreColor isActive when no parent element', () => {
+    mockEngine.selection.getParentElement.mockReturnValue(null)
+    expect(commands.foreColor.isActive(mockEngine)).toBe(false)
   })
 
-  it('should return a value for backColor isActive when queryCommandValue returns a color', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockReturnValue('rgb(0, 255, 0)')
-    expect(commands.backColor.isActive()).toBe('rgb(0, 255, 0)')
-    spy.mockRestore()
+  it('should return computed backgroundColor for backColor isActive', () => {
+    const span = document.createElement('span')
+    span.style.backgroundColor = 'rgb(0, 255, 0)'
+    span.textContent = 'text'
+    mockEngine.element.appendChild(span)
+
+    mockEngine.selection.getParentElement.mockReturnValue(span)
+    const result = commands.backColor.isActive(mockEngine)
+    expect(result).toBeTruthy()
   })
 
-  it('should return false for backColor isActive when queryCommandValue throws', () => {
-    const spy = vi.spyOn(document, 'queryCommandValue').mockImplementation(() => {
-      throw new Error('not supported')
-    })
-    expect(commands.backColor.isActive()).toBe(false)
-    spy.mockRestore()
+  it('should return false for backColor isActive when no parent element', () => {
+    mockEngine.selection.getParentElement.mockReturnValue(null)
+    expect(commands.backColor.isActive(mockEngine)).toBe(false)
   })
 })

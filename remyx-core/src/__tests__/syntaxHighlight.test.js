@@ -3,6 +3,9 @@ import {
   tokenize,
   SUPPORTED_LANGUAGES,
   LANGUAGE_MAP,
+  registerLanguage,
+  unregisterLanguage,
+  runRules,
 } from '../plugins/builtins/syntaxHighlight/tokenizers.js'
 
 describe('Syntax Highlighting Tokenizers', () => {
@@ -263,6 +266,109 @@ describe('Syntax Highlighting Tokenizers', () => {
       for (const lang of SUPPORTED_LANGUAGES) {
         expect(LANGUAGE_MAP).toHaveProperty(lang.id)
       }
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // registerLanguage / unregisterLanguage
+  // ---------------------------------------------------------------------------
+  describe('registerLanguage', () => {
+    afterEach(() => {
+      // Clean up any registered test languages
+      unregisterLanguage('testlang', ['tl'])
+    })
+
+    it('registers a custom language tokenizer', () => {
+      const myTokenizer = (code) => [{ text: code, className: 'rmx-syn-keyword' }]
+      registerLanguage('testlang', 'Test Language', myTokenizer)
+
+      expect(LANGUAGE_MAP.testlang).toBe(myTokenizer)
+      expect(SUPPORTED_LANGUAGES.find(l => l.id === 'testlang')).toEqual({
+        id: 'testlang',
+        label: 'Test Language',
+      })
+    })
+
+    it('registers aliases', () => {
+      const myTokenizer = (code) => [{ text: code, className: null }]
+      registerLanguage('testlang', 'Test Language', myTokenizer, ['tl'])
+
+      expect(LANGUAGE_MAP.tl).toBe(myTokenizer)
+    })
+
+    it('makes the language available via tokenize()', () => {
+      const myTokenizer = (code) => [{ text: code, className: 'rmx-syn-keyword' }]
+      registerLanguage('testlang', 'Test Language', myTokenizer)
+
+      const result = tokenize('hello', 'testlang')
+      expect(result).not.toBeNull()
+      expect(result[0].type).toBe('keyword')
+      expect(result[0].value).toBe('hello')
+    })
+
+    it('throws for missing id', () => {
+      expect(() => registerLanguage('', 'Label', () => [])).toThrow()
+    })
+
+    it('throws for missing label', () => {
+      expect(() => registerLanguage('id', '', () => [])).toThrow()
+    })
+
+    it('throws for non-function tokenizer', () => {
+      expect(() => registerLanguage('id', 'Label', 'not a function')).toThrow()
+    })
+
+    it('does not duplicate SUPPORTED_LANGUAGES entry on re-register', () => {
+      const tok = (code) => [{ text: code, className: null }]
+      registerLanguage('testlang', 'Test Language', tok)
+      registerLanguage('testlang', 'Test Language v2', tok)
+
+      const matches = SUPPORTED_LANGUAGES.filter(l => l.id === 'testlang')
+      expect(matches.length).toBe(1)
+    })
+  })
+
+  describe('unregisterLanguage', () => {
+    it('removes a registered language', () => {
+      const tok = (code) => [{ text: code, className: null }]
+      registerLanguage('testlang', 'Test Language', tok, ['tl'])
+
+      unregisterLanguage('testlang', ['tl'])
+
+      expect(LANGUAGE_MAP.testlang).toBeUndefined()
+      expect(LANGUAGE_MAP.tl).toBeUndefined()
+      expect(SUPPORTED_LANGUAGES.find(l => l.id === 'testlang')).toBeUndefined()
+    })
+
+    it('tokenize returns null for unregistered language', () => {
+      const tok = (code) => [{ text: code, className: 'rmx-syn-keyword' }]
+      registerLanguage('testlang', 'Test Language', tok)
+      unregisterLanguage('testlang')
+
+      expect(tokenize('hello', 'testlang')).toBeNull()
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // runRules (exported helper)
+  // ---------------------------------------------------------------------------
+  describe('runRules', () => {
+    it('tokenizes code with custom rules', () => {
+      const rules = [
+        [/\b(?:let|const|var)\b/g, 'rmx-syn-keyword'],
+        [/"[^"]*"/g, 'rmx-syn-string'],
+      ]
+      const tokens = runRules('let x = "hi"', rules)
+      expect(tokens.find(t => t.className === 'rmx-syn-keyword').text).toBe('let')
+      expect(tokens.find(t => t.className === 'rmx-syn-string').text).toBe('"hi"')
+    })
+
+    it('collects unmatched characters as plain text', () => {
+      const rules = [[/\d+/g, 'rmx-syn-number']]
+      const tokens = runRules('abc 123 def', rules)
+      expect(tokens[0]).toEqual({ text: 'abc ', className: null })
+      expect(tokens[1]).toEqual({ text: '123', className: 'rmx-syn-number' })
+      expect(tokens[2]).toEqual({ text: ' def', className: null })
     })
   })
 })

@@ -1,7 +1,8 @@
 import { createPlugin } from '../../createPlugin.js'
-import { detectLanguage, tokenize } from './tokenizers.js'
+import { detectLanguage, tokenize, LANGUAGE_MAP } from './tokenizers.js'
 
 const HIGHLIGHT_DEBOUNCE_MS = 150
+const COPY_FEEDBACK_MS = 1500
 
 /**
  * Finds the closest `<pre>` ancestor of the currently focused element,
@@ -47,6 +48,8 @@ export function SyntaxHighlightPlugin() {
   let debounceTimer = null
   let blurHandler = null
   let languageChangeUnsub = null
+  let copyClickHandler = null
+  let lineNumberClickHandler = null
 
   /**
    * Highlights a single `<code>` element inside a `<pre>`.
@@ -94,6 +97,83 @@ export function SyntaxHighlightPlugin() {
   }
 
   /**
+   * Injects or removes line number gutter for a `<pre>` block.
+   * Line numbers are rendered as a `<span class="rmx-line-numbers">` inside
+   * the `<pre>`, with one `<span>` per line.
+   */
+  function updateLineNumbers(pre) {
+    const show = pre.hasAttribute('data-line-numbers')
+    let gutter = pre.querySelector('.rmx-line-numbers')
+
+    if (!show) {
+      if (gutter) gutter.remove()
+      pre.classList.remove('rmx-has-line-numbers')
+      return
+    }
+
+    const code = pre.querySelector('code')
+    if (!code) return
+
+    const lineCount = (code.textContent.match(/\n/g) || []).length + 1
+
+    if (!gutter) {
+      gutter = document.createElement('span')
+      gutter.className = 'rmx-line-numbers'
+      gutter.setAttribute('aria-hidden', 'true')
+      gutter.contentEditable = 'false'
+      pre.insertBefore(gutter, pre.firstChild)
+    }
+
+    // Build line number spans
+    let nums = ''
+    for (let i = 1; i <= lineCount; i++) {
+      nums += `<span class="rmx-line-number">${i}</span>`
+    }
+    gutter.innerHTML = nums
+    pre.classList.add('rmx-has-line-numbers')
+  }
+
+  /**
+   * Injects a copy-to-clipboard button into a `<pre>` block if one doesn't
+   * already exist.
+   */
+  function ensureCopyButton(pre) {
+    if (pre.querySelector('.rmx-code-copy-btn')) return
+    const btn = document.createElement('button')
+    btn.className = 'rmx-code-copy-btn'
+    btn.type = 'button'
+    btn.setAttribute('aria-label', 'Copy code')
+    btn.contentEditable = 'false'
+    btn.textContent = '⧉'
+    pre.appendChild(btn)
+  }
+
+  /**
+   * Highlights inline `<code>` elements (not inside `<pre>`) with
+   * mini syntax highlighting when they have a `data-language` attribute.
+   */
+  function highlightInlineCode(engine) {
+    const codes = engine.element.querySelectorAll('code[data-language]:not(pre code)')
+    for (const code of codes) {
+      if (code.classList.contains('rmx-inline-highlighted')) continue
+      const language = code.getAttribute('data-language')
+      const tokens = tokenize(code.textContent, language)
+      if (!tokens) continue
+
+      let html = ''
+      for (const token of tokens) {
+        if (token.type === 'plain') {
+          html += escapeHTML(token.value)
+        } else {
+          html += `<span class="rmx-syn-${token.type}">${escapeHTML(token.value)}</span>`
+        }
+      }
+      code.innerHTML = html
+      code.classList.add('rmx-inline-highlighted')
+    }
+  }
+
+  /**
    * Highlights all `<pre><code>` blocks in the editor that are not
    * currently focused and have not already been highlighted.
    */
@@ -102,6 +182,10 @@ export function SyntaxHighlightPlugin() {
     const pres = engine.element.querySelectorAll('pre')
 
     for (const pre of pres) {
+      // Always ensure copy button and line numbers are present
+      ensureCopyButton(pre)
+      updateLineNumbers(pre)
+
       // Skip the block the user is actively editing
       if (pre === focusedPre) continue
       // Skip already-highlighted blocks that haven't changed
@@ -112,6 +196,9 @@ export function SyntaxHighlightPlugin() {
 
       highlightCodeElement(code, engine)
     }
+
+    // Highlight inline code spans
+    highlightInlineCode(engine)
   }
 
   /**
@@ -154,6 +241,21 @@ export function SyntaxHighlightPlugin() {
           if (!code) return null
           return code.getAttribute('data-language') || null
         },
+      },
+      {
+        name: 'toggleLineNumbers',
+        execute(engine, { element } = {}) {
+          const pre = element || getCurrentCodeBlock(engine)
+          if (!pre) return false
+          if (pre.hasAttribute('data-line-numbers')) {
+            pre.removeAttribute('data-line-numbers')
+          } else {
+            pre.setAttribute('data-line-numbers', '')
+          }
+          updateLineNumbers(pre)
+          return true
+        },
+        meta: { icon: 'lineNumbers', tooltip: 'Toggle Line Numbers' },
       },
     ],
 
@@ -216,6 +318,46 @@ export function SyntaxHighlightPlugin() {
         attributeFilter: ['data-language'],
       })
 
+      // Copy-to-clipboard click handler (delegated)
+      copyClickHandler = async (e) => {
+        const btn = e.target.closest('.rmx-code-copy-btn')
+        if (!btn) return
+        const pre = btn.closest('pre')
+        if (!pre) return
+        const code = pre.querySelector('code')
+        if (!code) return
+
+        e.preventDefault()
+        e.stopPropagation()
+
+        try {
+          await navigator.clipboard.writeText(code.textContent)
+          btn.textContent = '✓'
+          btn.classList.add('rmx-code-copy-success')
+          setTimeout(() => {
+            btn.textContent = '⧉'
+            btn.classList.remove('rmx-code-copy-success')
+          }, COPY_FEEDBACK_MS)
+        } catch {
+          // Fallback for insecure contexts
+          const textarea = document.createElement('textarea')
+          textarea.value = code.textContent
+          textarea.style.position = 'fixed'
+          textarea.style.opacity = '0'
+          document.body.appendChild(textarea)
+          textarea.select()
+          document.execCommand('copy')
+          document.body.removeChild(textarea)
+          btn.textContent = '✓'
+          btn.classList.add('rmx-code-copy-success')
+          setTimeout(() => {
+            btn.textContent = '⧉'
+            btn.classList.remove('rmx-code-copy-success')
+          }, COPY_FEEDBACK_MS)
+        }
+      }
+      engine.element.addEventListener('click', copyClickHandler, true)
+
       // Re-highlight the block the user was typing in once they leave it
       blurHandler = (e) => {
         const pre = e.target?.closest?.('pre')
@@ -225,6 +367,7 @@ export function SyntaxHighlightPlugin() {
           if (code) {
             highlightCodeElement(code, engine)
           }
+          updateLineNumbers(pre)
         }
       }
       engine.element.addEventListener('focusout', blurHandler, true)
@@ -255,6 +398,12 @@ export function SyntaxHighlightPlugin() {
       if (blurHandler) {
         engine.element.removeEventListener('focusout', blurHandler, true)
         blurHandler = null
+      }
+
+      // Remove copy click handler
+      if (copyClickHandler) {
+        engine.element.removeEventListener('click', copyClickHandler, true)
+        copyClickHandler = null
       }
 
       // Unsubscribe from eventBus

@@ -12,14 +12,50 @@ const DANGEROUS_REMOVE_TAGS = new Set([
 ])
 
 /**
+ * Default iframe src domain allowlist.
+ * Only iframes whose src matches one of these hostnames (or their subdomains)
+ * are permitted. All others are removed during sanitization.
+ */
+const DEFAULT_IFRAME_ALLOWED_DOMAINS = [
+  'www.youtube.com',
+  'youtube.com',
+  'www.youtube-nocookie.com',
+  'player.vimeo.com',
+  'www.dailymotion.com',
+  'geo.dailymotion.com',
+]
+
+/**
+ * Check whether an iframe src URL is on an allowed domain.
+ * Returns true if the URL's hostname matches or is a subdomain of an allowed domain.
+ */
+function isAllowedIframeDomain(src, allowedDomains) {
+  if (!src) return false
+  try {
+    const url = new URL(src)
+    // Only allow https (and protocol-relative URLs which the browser resolves)
+    if (url.protocol !== 'https:') return false
+    const hostname = url.hostname.toLowerCase()
+    return allowedDomains.some(domain => {
+      const d = domain.toLowerCase()
+      return hostname === d || hostname.endsWith('.' + d)
+    })
+  } catch {
+    return false
+  }
+}
+
+/**
  * @typedef {Object} SanitizerOptions
  * @property {Object} [allowedTags] - Map of allowed tag names to arrays of allowed attribute names
  * @property {string[]} [allowedStyles] - List of allowed CSS property names
+ * @property {string[]} [iframeAllowedDomains] - List of allowed iframe src hostnames
  */
 
 /**
  * Sanitizes HTML content by removing disallowed tags, attributes, and styles.
- * Prevents XSS through event handler attributes, javascript: URLs, and CSS injection.
+ * Prevents XSS through event handler attributes, javascript: URLs, CSS injection,
+ * and iframe src domain restrictions.
  */
 // LRU cache max size for sanitize results
 const SANITIZE_CACHE_MAX = 50
@@ -32,6 +68,7 @@ export class Sanitizer {
   constructor(options = {}) {
     this.allowedTags = options.allowedTags || ALLOWED_TAGS
     this.allowedStyles = options.allowedStyles || ALLOWED_STYLES
+    this.iframeAllowedDomains = options.iframeAllowedDomains || DEFAULT_IFRAME_ALLOWED_DOMAINS
     this._cache = new Map()
   }
 
@@ -139,6 +176,15 @@ export class Sanitizer {
       if (tagName === 'input') {
         const inputType = (child.getAttribute('type') || '').toLowerCase()
         if (inputType !== 'checkbox') {
+          node.removeChild(child)
+          continue
+        }
+      }
+
+      // Restrict <iframe> src to allowed domains only (YouTube, Vimeo, Dailymotion by default)
+      if (tagName === 'iframe') {
+        const src = child.getAttribute('src')
+        if (!isAllowedIframeDomain(src, this.iframeAllowedDomains)) {
           node.removeChild(child)
           continue
         }

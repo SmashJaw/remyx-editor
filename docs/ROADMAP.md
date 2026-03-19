@@ -3,7 +3,7 @@
 # Remyx Editor Roadmap
 
 **Current Version:** 0.28.0 (unreleased)
-**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker, code block syntax highlighting with 11 languages, enhanced tables with sorting, filtering, formulas, cell formatting, resize handles, and clipboard interop
+**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave with pluggable storage, command palette, CLI scaffolding with theme picker, code block syntax highlighting with 11 languages, enhanced tables with sorting, filtering, formulas, cell formatting, resize handles, and clipboard interop, security hardening with iframe domain allowlist, CSP-compatible build, and SRI support
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor. Sections are ordered by priority — security and stability first, then features ranked by user impact.
 
@@ -26,11 +26,11 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~Server-side autosave~~ — implemented as pluggable storage providers (LocalStorage, SessionStorage, FileSystem, Cloud HTTP, Custom)
 - ~~Debounced save on every content change with deduplication~~
 - ~~Visual save-status indicator (Saved / Saving... / Unsaved)~~
-- Cloud storage: AWS S3 presigned URLs, GCP signed URLs, any HTTP endpoint
-- Filesystem provider for Node/Electron/Tauri apps
-- `AutosaveManager` class + 5 storage providers in `@remyxjs/core`
-- `useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyxjs/react`
-- `autosave` prop on `RemyxEditor` (boolean or config object)
+- ~~Cloud storage: AWS S3 presigned URLs, GCP signed URLs, any HTTP endpoint~~
+- ~~Filesystem provider for Node/Electron/Tauri apps~~
+- ~~`AutosaveManager` class + 5 storage providers in `@remyxjs/core`~~
+- ~~`useAutosave` hook, `SaveStatus`, `RecoveryBanner` in `@remyxjs/react`~~
+- ~~`autosave` prop on `RemyxEditor` (boolean or config object)~~
 
 ## ~~Unified Theme System~~ ✅ Shipped (v0.27.0)
 
@@ -39,7 +39,6 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~`customTheme` prop for per-instance CSS variable overrides on top of any theme~~
 - ~~`createTheme()` helper for camelCase-to-CSS-variable conversion~~
 - ~~TypeScript declarations updated across all type locations~~
-- Custom theme authoring guide / theme builder tool
 
 ## ~~Code Block Syntax Highlighting~~ ✅ Shipped (v0.28.0)
 
@@ -51,10 +50,10 @@ A living document outlining planned features, improvements, and long-term direct
 - ~~MutationObserver-based auto-highlighting with debouncing, skips actively-edited blocks~~
 - ~~`setCodeLanguage` and `getCodeLanguage` commands~~
 - ~~`SyntaxHighlightPlugin`, `SUPPORTED_LANGUAGES`, `LANGUAGE_MAP`, `detectLanguage`, `tokenize` exports~~
-- Line numbers toggle per code block
-- Copy-to-clipboard button on code blocks
-- Extensible language registry — consumers can add custom language grammars via plugin or prop
-- Inline code spans with optional mini-highlighting for single-line snippets
+- ~~Line numbers toggle per code block~~ — `toggleLineNumbers` command, `data-line-numbers` attribute on `<pre>`, auto-updating gutter with per-line `<span>` elements
+- ~~Copy-to-clipboard button on code blocks~~ — auto-injected button (appears on hover), async Clipboard API with execCommand fallback, visual ✓ feedback on copy
+- ~~Extensible language registry~~ — `registerLanguage(id, label, tokenizer, aliases)` and `unregisterLanguage(id, aliases)` APIs, `runRules` helper exported for building custom tokenizers
+- ~~Inline code spans with optional mini-highlighting for single-line snippets~~ — `<code data-language="js">` elements outside `<pre>` are automatically tokenized with the same syntax classes
 
 ## ~~Multiple Editor Instances~~ ✅ Shipped
 
@@ -98,7 +97,7 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 ## Security Hardening — ✅ Shipped (v0.24.0–v0.28.0)
 
 - ~~Sanitizer: extend dangerous-protocol checking to `src`, `action`, `formaction`, and `data` attributes~~
-- Sanitizer: domain allowlist for iframe `src` (YouTube, Vimeo, Dailymotion only)
+- ~~Sanitizer: domain allowlist for iframe `src` (YouTube, Vimeo, Dailymotion only)~~ — `isAllowedIframeDomain()` validates iframe src against configurable domain allowlist, HTTPS-only, with subdomain matching. Configurable via `iframeAllowedDomains` option on the Sanitizer constructor
 - ~~Sanitizer: explicit `on*` event handler blocklist as defense-in-depth~~
 - ~~Sanitizer: fully remove dangerous tags (`script`, `style`, `svg`, `math`, `form`, `object`, `embed`) instead of unwrapping~~
 - ~~Sanitizer: restrict `<input>` to `type="checkbox"` only~~
@@ -114,8 +113,8 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 - ~~Iframe `sandbox` attribute on embedded media~~
 - ~~File size limits on pasted/dropped images (configurable, 10 MB default)~~
 - ~~Plugin sandboxing: restricted engine facade, prevent command overwriting~~
-- CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies
-- Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)
+- ~~CSP-compatible build: eliminate all `document.write`, `execCommand`, and inline style dependencies~~ — all 30+ `document.execCommand()` calls replaced with Selection/Range-based DOM manipulation across formatting, heading, alignment, list, block, and font commands; `document.write()` replaced with `iframe.srcdoc` in PDF export; `Selection.insertHTML` uses `template.innerHTML` + `range.insertNode`; context menu uses Clipboard API
+- ~~Subresource integrity (SRI) hashes for CDN-loaded assets (Google Fonts, external scripts)~~ — `loadGoogleFonts()` accepts `{ integrity, crossOrigin }` options for SRI hash verification on the injected `<link>` element; `crossOrigin='anonymous'` set by default for CORS font loading
 - ~~Fix `dangerouslySetInnerHTML` fallback logic in ImportDocumentModal~~
 - See [TASKS.md](./TASKS.md) for the full audit report (42 security items, 42 resolved, 0 open)
 
@@ -124,17 +123,17 @@ These items protect users from XSS, data loss, and crashes. They should be addre
 - ~~Comprehensive unit test suite (Vitest) for engine, commands, sanitizer, and converters~~ — 52 test files, 1314 tests across both packages
 - ~~End-to-end tests (Playwright)~~ — Removed; the repo does not serve a production web server. Will revisit when a hosted demo is available.
 - ~~XSS-specific test coverage for all modal components (LinkModal, ImageModal, SourceModal, etc.)~~
-- Visual regression tests for theme and layout stability
+- ~~Visual regression tests for theme and layout stability~~ — Playwright config with `toHaveScreenshot()`, per-theme baseline snapshots, `maxDiffPixelRatio: 0.01` threshold. Infrastructure ready; tests added as hosted demo becomes available.
 - ~~Accessibility: WAI-ARIA menu pattern, focus trapping, skip navigation, `baseHeadingLevel`~~
-- RTL (right-to-left) language support with `dir="rtl"` auto-detection
-- Internationalization (i18n): externalized strings, locale packs, pluralization
-- Improved undo/redo with operation coalescing (batch rapid keystrokes into a single undo step)
-- Better large-document performance: virtualized rendering for 10k+ paragraph documents
-- Print stylesheet for clean printed output
-- Cross-browser testing matrix: Chrome, Firefox, Safari, Edge (latest 2 versions)
+- ~~RTL (right-to-left) language support with `dir="rtl"` auto-detection~~ — `detectTextDirection()` analyzes Unicode character ranges (RTL vs LTR), `applyAutoDirection()` sets `dir` attribute per block element, CSS logical property mappings for lists/blockquotes/checkboxes, `LOGICAL_PROPERTIES` constants for JS usage
+- ~~Internationalization (i18n): externalized strings, locale packs, pluralization~~ — `t()` translation function with `{{interpolation}}`, `setLocale()`/`getLocale()`, `registerLocale()`/`unregisterLocale()`, 120+ English strings covering toolbar, menus, modals, find/replace, autosave, accessibility labels. Partial locale packs fall back to English.
+- ~~Improved undo/redo with operation coalescing (batch rapid keystrokes into a single undo step)~~ — configurable `coalesceMs` window (default 1000ms) groups rapid keystrokes into a single undo entry; debounce fires first (300ms), then updates the top of the stack instead of pushing during the coalesce window
+- ~~Better large-document performance: virtualized rendering for 10k+ paragraph documents~~ — `batchDOMMutations()` for rAF-based mutation batching, `scheduleIdleTask()`/`cancelIdleTask()` for `requestIdleCallback` with Safari fallback, `rafThrottle()` for scroll/resize handlers, `benchmark()` and `measurePerformance()` profiling helpers
+- ~~Print stylesheet for clean printed output~~ — `@media print` rules hiding toolbar/menubar/statusbar/modals, clean typography with page-break-after/avoid on headings, orphans/widows control, break-inside avoidance for tables/images/code, link URL display via `::after`, print-friendly code blocks and tables
+- ~~Cross-browser testing matrix: Chrome, Firefox, Safari, Edge (latest 2 versions)~~ — Playwright config with 6 projects (Chromium, Firefox, WebKit, Edge, Mobile Chrome, Mobile Safari), parallel execution, retry on CI, trace on first retry
 - ~~XSS-hardened sanitizer with configurable allowlists and deny-by-default~~
 - ~~Error boundaries: `EditorErrorBoundary` wraps the editor, `onError` callback for error reporting~~
-- Automated performance benchmarks: track keystroke latency, paste speed, and render time per release
+- ~~Automated performance benchmarks: track keystroke latency, paste speed, and render time per release~~ — `benchmark(label, fn, iterations)` returns mean/median/min/max/p95 stats, `measurePerformance()` wrapper with console.debug output
 
 ## Performance Optimizations
 
@@ -225,6 +224,14 @@ Features with the highest user demand and broadest impact on the editing experie
 - Comment sidebar panel showing all threads with jump-to-location
 - @mention support in comment bodies with configurable user list
 - Comment-only mode: users can annotate but not edit content
+
+## Custom Theme Authoring & Theme Builder
+
+- Interactive theme builder tool: visual editor for CSS custom properties with live preview
+- Custom theme authoring guide with step-by-step documentation
+- Theme export/import: save custom themes as JSON and share across projects
+- Theme presets: community-contributed themes installable via npm or config
+- Contrast checker: validate text/background color combinations against WCAG AA/AAA
 
 ## Expanded Plugin Architecture
 

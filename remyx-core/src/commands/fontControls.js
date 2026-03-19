@@ -1,31 +1,61 @@
 /**
- * Font formatting commands.
+ * CSP-compatible font formatting commands.
  *
- * **Deprecation notice:** Several commands in this module use `document.execCommand()`,
- * which is deprecated by the W3C and may be removed from browsers in the future.
- * Affected commands: `fontFamily` (execCommand 'fontName'), `foreColor`, `backColor`
- * (execCommand 'hiliteColor'/'backColor').
- *
- * Migration path: Replace with Selection/Range-based span wrapping (similar to
- * the `fontSize` command which already uses this approach). The Clipboard API
- * should replace execCommand('cut'/'copy') in useContextMenu.js.
- *
- * Current browser support for execCommand remains broad (as of 2026), so this is
- * not an urgent issue, but should be addressed in a future major version.
+ * All commands use Selection/Range-based span wrapping instead of the
+ * deprecated `document.execCommand()` API. This eliminates CSP violations
+ * and ensures forward compatibility with browsers removing execCommand.
  */
+
+/**
+ * Wraps the current selection in a span with the given style property/value.
+ * If already wrapped in a span with that property, updates the value.
+ */
+function wrapWithStyle(engine, property, value) {
+  if (!value) return
+  const sel = engine.selection.getSelection()
+  if (!sel || sel.rangeCount === 0) return
+  const range = sel.getRangeAt(0)
+  if (range.collapsed) return
+
+  // Check if already wrapped in a styled span
+  const parent = engine.selection.getParentElement()
+  if (parent && parent.tagName === 'SPAN' && parent.style[property]) {
+    parent.style[property] = value
+    return
+  }
+
+  const span = document.createElement('span')
+  span.style[property] = value
+
+  try {
+    range.surroundContents(span)
+  } catch {
+    const fragment = range.extractContents()
+    span.appendChild(fragment)
+    range.insertNode(span)
+  }
+}
+
+/**
+ * Get the computed style value for a CSS property from the current selection.
+ */
+function getSelectionStyle(engine, property) {
+  const parent = engine.selection.getParentElement()
+  if (!parent) return false
+  try {
+    return window.getComputedStyle(parent)[property] || false
+  } catch {
+    return false
+  }
+}
+
 export function registerFontCommands(engine) {
   engine.commands.register('fontFamily', {
     execute(eng, family) {
-      if (!family) return
-      document.execCommand('fontName', false, family)
+      wrapWithStyle(eng, 'fontFamily', family)
     },
-    isActive() {
-      try {
-        const val = document.queryCommandValue('fontName')
-        return val || false
-      } catch {
-        return false
-      }
+    isActive(eng) {
+      return getSelectionStyle(eng, 'fontFamily')
     },
     meta: { icon: 'fontFamily', tooltip: 'Font Family' },
   })
@@ -35,65 +65,27 @@ export function registerFontCommands(engine) {
       if (!size) return
       // Validate numeric value
       if (!/^\d+(\.\d+)?(px|pt|em|rem|%)$/.test(size)) return
-      // execCommand fontSize uses 1-7 scale, so we use spans instead
-      const sel = eng.selection.getSelection()
-      if (!sel || sel.rangeCount === 0) return
-      const range = sel.getRangeAt(0)
-
-      if (range.collapsed) return
-
-      // Check if already wrapped in a font-size span
-      const parent = eng.selection.getParentElement()
-      if (parent && parent.tagName === 'SPAN' && parent.style.fontSize) {
-        parent.style.fontSize = size
-        return
-      }
-
-      const span = document.createElement('span')
-      span.style.fontSize = size
-
-      try {
-        range.surroundContents(span)
-      } catch {
-        const fragment = range.extractContents()
-        span.appendChild(fragment)
-        range.insertNode(span)
-      }
+      wrapWithStyle(eng, 'fontSize', size)
     },
     meta: { icon: 'fontSize', tooltip: 'Font Size' },
   })
 
   engine.commands.register('foreColor', {
     execute(eng, color) {
-      if (!color) return
-      document.execCommand('foreColor', false, color)
+      wrapWithStyle(eng, 'color', color)
     },
-    isActive() {
-      try {
-        return document.queryCommandValue('foreColor') || false
-      } catch {
-        return false
-      }
+    isActive(eng) {
+      return getSelectionStyle(eng, 'color')
     },
     meta: { icon: 'foreColor', tooltip: 'Text Color' },
   })
 
   engine.commands.register('backColor', {
     execute(eng, color) {
-      if (!color) return
-      // hiliteColor works on most browsers, backColor on IE
-      try {
-        document.execCommand('hiliteColor', false, color)
-      } catch {
-        document.execCommand('backColor', false, color)
-      }
+      wrapWithStyle(eng, 'backgroundColor', color)
     },
-    isActive() {
-      try {
-        return document.queryCommandValue('backColor') || false
-      } catch {
-        return false
-      }
+    isActive(eng) {
+      return getSelectionStyle(eng, 'backgroundColor')
     },
     meta: { icon: 'backColor', tooltip: 'Background Color' },
   })

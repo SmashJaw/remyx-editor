@@ -7,8 +7,6 @@ describe('registerHeadingCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
-    document.queryCommandState = vi.fn().mockReturnValue(false)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -32,6 +30,7 @@ describe('registerHeadingCommands', () => {
         wrapWith: vi.fn(),
         unwrap: vi.fn(),
         getParentBlock: vi.fn(),
+        setRange: vi.fn(),
       },
       sanitizer: { sanitize: vi.fn(html => html) },
       getHTML: vi.fn().mockReturnValue('<p>test</p>'),
@@ -57,32 +56,55 @@ describe('registerHeadingCommands', () => {
     expect(mockEngine.commands.register).toHaveBeenCalledTimes(8)
   })
 
-  it('should execute heading with paragraph level', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should convert block to <p> when heading execute called with paragraph level', () => {
+    const h2 = document.createElement('h2')
+    h2.textContent = 'Title'
+    mockEngine.element.appendChild(h2)
+
+    mockEngine.selection.getParentBlock.mockReturnValue(h2)
     commands.heading.execute(mockEngine, 'p')
-    expect(spy).toHaveBeenCalledWith('formatBlock', false, '<p>')
-    spy.mockRestore()
+
+    const p = mockEngine.element.querySelector('p')
+    expect(p).not.toBeNull()
+    expect(p.textContent).toBe('Title')
+    expect(mockEngine.element.querySelector('h2')).toBeNull()
   })
 
-  it('should execute heading with numeric level', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+  it('should convert block to <h2> when heading execute called with numeric level', () => {
+    const p = document.createElement('p')
+    p.textContent = 'Content'
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentBlock.mockReturnValue(p)
     commands.heading.execute(mockEngine, 2)
-    expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
-    spy.mockRestore()
+
+    const h2 = mockEngine.element.querySelector('h2')
+    expect(h2).not.toBeNull()
+    expect(h2.textContent).toBe('Content')
   })
 
-  it('should execute individual heading commands', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.h3.execute()
-    expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h3>')
-    spy.mockRestore()
+  it('should convert block to <h3> when h3 command execute is called', () => {
+    const p = document.createElement('p')
+    p.textContent = 'Content'
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentBlock.mockReturnValue(p)
+    commands.h3.execute(mockEngine)
+
+    expect(mockEngine.element.querySelector('h3')).not.toBeNull()
+    expect(mockEngine.element.querySelector('h3').textContent).toBe('Content')
   })
 
-  it('should execute paragraph command', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.paragraph.execute()
-    expect(spy).toHaveBeenCalledWith('formatBlock', false, '<p>')
-    spy.mockRestore()
+  it('should convert block to <p> when paragraph command execute is called', () => {
+    const h1 = document.createElement('h1')
+    h1.textContent = 'Title'
+    mockEngine.element.appendChild(h1)
+
+    mockEngine.selection.getParentBlock.mockReturnValue(h1)
+    commands.paragraph.execute(mockEngine)
+
+    expect(mockEngine.element.querySelector('p')).not.toBeNull()
+    expect(mockEngine.element.querySelector('h1')).toBeNull()
   })
 
   it('should return heading tag when isActive and block is a heading', () => {
@@ -128,24 +150,39 @@ describe('registerHeadingCommands', () => {
     })
 
     it('should apply baseHeadingLevel offset to heading command', () => {
-      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+      const p = document.createElement('p')
+      p.textContent = 'Content'
+      mockEngine.element.appendChild(p)
+
+      mockEngine.selection.getParentBlock.mockReturnValue(p)
       commands.heading.execute(mockEngine, 1)
-      expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
-      spy.mockRestore()
+
+      // baseHeadingLevel=2, logical level=1 => effective=2
+      expect(mockEngine.element.querySelector('h2')).not.toBeNull()
     })
 
     it('should clamp heading level to 6', () => {
-      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+      const p = document.createElement('p')
+      p.textContent = 'Content'
+      mockEngine.element.appendChild(p)
+
+      mockEngine.selection.getParentBlock.mockReturnValue(p)
       commands.heading.execute(mockEngine, 6)
-      expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h6>')
-      spy.mockRestore()
+
+      // baseHeadingLevel=2, logical level=6 => clamped to h6
+      expect(mockEngine.element.querySelector('h6')).not.toBeNull()
     })
 
     it('should apply offset to individual heading commands', () => {
-      const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-      commands.h1.execute()
-      expect(spy).toHaveBeenCalledWith('formatBlock', false, '<h2>')
-      spy.mockRestore()
+      const p = document.createElement('p')
+      p.textContent = 'Content'
+      mockEngine.element.appendChild(p)
+
+      mockEngine.selection.getParentBlock.mockReturnValue(p)
+      commands.h1.execute(mockEngine)
+
+      // h1 with baseHeadingLevel=2 => effective h2
+      expect(mockEngine.element.querySelector('h2')).not.toBeNull()
     })
   })
 })

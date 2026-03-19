@@ -7,7 +7,6 @@ describe('registerBlockCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -31,6 +30,7 @@ describe('registerBlockCommands', () => {
         wrapWith: vi.fn(),
         unwrap: vi.fn(),
         getClosestElement: vi.fn(),
+        getParentBlock: vi.fn(),
         setRange: vi.fn(),
       },
       sanitizer: { sanitize: vi.fn(html => html) },
@@ -60,13 +60,19 @@ describe('registerBlockCommands', () => {
     expect(commands.codeBlock.shortcut).toBe('mod+shift+c')
   })
 
-  it('should create blockquote via execCommand when not in one', () => {
+  it('should wrap block in <blockquote> when not in one', () => {
+    const p = document.createElement('p')
+    p.textContent = 'content'
+    mockEngine.element.appendChild(p)
+
     mockEngine.selection.getClosestElement.mockReturnValue(null)
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
+    mockEngine.selection.getParentBlock.mockReturnValue(p)
 
     commands.blockquote.execute(mockEngine)
-    expect(spy).toHaveBeenCalledWith('formatBlock', false, '<blockquote>')
-    spy.mockRestore()
+    const bq = mockEngine.element.querySelector('blockquote')
+    expect(bq).not.toBeNull()
+    expect(bq.querySelector('p')).not.toBeNull()
+    expect(bq.querySelector('p').textContent).toBe('content')
   })
 
   it('should unwrap blockquote when already in one', () => {
@@ -127,11 +133,18 @@ describe('registerBlockCommands', () => {
     expect(commands.codeBlock.isActive(mockEngine)).toBe(true)
   })
 
-  it('should execute horizontalRule with insertHorizontalRule', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.horizontalRule.execute()
-    expect(spy).toHaveBeenCalledWith('insertHorizontalRule', false, null)
-    spy.mockRestore()
+  it('should insert <hr> when executing horizontalRule', () => {
+    const p = document.createElement('p')
+    p.textContent = 'text'
+    mockEngine.element.appendChild(p)
+
+    const range = document.createRange()
+    range.selectNodeContents(p)
+    range.collapse(true)
+    mockEngine.selection.getRange.mockReturnValue(range)
+
+    commands.horizontalRule.execute(mockEngine)
+    expect(mockEngine.element.querySelector('hr')).not.toBeNull()
   })
 
   it('should have correct meta for all block commands', () => {

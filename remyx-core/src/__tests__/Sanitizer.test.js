@@ -262,4 +262,76 @@ describe('Sanitizer', () => {
       expect(result).not.toContain('<input')
     })
   })
+
+  describe('iframe domain allowlist', () => {
+    it('should allow YouTube iframe', () => {
+      const html = '<iframe src="https://www.youtube.com/embed/abc123"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).toContain('<iframe')
+      expect(result).toContain('youtube.com')
+    })
+
+    it('should allow youtube-nocookie.com iframe', () => {
+      const html = '<iframe src="https://www.youtube-nocookie.com/embed/abc123"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).toContain('<iframe')
+    })
+
+    it('should allow Vimeo iframe', () => {
+      const html = '<iframe src="https://player.vimeo.com/video/123456"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).toContain('<iframe')
+      expect(result).toContain('vimeo.com')
+    })
+
+    it('should allow Dailymotion iframe', () => {
+      const html = '<iframe src="https://www.dailymotion.com/embed/video/abc"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).toContain('<iframe')
+    })
+
+    it('should remove iframe with disallowed domain', () => {
+      const html = '<iframe src="https://evil.example.com/attack"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).not.toContain('<iframe')
+    })
+
+    it('should remove iframe with no src', () => {
+      const html = '<iframe></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).not.toContain('<iframe')
+    })
+
+    it('should remove iframe with http:// src (non-HTTPS)', () => {
+      const html = '<iframe src="http://www.youtube.com/embed/abc123"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).not.toContain('<iframe')
+    })
+
+    it('should remove iframe with javascript: src', () => {
+      const html = '<iframe src="javascript:alert(1)"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).not.toContain('<iframe')
+    })
+
+    it('should remove iframe with data: src', () => {
+      const html = '<iframe src="data:text/html,<script>alert(1)</script>"></iframe>'
+      const result = sanitizer.sanitize(html)
+      expect(result).not.toContain('<iframe')
+    })
+
+    it('should accept custom iframeAllowedDomains', () => {
+      const custom = new Sanitizer({ iframeAllowedDomains: ['example.com'] })
+      const allowed = '<iframe src="https://example.com/page"></iframe>'
+      const blocked = '<iframe src="https://www.youtube.com/embed/abc"></iframe>'
+      expect(custom.sanitize(allowed)).toContain('<iframe')
+      expect(custom.sanitize(blocked)).not.toContain('<iframe')
+    })
+
+    it('should allow subdomains of allowed domains', () => {
+      const custom = new Sanitizer({ iframeAllowedDomains: ['example.com'] })
+      const html = '<iframe src="https://sub.example.com/page"></iframe>'
+      expect(custom.sanitize(html)).toContain('<iframe')
+    })
+  })
 })

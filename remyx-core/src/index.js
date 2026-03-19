@@ -38,7 +38,7 @@ export { createPlugin } from './plugins/createPlugin.js'
 export { WordCountPlugin } from './plugins/builtins/WordCountPlugin.js'
 export { AutolinkPlugin } from './plugins/builtins/AutolinkPlugin.js'
 export { PlaceholderPlugin } from './plugins/builtins/PlaceholderPlugin.js'
-export { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize } from './plugins/builtins/syntaxHighlight/index.js'
+export { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize, registerLanguage, unregisterLanguage, runRules } from './plugins/builtins/syntaxHighlight/index.js'
 export { TablePlugin } from './plugins/builtins/tableFeatures/index.js'
 export { evaluateTableFormulas } from './commands/tables.js'
 
@@ -51,6 +51,9 @@ export { loadGoogleFonts, removeFonts, addFonts } from './utils/fontConfig.js'
 export { formatHTML } from './utils/formatHTML.js'
 export { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from './utils/dom.js'
 export { isMac, getModKey } from './utils/platform.js'
+export { detectTextDirection, applyAutoDirection, applyAutoDirectionAll, LOGICAL_PROPERTIES } from './utils/rtl.js'
+export { t, setLocale, getLocale, registerLocale, unregisterLocale, getRegisteredLocales } from './i18n/index.js'
+export { batchDOMMutations, scheduleIdleTask, cancelIdleTask, rafThrottle, measurePerformance, benchmark } from './utils/performance.js'
 
 // Theme configuration
 export { createTheme, THEME_VARIABLES } from './utils/themeConfig.js'

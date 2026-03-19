@@ -63,7 +63,17 @@ export function addFonts(fonts, fontsToAdd, options = {}) {
  * // With specific weights
  * loadGoogleFonts(['Roboto:wght@400;700', 'Open Sans:ital,wght@0,400;1,400'])
  */
-export function loadGoogleFonts(fontFamilies) {
+/**
+ * @typedef {Object} LoadGoogleFontsOptions
+ * @property {string} [integrity] - Subresource Integrity (SRI) hash for the stylesheet
+ *   (e.g. 'sha384-abc123...'). When provided, the browser verifies the fetched
+ *   stylesheet matches this hash before applying it. Generate with:
+ *   `openssl dgst -sha384 -binary <file> | openssl base64 -A`
+ * @property {string} [crossOrigin='anonymous'] - CORS attribute for the link element.
+ *   Must be set when using SRI. Defaults to 'anonymous'.
+ */
+
+export function loadGoogleFonts(fontFamilies, options = {}) {
   if (!fontFamilies || fontFamilies.length === 0) return null
   if (typeof document === 'undefined') return null
 
@@ -85,6 +95,16 @@ export function loadGoogleFonts(fontFamilies) {
   link.rel = 'stylesheet'
   link.href = url
   link.dataset.remyxFonts = 'true'
+
+  // Subresource Integrity (SRI) — verify stylesheet hasn't been tampered with
+  if (options.integrity) {
+    link.integrity = options.integrity
+    link.crossOrigin = options.crossOrigin || 'anonymous'
+  } else {
+    // Always set crossorigin for Google Fonts (required for CORS font loading)
+    link.crossOrigin = options.crossOrigin || 'anonymous'
+  }
+
   document.head.appendChild(link)
 
   return link

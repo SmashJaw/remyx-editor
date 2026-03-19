@@ -345,42 +345,44 @@ describe('Selection', () => {
   })
 
   describe('insertHTML', () => {
-    it('should call document.execCommand with insertHTML', () => {
-      // jsdom does not define execCommand, so define it for this test
-      const mockExecCommand = vi.fn().mockReturnValue(true)
-      document.execCommand = mockExecCommand
+    it('should insert HTML content via Range-based DOM manipulation', () => {
+      selectTextInEditor(editor, 0, 5) // select "Hello"
       selection.insertHTML('<b>test</b>')
-      expect(mockExecCommand).toHaveBeenCalledWith('insertHTML', false, '<b>test</b>')
-      delete document.execCommand
+      expect(editor.querySelector('b')).not.toBeNull()
+      expect(editor.querySelector('b').textContent).toBe('test')
     })
 
     it('should call sanitizer.sanitize when a sanitizer is set', () => {
       const mockSanitizer = { sanitize: vi.fn((html) => '<b>clean</b>') }
-      const mockExecCommand = vi.fn().mockReturnValue(true)
-      document.execCommand = mockExecCommand
 
       selection.setSanitizer(mockSanitizer)
+      selectTextInEditor(editor, 0, 5) // select "Hello"
       selection.insertHTML('<script>alert(1)</script><b>clean</b>')
 
       expect(mockSanitizer.sanitize).toHaveBeenCalledWith('<script>alert(1)</script><b>clean</b>')
-      expect(mockExecCommand).toHaveBeenCalledWith('insertHTML', false, '<b>clean</b>')
+      expect(editor.querySelector('b')).not.toBeNull()
+      expect(editor.querySelector('b').textContent).toBe('clean')
 
       // Clean up
       selection._sanitizer = undefined
-      delete document.execCommand
     })
 
     it('should use raw html when no sanitizer is set (backward compat)', () => {
-      const mockExecCommand = vi.fn().mockReturnValue(true)
-      document.execCommand = mockExecCommand
-
       // Ensure no sanitizer is attached
       selection._sanitizer = undefined
-      const rawHtml = '<img src=x onerror=alert(1)>'
-      selection.insertHTML(rawHtml)
+      selectTextInEditor(editor, 0, 5) // select "Hello"
+      selection.insertHTML('<span class="raw">inserted</span>')
 
-      expect(mockExecCommand).toHaveBeenCalledWith('insertHTML', false, rawHtml)
-      delete document.execCommand
+      const span = editor.querySelector('span.raw')
+      expect(span).not.toBeNull()
+      expect(span.textContent).toBe('inserted')
+    })
+
+    it('should do nothing when no selection exists', () => {
+      window.getSelection().removeAllRanges()
+      const before = editor.innerHTML
+      selection.insertHTML('<b>test</b>')
+      expect(editor.innerHTML).toBe(before)
     })
   })
 

@@ -21,9 +21,13 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Autosave** — Periodic + debounced saves with crash recovery banner, visual save-status indicator, pluggable storage (localStorage, sessionStorage, filesystem, AWS S3/GCP/cloud HTTP, or custom)
 - **Keyboard shortcuts** — 17+ default shortcuts, customizable via API
 - **Accessibility** — Skip navigation, focus trapping in modals, ARIA roles, keyboard-navigable toolbar
-- **Code block syntax highlighting** — 11 languages (JS/TS, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, HTML) with auto-detection, theme-aware token colors, and language selector dropdown
+- **Code block syntax highlighting** — 11 languages (JS/TS, Python, CSS, SQL, JSON, Bash, Rust, Go, Java, HTML) with auto-detection, theme-aware token colors, language selector dropdown, line numbers toggle, copy-to-clipboard button, inline code highlighting, and extensible language registry
 - **Enhanced tables** — Sortable columns, multi-column sort, filterable rows, inline formulas (SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT), cell formatting (number, currency, percentage, date), column/row resize handles, sticky header rows, and copy/paste interop with Excel and Google Sheets
-- **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention
+- **RTL support** — Automatic text direction detection (`detectTextDirection`), per-block `dir` attribute, CSS logical properties for lists and blockquotes
+- **Internationalization (i18n)** — 120+ externalized strings, `t()` with interpolation, `registerLocale()` for custom translations, partial locale packs with English fallback
+- **Print stylesheet** — Clean printed output with hidden chrome, page-break control, link URLs, orphan/widow handling
+- **Security** — XSS-safe HTML sanitizer, dangerous tag removal, event handler blocking, CSS injection prevention, iframe domain allowlist (YouTube/Vimeo/Dailymotion), CSP-compatible (zero `execCommand`/`document.write`), SRI hash support for CDN assets
+- **Performance** — DOM mutation batching, `requestIdleCallback` scheduling, rAF-throttled handlers, operation coalescing in undo/redo, built-in benchmarking tools
 - **Tree-shakeable** — Import only the commands and utilities you need
 
 ## Packages

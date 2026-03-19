@@ -7,7 +7,6 @@ describe('registerListCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -31,6 +30,8 @@ describe('registerListCommands', () => {
         wrapWith: vi.fn(),
         unwrap: vi.fn(),
         getClosestElement: vi.fn(),
+        getParentBlock: vi.fn(),
+        setRange: vi.fn(),
       },
       sanitizer: { sanitize: vi.fn(html => html) },
       getHTML: vi.fn().mockReturnValue('<p>test</p>'),
@@ -56,27 +57,67 @@ describe('registerListCommands', () => {
     expect(commands.outdent).toBeDefined()
   })
 
-  it('should execute orderedList with insertOrderedList', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.orderedList.execute()
-    expect(spy).toHaveBeenCalledWith('insertOrderedList', false, null)
-    spy.mockRestore()
+  it('should wrap block in <ol><li> when executing orderedList on a paragraph', () => {
+    const p = document.createElement('p')
+    p.textContent = 'Item text'
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getClosestElement.mockReturnValue(null)
+    mockEngine.selection.getParentBlock.mockReturnValue(p)
+
+    commands.orderedList.execute(mockEngine)
+    const ol = mockEngine.element.querySelector('ol')
+    expect(ol).not.toBeNull()
+    expect(ol.querySelector('li').textContent).toBe('Item text')
   })
 
-  it('should execute unorderedList with insertUnorderedList', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.unorderedList.execute()
-    expect(spy).toHaveBeenCalledWith('insertUnorderedList', false, null)
-    spy.mockRestore()
+  it('should unwrap list when executing orderedList on existing ol', () => {
+    const ol = document.createElement('ol')
+    const li = document.createElement('li')
+    li.textContent = 'Item'
+    ol.appendChild(li)
+    mockEngine.element.appendChild(ol)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'ol') return ol
+      return null
+    })
+
+    commands.orderedList.execute(mockEngine)
+    expect(mockEngine.element.querySelector('ol')).toBeNull()
+    expect(mockEngine.element.querySelector('p')).not.toBeNull()
   })
 
-  it('should execute indent and outdent', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.indent.execute()
-    expect(spy).toHaveBeenCalledWith('indent', false, null)
-    commands.outdent.execute()
-    expect(spy).toHaveBeenCalledWith('outdent', false, null)
-    spy.mockRestore()
+  it('should wrap block in <ul><li> when executing unorderedList on a paragraph', () => {
+    const p = document.createElement('p')
+    p.textContent = 'Item text'
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getClosestElement.mockReturnValue(null)
+    mockEngine.selection.getParentBlock.mockReturnValue(p)
+
+    commands.unorderedList.execute(mockEngine)
+    const ul = mockEngine.element.querySelector('ul')
+    expect(ul).not.toBeNull()
+    expect(ul.querySelector('li').textContent).toBe('Item text')
+  })
+
+  it('should convert ul to ol when executing orderedList on existing ul', () => {
+    const ul = document.createElement('ul')
+    const li = document.createElement('li')
+    li.textContent = 'Item'
+    ul.appendChild(li)
+    mockEngine.element.appendChild(ul)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'ol') return null
+      if (tag === 'ul') return ul
+      return null
+    })
+
+    commands.orderedList.execute(mockEngine)
+    expect(mockEngine.element.querySelector('ul')).toBeNull()
+    expect(mockEngine.element.querySelector('ol')).not.toBeNull()
   })
 
   it('should have correct shortcuts for ordered and unordered lists', () => {
@@ -163,5 +204,49 @@ describe('registerListCommands', () => {
     expect(commands.taskList.meta).toEqual({ icon: 'taskList', tooltip: 'Task List' })
     expect(commands.indent.meta).toEqual({ icon: 'indent', tooltip: 'Increase Indent' })
     expect(commands.outdent.meta).toEqual({ icon: 'outdent', tooltip: 'Decrease Indent' })
+  })
+
+  it('should indent a list item into previous sibling', () => {
+    const ul = document.createElement('ul')
+    const li1 = document.createElement('li')
+    li1.textContent = 'First'
+    const li2 = document.createElement('li')
+    li2.textContent = 'Second'
+    ul.appendChild(li1)
+    ul.appendChild(li2)
+    mockEngine.element.appendChild(ul)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'li') return li2
+      return null
+    })
+
+    commands.indent.execute(mockEngine)
+    const subList = li1.querySelector('ul')
+    expect(subList).not.toBeNull()
+    expect(subList.contains(li2)).toBe(true)
+  })
+
+  it('should outdent a nested list item', () => {
+    const ul = document.createElement('ul')
+    const li1 = document.createElement('li')
+    li1.textContent = 'First'
+    const subUl = document.createElement('ul')
+    const li2 = document.createElement('li')
+    li2.textContent = 'Nested'
+    subUl.appendChild(li2)
+    li1.appendChild(subUl)
+    ul.appendChild(li1)
+    mockEngine.element.appendChild(ul)
+
+    mockEngine.selection.getClosestElement.mockImplementation((tag) => {
+      if (tag === 'li') return li2
+      return null
+    })
+
+    commands.outdent.execute(mockEngine)
+    // li2 should now be a direct child of ul, after li1
+    expect(ul.contains(li2)).toBe(true)
+    expect(li2.parentElement).toBe(ul)
   })
 })

@@ -7,7 +7,6 @@ describe('registerAlignmentCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -55,32 +54,44 @@ describe('registerAlignmentCommands', () => {
     expect(commands.alignJustify).toBeDefined()
   })
 
-  it('should execute alignLeft with justifyLeft', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.alignLeft.execute()
-    expect(spy).toHaveBeenCalledWith('justifyLeft', false, null)
-    spy.mockRestore()
+  it('should set textAlign to left when executing alignLeft', () => {
+    const block = document.createElement('p')
+    block.textContent = 'text'
+    mockEngine.element.appendChild(block)
+    mockEngine.selection.getParentBlock.mockReturnValue(block)
+
+    commands.alignLeft.execute(mockEngine)
+    expect(block.style.textAlign).toBe('left')
   })
 
-  it('should execute alignCenter with justifyCenter', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.alignCenter.execute()
-    expect(spy).toHaveBeenCalledWith('justifyCenter', false, null)
-    spy.mockRestore()
+  it('should set textAlign to center when executing alignCenter', () => {
+    const block = document.createElement('p')
+    block.textContent = 'text'
+    mockEngine.element.appendChild(block)
+    mockEngine.selection.getParentBlock.mockReturnValue(block)
+
+    commands.alignCenter.execute(mockEngine)
+    expect(block.style.textAlign).toBe('center')
   })
 
-  it('should execute alignRight with justifyRight', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.alignRight.execute()
-    expect(spy).toHaveBeenCalledWith('justifyRight', false, null)
-    spy.mockRestore()
+  it('should set textAlign to right when executing alignRight', () => {
+    const block = document.createElement('p')
+    block.textContent = 'text'
+    mockEngine.element.appendChild(block)
+    mockEngine.selection.getParentBlock.mockReturnValue(block)
+
+    commands.alignRight.execute(mockEngine)
+    expect(block.style.textAlign).toBe('right')
   })
 
-  it('should execute alignJustify with justifyFull', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.alignJustify.execute()
-    expect(spy).toHaveBeenCalledWith('justifyFull', false, null)
-    spy.mockRestore()
+  it('should set textAlign to justify when executing alignJustify', () => {
+    const block = document.createElement('p')
+    block.textContent = 'text'
+    mockEngine.element.appendChild(block)
+    mockEngine.selection.getParentBlock.mockReturnValue(block)
+
+    commands.alignJustify.execute(mockEngine)
+    expect(block.style.textAlign).toBe('justify')
   })
 
   it('should return true for alignLeft isActive when no alignment set', () => {

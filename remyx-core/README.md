@@ -901,10 +901,13 @@ import { PlaceholderPlugin } from '@remyxjs/core';
 engine.plugins.register(PlaceholderPlugin('Start writing...'));
 ```
 
-**SyntaxHighlightPlugin** — Automatic syntax highlighting for `<pre><code>` blocks. Detects language from `data-language` attribute or auto-detects from content. Highlights using `.rmx-syn-*` CSS classes that adapt to all built-in themes. Provides `setCodeLanguage` and `getCodeLanguage` commands.
+**SyntaxHighlightPlugin** — Automatic syntax highlighting for `<pre><code>` blocks. Detects language from `data-language` attribute or auto-detects from content. Highlights using `.rmx-syn-*` CSS classes that adapt to all built-in themes. Includes line numbers toggle, copy-to-clipboard button, inline code highlighting, and an extensible language registry.
 
 ```js
-import { SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, detectLanguage, tokenize } from '@remyxjs/core';
+import {
+  SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, detectLanguage, tokenize,
+  registerLanguage, unregisterLanguage, runRules,
+} from '@remyxjs/core';
 
 // Register the plugin
 engine.plugins.register(SyntaxHighlightPlugin());
@@ -914,6 +917,9 @@ engine.executeCommand('setCodeLanguage', { language: 'python' });
 
 // Get language of the focused code block
 const lang = engine.executeCommand('getCodeLanguage'); // 'python' or null
+
+// Toggle line numbers on the focused code block
+engine.executeCommand('toggleLineNumbers');
 
 // Available languages (for building UI dropdowns)
 console.log(SUPPORTED_LANGUAGES);
@@ -929,6 +935,58 @@ const tokens = tokenize('const x = 42', 'javascript');
 ```
 
 **Supported languages:** JavaScript/TypeScript, Python, CSS, SQL, JSON, Bash/Shell, Rust, Go, Java, HTML/XML. Language aliases are supported (e.g., `js`, `ts`, `tsx`, `py`, `sh`, `rs`, `golang`).
+
+#### Line numbers
+
+Add the `data-line-numbers` attribute to any `<pre>` element (or use the `toggleLineNumbers` command) to show a line number gutter. Line numbers update automatically when the code content changes.
+
+```js
+engine.executeCommand('toggleLineNumbers'); // Toggle on the focused code block
+```
+
+#### Copy-to-clipboard
+
+Every code block automatically gets a copy button (top-right corner, visible on hover). The button uses the async Clipboard API with an `execCommand('copy')` fallback for insecure contexts. A ✓ checkmark appears briefly after a successful copy.
+
+#### Inline code highlighting
+
+Add a `data-language` attribute to inline `<code>` elements (not inside `<pre>`) for mini syntax highlighting:
+
+```html
+<code data-language="js">const x = 42</code>
+```
+
+The inline code element will be tokenized with the same `rmx-syn-*` classes used by code blocks.
+
+#### Custom language registration
+
+Register custom language tokenizers at runtime. The new language immediately becomes available for highlighting and appears in `SUPPORTED_LANGUAGES`.
+
+```js
+import { registerLanguage, unregisterLanguage, runRules } from '@remyxjs/core';
+
+// Define tokenizer rules (same format used by all built-in tokenizers)
+const RUBY_RULES = [
+  [/#[^\n]*/g, 'rmx-syn-comment'],
+  [/"(?:[^"\\]|\\.)*"/g, 'rmx-syn-string'],
+  [/'(?:[^'\\]|\\.)*'/g, 'rmx-syn-string'],
+  [/\b(?:def|end|class|module|if|else|elsif|unless|do|while|for|return|yield|begin|rescue|ensure)\b/g, 'rmx-syn-keyword'],
+  [/\b(?:puts|print|require|include|attr_accessor|attr_reader)\b/g, 'rmx-syn-builtin'],
+  [/:\w+/g, 'rmx-syn-entity'],
+  [/\b\d[\d_.]*\b/g, 'rmx-syn-number'],
+];
+
+// Register with the built-in rule engine
+registerLanguage('ruby', 'Ruby', (code) => runRules(code, RUBY_RULES), ['rb']);
+
+// Now works everywhere
+tokenize('puts "hello"', 'ruby');          // tokenize API
+tokenize('puts "hello"', 'rb');            // alias works too
+engine.executeCommand('setCodeLanguage', { language: 'ruby' });  // in editor
+
+// Remove later if needed
+unregisterLanguage('ruby', ['rb']);
+```
 
 **TablePlugin** — Enhanced table features including column/row resize handles, click-to-sort on header cells (single + multi-column with Shift), filterable rows with per-column dropdown UI, inline cell formulas with a recursive-descent expression engine, cell formatting (number, currency, percentage, date), and sticky header rows. Uses MutationObserver to auto-detect tables and attach functionality.
 
@@ -1075,7 +1133,7 @@ The sanitizer runs on every content read (`getHTML()`) and write (`setHTML()`), 
 // Default behavior — blocks dangerous content automatically
 engine.getHTML(); // always sanitized
 
-// Customize allowed tags and styles via engine options
+// Customize allowed tags, styles, and iframe domains via engine options
 new EditorEngine(element, {
   sanitize: {
     allowedTags: {
@@ -1093,6 +1151,12 @@ new EditorEngine(element, {
       'margin', 'padding', 'border', 'width', 'height',
       // ... see schema.js for full defaults
     ],
+    // Restrict which domains can be embedded via iframe
+    iframeAllowedDomains: [
+      'www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com',
+      'player.vimeo.com', 'www.dailymotion.com',
+      // Add your own domains here
+    ],
   },
 });
 ```
@@ -1104,8 +1168,11 @@ new EditorEngine(element, {
 - `javascript:` and `vbscript:` URLs blocked
 - CSS injection blocked: `expression()`, `@import`, `behavior:`, `javascript:`
 - `<input>` restricted to `type="checkbox"` only
+- `<iframe>` src restricted to allowed domains only (YouTube, Vimeo, Dailymotion by default; HTTPS only)
 - `contenteditable` attribute stripped
 - SVG data URIs blocked in image sources
+- CSP-compatible: zero `document.execCommand` or `document.write` calls in source code
+- SRI hash support for `loadGoogleFonts()` to verify CDN asset integrity
 
 ## Utilities
 
@@ -1181,6 +1248,12 @@ import { loadGoogleFonts, addFonts, removeFonts } from '@remyxjs/core';
 
 // Load Google Fonts (injects <link> into <head>)
 loadGoogleFonts(['Roboto', 'Open Sans', 'Merriweather']);
+
+// With Subresource Integrity (SRI) hash for security
+loadGoogleFonts(['Roboto'], {
+  integrity: 'sha384-abc123...', // pre-computed hash of the stylesheet
+  crossOrigin: 'anonymous',      // required for SRI (default)
+});
 
 // Modify a font list
 const fonts = ['Arial', 'Georgia', 'Times New Roman'];

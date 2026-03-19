@@ -144,7 +144,7 @@ const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 - **Theming** — light/dark mode, 4 built-in presets (Ocean, Forest, Sunset, Rose), full CSS variable customization
 - **File uploads** — images and attachments via drag-and-drop, paste, or toolbar with pluggable upload handlers (S3, R2, GCS, custom)
 - **Fonts** — custom font lists, Google Fonts auto-loading, and helper functions
-- **Code block syntax highlighting** — 11 languages with auto-detection, theme-aware colors, and language selector dropdown
+- **Code block syntax highlighting** — 11 languages with auto-detection, theme-aware colors, language selector dropdown, line numbers toggle, copy-to-clipboard, inline code highlighting, and extensible language registry
 - **Enhanced tables** — sortable columns, multi-column sort, filterable rows, inline formulas, cell formatting, column/row resize, sticky headers, and Excel/Sheets clipboard interop via `TablePlugin`
 - **Plugins** — `createPlugin()` API with hooks for commands, toolbar items, status bar items, and context menus
 - **Config file** — centralized `defineConfig()` with named editor configurations and provider-based sharing
@@ -835,7 +835,7 @@ Five built-in plugins are available:
 - **WordCountPlugin** — word/character counts in the status bar
 - **PlaceholderPlugin** — placeholder text when empty
 - **AutolinkPlugin** — auto-converts typed URLs to links
-- **SyntaxHighlightPlugin** — automatic syntax highlighting for code blocks with language detection, theme-aware colors, and `setCodeLanguage`/`getCodeLanguage` commands. When active, a language selector dropdown appears on focused code blocks.
+- **SyntaxHighlightPlugin** — automatic syntax highlighting for code blocks with language detection, theme-aware colors, `setCodeLanguage`/`getCodeLanguage`/`toggleLineNumbers` commands, copy-to-clipboard button, inline `<code>` mini-highlighting, and extensible language registry (`registerLanguage`/`unregisterLanguage`). When active, a language selector dropdown appears on focused code blocks.
 - **TablePlugin** — enhanced table features including column/row resize handles, click-to-sort on header cells (single + multi-column with Shift), per-column filter dropdowns, inline cell formulas (SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT), cell formatting (number, currency, percentage, date), and sticky header rows. Adds 6 new commands: `toggleHeaderRow`, `sortTable`, `filterTable`, `clearTableFilters`, `formatCell`, `evaluateFormulas`. Context menu adds Toggle Header Row, Format Cell options, and Clear Filters when right-clicking in a table.
 
 ```jsx

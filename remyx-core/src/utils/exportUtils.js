@@ -32,9 +32,8 @@ export function exportAsPDF(html, title = 'Document') {
   const safeHtml = _sanitizer.sanitize(html)
   const safeTitle = title.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
-  const doc = iframe.contentDocument || iframe.contentWindow.document
-  doc.open()
-  doc.write(`<!DOCTYPE html>
+  // Build iframe content via srcdoc (CSP-compatible, no document.write)
+  const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
   <title>${safeTitle}</title>
@@ -51,8 +50,8 @@ export function exportAsPDF(html, title = 'Document') {
   </style>
 </head>
 <body>${safeHtml}</body>
-</html>`)
-  doc.close()
+</html>`
+  iframe.srcdoc = htmlContent
 
   // Guard against double-cleanup from concurrent onafterprint and timeout
   let cleaned = false

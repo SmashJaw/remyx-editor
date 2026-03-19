@@ -1,3 +1,6 @@
+/**
+ * CSP-compatible block-level commands using Range-based DOM manipulation.
+ */
 export function registerBlockCommands(engine) {
   engine.commands.register('blockquote', {
     execute(eng) {
@@ -10,7 +13,12 @@ export function registerBlockCommands(engine) {
         }
         parent.removeChild(existing)
       } else {
-        document.execCommand('formatBlock', false, '<blockquote>')
+        // Wrap current block in <blockquote>
+        const block = eng.selection.getParentBlock()
+        if (!block) return
+        const bq = document.createElement('blockquote')
+        block.parentNode.replaceChild(bq, block)
+        bq.appendChild(block)
       }
     },
     isActive(eng) {
@@ -76,8 +84,26 @@ export function registerBlockCommands(engine) {
   })
 
   engine.commands.register('horizontalRule', {
-    execute() {
-      document.execCommand('insertHorizontalRule', false, null)
+    execute(eng) {
+      const range = eng.selection.getRange()
+      if (!range) return
+
+      const hr = document.createElement('hr')
+      range.deleteContents()
+      range.insertNode(hr)
+
+      // Add a paragraph after the hr for continued editing
+      if (!hr.nextSibling || hr.nextSibling.tagName !== 'P') {
+        const p = document.createElement('p')
+        p.innerHTML = '<br>'
+        hr.parentNode.insertBefore(p, hr.nextSibling)
+      }
+
+      // Move cursor after the hr
+      const newRange = document.createRange()
+      newRange.setStartAfter(hr)
+      newRange.collapse(true)
+      eng.selection.setRange(newRange)
     },
     meta: { icon: 'horizontalRule', tooltip: 'Horizontal Rule' },
   })

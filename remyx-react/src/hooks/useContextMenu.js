@@ -96,11 +96,30 @@ export function useContextMenu(engine, editorRef) {
 
     // Always show basic items
     items.push(
-      { label: 'Cut', command: () => document.execCommand('cut') },
-      { label: 'Copy', command: () => document.execCommand('copy') },
+      { label: 'Cut', command: async () => {
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed) {
+          try {
+            await navigator.clipboard.writeText(sel.toString())
+            sel.getRangeAt(0).deleteContents()
+          } catch { /* fallback: no-op in insecure contexts */ }
+        }
+      }},
+      { label: 'Copy', command: async () => {
+        const sel = window.getSelection()
+        if (sel && !sel.isCollapsed) {
+          try { await navigator.clipboard.writeText(sel.toString()) } catch { /* no-op */ }
+        }
+      }},
       { label: 'Paste', command: () => handleContextMenuPaste(engine) },
       { separator: true },
-      { label: 'Select All', command: () => document.execCommand('selectAll') },
+      { label: 'Select All', command: () => {
+        const sel = window.getSelection()
+        const range = document.createRange()
+        range.selectNodeContents(engine.element)
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }},
     )
 
     // Context-specific items

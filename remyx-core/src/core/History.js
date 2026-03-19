@@ -16,6 +16,7 @@ function djb2Hash(str) {
  * @typedef {Object} HistoryOptions
  * @property {number} [maxSize=100] - Maximum number of undo states to retain
  * @property {number} [debounceMs=300] - Debounce interval in milliseconds for automatic snapshots
+ * @property {number} [coalesceMs=1000] - Window in which rapid keystrokes are coalesced into a single undo step
  */
 
 /**
@@ -38,11 +39,14 @@ export class History {
     this.engine = engine
     this.maxSize = options.maxSize || 100
     this.debounceMs = options.debounceMs || 300
+    this.coalesceMs = options.coalesceMs || 1000
     this._undoStack = []
     this._redoStack = []
     this._observer = null
     this._debounceTimer = null
+    this._coalesceTimer = null
     this._isPerformingUndoRedo = false
+    this._isCoalescing = false
     this._lastSnapshot = null
     this._lastNormalized = null
     this._lastNormalizedHash = null
@@ -81,6 +85,11 @@ export class History {
       clearTimeout(this._debounceTimer)
       this._debounceTimer = null
     }
+    if (this._coalesceTimer) {
+      clearTimeout(this._coalesceTimer)
+      this._coalesceTimer = null
+    }
+    this._isCoalescing = false
   }
 
   /**
@@ -97,7 +106,15 @@ export class History {
   }
 
   /**
-   * Schedules a debounced snapshot. Resets the timer if already pending.
+   * Schedules a debounced snapshot with operation coalescing.
+   *
+   * Rapid keystrokes within the coalesce window (default 1000ms) are
+   * batched into a single undo step. The debounce timer (default 300ms)
+   * fires first, but if the coalesce window hasn't expired yet, the
+   * snapshot updates the top of the undo stack instead of pushing a
+   * new entry. This gives the user natural undo boundaries at typing
+   * pauses rather than one entry per character.
+   *
    * @private
    * @returns {void}
    */
@@ -106,8 +123,47 @@ export class History {
       clearTimeout(this._debounceTimer)
     }
     this._debounceTimer = setTimeout(() => {
-      this._takeSnapshot()
+      if (this._isCoalescing) {
+        // Still within the coalesce window — update the top of the stack
+        this._updateTopSnapshot()
+      } else {
+        // Start a new coalesce window
+        this._isCoalescing = true
+        this._takeSnapshot()
+        if (this._coalesceTimer) clearTimeout(this._coalesceTimer)
+        this._coalesceTimer = setTimeout(() => {
+          this._isCoalescing = false
+        }, this.coalesceMs)
+      }
     }, this.debounceMs)
+  }
+
+  /**
+   * Updates the top entry on the undo stack with the current state
+   * instead of pushing a new entry. Used during coalescing to batch
+   * rapid keystrokes.
+   * @private
+   * @returns {void}
+   */
+  _updateTopSnapshot() {
+    const html = this.engine.element.innerHTML
+    const normalized = html.replace(/\s+/g, ' ').trim()
+    const hash = djb2Hash(normalized)
+
+    if (hash === this._lastNormalizedHash && normalized === this._lastNormalized) return
+
+    const bookmark = this.engine.selection.save()
+
+    if (this._undoStack.length > 0) {
+      // Replace the top entry
+      this._undoStack[this._undoStack.length - 1] = { html, bookmark }
+    } else {
+      this._undoStack.push({ html, bookmark })
+    }
+
+    this._lastSnapshot = html
+    this._lastNormalized = normalized
+    this._lastNormalizedHash = hash
   }
 
   /**

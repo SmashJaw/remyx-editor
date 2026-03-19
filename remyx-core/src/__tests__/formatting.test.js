@@ -7,8 +7,6 @@ describe('registerFormattingCommands', () => {
 
   beforeEach(() => {
     commands = {}
-    document.execCommand = vi.fn().mockReturnValue(true)
-    document.queryCommandState = vi.fn().mockReturnValue(false)
 
     const element = document.createElement('div')
     element.setAttribute('contenteditable', 'true')
@@ -31,6 +29,8 @@ describe('registerFormattingCommands', () => {
         insertHTML: vi.fn(),
         wrapWith: vi.fn(),
         unwrap: vi.fn(),
+        getParentElement: vi.fn(),
+        setRange: vi.fn(),
       },
       sanitizer: { sanitize: vi.fn(html => html) },
       getHTML: vi.fn().mockReturnValue('<p>test</p>'),
@@ -82,46 +82,242 @@ describe('registerFormattingCommands', () => {
     expect(commands.superscript.shortcut).toBe('mod+.')
   })
 
-  it('should call document.execCommand for bold execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.bold.execute()
-    expect(spy).toHaveBeenCalledWith('bold', false, null)
-    spy.mockRestore()
+  it('should wrap selection in <strong> when executing bold', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.bold.execute(mockEngine)
+    expect(mockEngine.element.querySelector('strong')).not.toBeNull()
+    expect(mockEngine.element.querySelector('strong').textContent).toBe('hello')
   })
 
-  it('should call document.execCommand for italic execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.italic.execute()
-    expect(spy).toHaveBeenCalledWith('italic', false, null)
-    spy.mockRestore()
+  it('should wrap selection in <em> when executing italic', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.italic.execute(mockEngine)
+    expect(mockEngine.element.querySelector('em')).not.toBeNull()
   })
 
-  it('should call document.execCommand for strikethrough execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.strikethrough.execute()
-    expect(spy).toHaveBeenCalledWith('strikeThrough', false, null)
-    spy.mockRestore()
+  it('should wrap selection in <s> when executing strikethrough', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.strikethrough.execute(mockEngine)
+    expect(mockEngine.element.querySelector('s')).not.toBeNull()
   })
 
-  it('should call document.execCommand for removeFormat execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.removeFormat.execute()
-    expect(spy).toHaveBeenCalledWith('removeFormat', false, null)
-    spy.mockRestore()
+  it('should wrap selection in <u> when executing underline', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.underline.execute(mockEngine)
+    expect(mockEngine.element.querySelector('u')).not.toBeNull()
   })
 
-  it('should check queryCommandState for bold isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
-    expect(commands.bold.isActive()).toBe(true)
-    expect(spy).toHaveBeenCalledWith('bold')
-    spy.mockRestore()
+  it('should wrap selection in <sub> when executing subscript', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.subscript.execute(mockEngine)
+    expect(mockEngine.element.querySelector('sub')).not.toBeNull()
   })
 
-  it('should check queryCommandState for italic isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(false)
-    expect(commands.italic.isActive()).toBe(false)
-    expect(spy).toHaveBeenCalledWith('italic')
-    spy.mockRestore()
+  it('should wrap selection in <sup> when executing superscript', () => {
+    const p = document.createElement('p')
+    p.textContent = 'hello world'
+    mockEngine.element.appendChild(p)
+
+    const textNode = p.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 5)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+
+    commands.superscript.execute(mockEngine)
+    expect(mockEngine.element.querySelector('sup')).not.toBeNull()
+  })
+
+  it('should remove inline tags when executing removeFormat', () => {
+    const p = document.createElement('p')
+    const strong = document.createElement('strong')
+    strong.textContent = 'bold text'
+    p.appendChild(strong)
+    p.appendChild(document.createTextNode(' normal'))
+    mockEngine.element.appendChild(p)
+
+    // Select across the entire p content so commonAncestorContainer is p
+    const range = document.createRange()
+    range.setStart(strong.firstChild, 0)
+    range.setEnd(p.lastChild, 7)
+
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+
+    commands.removeFormat.execute(mockEngine)
+    expect(mockEngine.element.querySelector('strong')).toBeNull()
+    expect(p.textContent).toBe('bold text normal')
+  })
+
+  it('should return true for bold isActive when inside <strong>', () => {
+    const strong = document.createElement('strong')
+    strong.textContent = 'bold'
+    mockEngine.element.appendChild(strong)
+
+    mockEngine.selection.getParentElement.mockReturnValue(strong)
+    expect(commands.bold.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return false for bold isActive when not inside <strong> or <b>', () => {
+    const p = document.createElement('p')
+    p.textContent = 'normal'
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+    expect(commands.bold.isActive(mockEngine)).toBe(false)
+  })
+
+  it('should return true for italic isActive when inside <em>', () => {
+    const em = document.createElement('em')
+    em.textContent = 'italic'
+    mockEngine.element.appendChild(em)
+
+    mockEngine.selection.getParentElement.mockReturnValue(em)
+    expect(commands.italic.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return false for italic isActive when not inside <em> or <i>', () => {
+    const p = document.createElement('p')
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+    expect(commands.italic.isActive(mockEngine)).toBe(false)
+  })
+
+  it('should return true for underline isActive when inside <u>', () => {
+    const u = document.createElement('u')
+    u.textContent = 'underlined'
+    mockEngine.element.appendChild(u)
+
+    mockEngine.selection.getParentElement.mockReturnValue(u)
+    expect(commands.underline.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return true for strikethrough isActive when inside <s>', () => {
+    const s = document.createElement('s')
+    s.textContent = 'struck'
+    mockEngine.element.appendChild(s)
+
+    mockEngine.selection.getParentElement.mockReturnValue(s)
+    expect(commands.strikethrough.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return true for subscript isActive when inside <sub>', () => {
+    const sub = document.createElement('sub')
+    sub.textContent = 'sub'
+    mockEngine.element.appendChild(sub)
+
+    mockEngine.selection.getParentElement.mockReturnValue(sub)
+    expect(commands.subscript.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return false for subscript isActive when not inside <sub>', () => {
+    const p = document.createElement('p')
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+    expect(commands.subscript.isActive(mockEngine)).toBe(false)
+  })
+
+  it('should return true for superscript isActive when inside <sup>', () => {
+    const sup = document.createElement('sup')
+    sup.textContent = 'sup'
+    mockEngine.element.appendChild(sup)
+
+    mockEngine.selection.getParentElement.mockReturnValue(sup)
+    expect(commands.superscript.isActive(mockEngine)).toBe(true)
+  })
+
+  it('should return false for superscript isActive when not inside <sup>', () => {
+    const p = document.createElement('p')
+    mockEngine.element.appendChild(p)
+
+    mockEngine.selection.getParentElement.mockReturnValue(p)
+    expect(commands.superscript.isActive(mockEngine)).toBe(false)
   })
 
   it('should not have isActive on removeFormat', () => {
@@ -132,52 +328,37 @@ describe('registerFormattingCommands', () => {
     expect(commands.removeFormat.meta).toEqual({ icon: 'removeFormat', tooltip: 'Remove Formatting' })
   })
 
-  it('should call document.execCommand for underline execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.underline.execute()
-    expect(spy).toHaveBeenCalledWith('underline', false, null)
-    spy.mockRestore()
+  it('should return false for isActive when getParentElement returns null', () => {
+    mockEngine.selection.getParentElement.mockReturnValue(null)
+    expect(commands.bold.isActive(mockEngine)).toBe(false)
+    expect(commands.italic.isActive(mockEngine)).toBe(false)
+    expect(commands.underline.isActive(mockEngine)).toBe(false)
+    expect(commands.strikethrough.isActive(mockEngine)).toBe(false)
+    expect(commands.subscript.isActive(mockEngine)).toBe(false)
+    expect(commands.superscript.isActive(mockEngine)).toBe(false)
   })
 
-  it('should check queryCommandState for underline isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
-    expect(commands.underline.isActive()).toBe(true)
-    expect(spy).toHaveBeenCalledWith('underline')
-    spy.mockRestore()
-  })
+  it('should unwrap existing <strong> tag when toggling bold off', () => {
+    const p = document.createElement('p')
+    const strong = document.createElement('strong')
+    strong.textContent = 'bold'
+    p.appendChild(strong)
+    mockEngine.element.appendChild(p)
 
-  it('should call document.execCommand for subscript execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.subscript.execute()
-    expect(spy).toHaveBeenCalledWith('subscript', false, null)
-    spy.mockRestore()
-  })
+    const textNode = strong.firstChild
+    const range = document.createRange()
+    range.setStart(textNode, 0)
+    range.setEnd(textNode, 4)
 
-  it('should check queryCommandState for subscript isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
-    expect(commands.subscript.isActive()).toBe(true)
-    expect(spy).toHaveBeenCalledWith('subscript')
-    spy.mockRestore()
-  })
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
 
-  it('should call document.execCommand for superscript execute', () => {
-    const spy = vi.spyOn(document, 'execCommand').mockReturnValue(true)
-    commands.superscript.execute()
-    expect(spy).toHaveBeenCalledWith('superscript', false, null)
-    spy.mockRestore()
-  })
+    mockEngine.selection.getSelection.mockReturnValue(sel)
+    mockEngine.selection.getParentElement.mockReturnValue(strong)
 
-  it('should check queryCommandState for superscript isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(false)
-    expect(commands.superscript.isActive()).toBe(false)
-    expect(spy).toHaveBeenCalledWith('superscript')
-    spy.mockRestore()
-  })
-
-  it('should check queryCommandState for strikethrough isActive', () => {
-    const spy = vi.spyOn(document, 'queryCommandState').mockReturnValue(true)
-    expect(commands.strikethrough.isActive()).toBe(true)
-    expect(spy).toHaveBeenCalledWith('strikeThrough')
-    spy.mockRestore()
+    commands.bold.execute(mockEngine)
+    expect(mockEngine.element.querySelector('strong')).toBeNull()
+    expect(p.textContent).toBe('bold')
   })
 })

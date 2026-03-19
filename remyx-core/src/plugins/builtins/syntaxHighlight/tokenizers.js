@@ -502,6 +502,53 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 // ---------------------------------------------------------------------------
+// Extensible Language Registry
+// ---------------------------------------------------------------------------
+
+/**
+ * Register a custom language tokenizer.
+ *
+ * @param {string} id - Language identifier (e.g. 'ruby', 'swift')
+ * @param {string} label - Display label (e.g. 'Ruby', 'Swift')
+ * @param {function} tokenizer - Function that takes source code string and
+ *   returns an array of { text: string, className: string | null } tokens.
+ *   className should use the `rmx-syn-` prefix (e.g. 'rmx-syn-keyword').
+ * @param {string[]} [aliases] - Additional identifiers that map to this
+ *   tokenizer (e.g. ['rb'] for Ruby).
+ */
+export function registerLanguage(id, label, tokenizer, aliases = []) {
+  if (!id || typeof id !== 'string') throw new Error('registerLanguage: id is required')
+  if (!label || typeof label !== 'string') throw new Error('registerLanguage: label is required')
+  if (typeof tokenizer !== 'function') throw new Error('registerLanguage: tokenizer must be a function')
+
+  LANGUAGE_MAP[id.toLowerCase()] = tokenizer
+  for (const alias of aliases) {
+    LANGUAGE_MAP[alias.toLowerCase()] = tokenizer
+  }
+
+  // Add to SUPPORTED_LANGUAGES if not already present
+  if (!SUPPORTED_LANGUAGES.find(l => l.id === id)) {
+    SUPPORTED_LANGUAGES.push({ id, label })
+  }
+}
+
+/**
+ * Unregister a previously registered language tokenizer.
+ * Built-in languages can also be removed.
+ *
+ * @param {string} id - Language identifier to remove
+ * @param {string[]} [aliases] - Aliases to also remove
+ */
+export function unregisterLanguage(id, aliases = []) {
+  delete LANGUAGE_MAP[id.toLowerCase()]
+  for (const alias of aliases) {
+    delete LANGUAGE_MAP[alias.toLowerCase()]
+  }
+  const idx = SUPPORTED_LANGUAGES.findIndex(l => l.id === id)
+  if (idx !== -1) SUPPORTED_LANGUAGES.splice(idx, 1)
+}
+
+// ---------------------------------------------------------------------------
 // Public tokenize(code, language) API
 // ---------------------------------------------------------------------------
 
@@ -526,6 +573,16 @@ export function tokenize(code, language) {
     value: text,
   }))
 }
+
+/**
+ * Helper exported for consumers who want to build custom tokenizers using
+ * the same regex-rule engine used by all built-in tokenizers.
+ *
+ * @param {string} code - Source code to tokenize
+ * @param {Array<[RegExp, string|null]>} rules - Ordered regex rules
+ * @returns {{ text: string, className: string|null }[]}
+ */
+export { runRules }
 
 // ---------------------------------------------------------------------------
 // Language detection heuristic

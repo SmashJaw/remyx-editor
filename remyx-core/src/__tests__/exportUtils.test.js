@@ -6,6 +6,13 @@ vi.mock('../utils/markdownConverter.js', () => ({
   htmlToMarkdown: vi.fn((html) => `# Converted\n\n${html}`),
 }))
 
+// Mock the Sanitizer module used by exportUtils at module level
+vi.mock('../core/Sanitizer.js', () => ({
+  Sanitizer: class MockSanitizer {
+    sanitize(html) { return html }
+  },
+}))
+
 describe('exportUtils', () => {
   let mockAnchor
   let createElementSpy
@@ -25,17 +32,11 @@ describe('exportUtils', () => {
       if (tag === 'a') return mockAnchor
       // For iframe in exportAsPDF
       if (tag === 'iframe') {
-        const iframeDoc = {
-          open: vi.fn(),
-          write: vi.fn(),
-          close: vi.fn(),
-        }
         return {
-          style: {},
+          style: { cssText: '' },
+          srcdoc: '',
           setAttribute: vi.fn(),
-          contentDocument: iframeDoc,
           contentWindow: {
-            document: iframeDoc,
             focus: vi.fn(),
             print: vi.fn(),
             onafterprint: null,
@@ -115,7 +116,7 @@ describe('exportUtils', () => {
       expect(appendChildSpy).toHaveBeenCalled()
     })
 
-    it('should write HTML content to the iframe document', () => {
+    it('should set iframe.srcdoc with HTML content', () => {
       const iframe = createMockIframe()
       createElementSpy.mockImplementation((tag) => {
         if (tag === 'iframe') return iframe
@@ -123,13 +124,11 @@ describe('exportUtils', () => {
       })
 
       exportAsPDF('<p>Hello</p>', 'My Doc')
-      expect(iframe.contentDocument.write).toHaveBeenCalled()
-      const writtenHTML = iframe.contentDocument.write.mock.calls[0][0]
-      expect(writtenHTML).toContain('<p>Hello</p>')
-      expect(writtenHTML).toContain('My Doc')
+      expect(iframe.srcdoc).toContain('<p>Hello</p>')
+      expect(iframe.srcdoc).toContain('My Doc')
     })
 
-    it('should use default title "Document"', () => {
+    it('should use default title "Document" in srcdoc', () => {
       const iframe = createMockIframe()
       createElementSpy.mockImplementation((tag) => {
         if (tag === 'iframe') return iframe
@@ -137,8 +136,7 @@ describe('exportUtils', () => {
       })
 
       exportAsPDF('<p>Hello</p>')
-      const writtenHTML = iframe.contentDocument.write.mock.calls[0][0]
-      expect(writtenHTML).toContain('<title>Document</title>')
+      expect(iframe.srcdoc).toContain('<title>Document</title>')
     })
 
     it('should hide the iframe off-screen', () => {
@@ -293,11 +291,6 @@ describe('exportUtils', () => {
     it('should include Word XML namespaces in the blob content', () => {
       exportAsDocx('<p>Hello World</p>')
       const blob = createObjectURLSpy.mock.calls[0][0]
-      // Blob constructor received ['\ufeff', wordHtml] — extract the wordHtml part
-      // In jsdom, Blob.text() may not exist, so read the constructor args
-      // The blob was created with new Blob(['\ufeff', wordHtml], ...)
-      // We can create a new blob reader or just check the args passed to createObjectURL
-      // Since we can't easily read the blob in jsdom, verify via the doc.write mock
       expect(blob).toBeInstanceOf(Blob)
       expect(blob.type).toBe('application/msword')
     })
@@ -318,17 +311,11 @@ describe('exportUtils', () => {
 })
 
 function createMockIframe() {
-  const iframeDoc = {
-    open: vi.fn(),
-    write: vi.fn(),
-    close: vi.fn(),
-  }
   return {
     style: { cssText: '' },
+    srcdoc: '',
     setAttribute: vi.fn(),
-    contentDocument: iframeDoc,
     contentWindow: {
-      document: iframeDoc,
       focus: vi.fn(),
       print: vi.fn(),
       onafterprint: null,

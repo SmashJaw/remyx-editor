@@ -738,6 +738,83 @@
   user-select: none;
 }
 
+/* ── Line Numbers ── */
+.rmx-content pre.rmx-has-line-numbers {
+  padding-left: 0;
+}
+
+.rmx-content pre .rmx-line-numbers {
+  display: inline-flex;
+  flex-direction: column;
+  text-align: right;
+  padding: 1em 0.75em 1em 1em;
+  margin-right: 1em;
+  border-right: 1px solid var(--rmx-border-subtle, #e2e8f0);
+  color: var(--rmx-text-secondary, #94a3b8);
+  opacity: 0.5;
+  user-select: none;
+  pointer-events: none;
+  min-width: 2em;
+  font-size: inherit;
+  line-height: inherit;
+  vertical-align: top;
+}
+
+.rmx-content pre .rmx-line-numbers .rmx-line-number {
+  display: block;
+}
+
+/* ── Copy-to-Clipboard Button ── */
+.rmx-content pre {
+  position: relative;
+}
+
+.rmx-content pre .rmx-code-copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rmx-border-subtle, #e2e8f0);
+  border-radius: 4px;
+  background: var(--rmx-bg, #ffffff);
+  color: var(--rmx-text-secondary, #94a3b8);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+  z-index: 2;
+  line-height: 1;
+  padding: 0;
+}
+
+.rmx-content pre:hover .rmx-code-copy-btn {
+  opacity: 1;
+}
+
+.rmx-content pre .rmx-code-copy-btn:hover {
+  background: var(--rmx-bg-hover, #f1f5f9);
+  color: var(--rmx-text, #1e293b);
+}
+
+.rmx-content pre .rmx-code-copy-btn.rmx-code-copy-success {
+  opacity: 1;
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
+/* ── Inline Code Highlighting ── */
+.rmx-content code[data-language]:not(pre code) {
+  background: rgba(99, 102, 241, 0.06);
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.875em;
+}
+
 /* Programming language syntax tokens (light theme defaults) */
 .rmx-syn-comment { color: #6a737d; font-style: italic; }
 .rmx-syn-keyword { color: #d73a49; font-weight: 600; }
@@ -2074,4 +2151,123 @@
 
 .rmx-recovery-btn--dismiss:hover {
   background: rgba(0, 0, 0, 0.05);
+}
+
+/* ====== Print Stylesheet ====== */
+@media print {
+  /* Hide all chrome — only print content */
+  .rmx-toolbar,
+  .rmx-menubar,
+  .rmx-statusbar,
+  .rmx-recovery-banner,
+  .rmx-modal-overlay,
+  .rmx-command-palette,
+  .rmx-context-menu,
+  .rmx-code-copy-btn,
+  .rmx-code-lang-label,
+  .rmx-table-filter-dropdown {
+    display: none !important;
+  }
+
+  /* Remove editor chrome styling */
+  .rmx-editor {
+    border: none !important;
+    box-shadow: none !important;
+    contain: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .rmx-content {
+    padding: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Typography for print */
+  .rmx-content h1, .rmx-content h2, .rmx-content h3,
+  .rmx-content h4, .rmx-content h5, .rmx-content h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .rmx-content p, .rmx-content li, .rmx-content blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .rmx-content table, .rmx-content figure, .rmx-content img,
+  .rmx-content pre {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .rmx-content img {
+    max-width: 100% !important;
+  }
+
+  /* Print-friendly code blocks */
+  .rmx-content pre {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    border: 1px solid #ccc !important;
+    background: #f9f9f9 !important;
+  }
+
+  /* Print-friendly tables */
+  .rmx-content table {
+    border-collapse: collapse !important;
+  }
+
+  .rmx-content th, .rmx-content td {
+    border: 1px solid #999 !important;
+  }
+
+  /* Show link URLs in print */
+  .rmx-content a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+  }
+
+  /* Don't show URLs for internal/anchor links */
+  .rmx-content a[href^="#"]::after,
+  .rmx-content a[href^="javascript"]::after {
+    content: '';
+  }
+
+  /* Line numbers visible in print */
+  .rmx-content pre .rmx-line-numbers {
+    opacity: 1 !important;
+    color: #999 !important;
+  }
+}
+
+/* ====== RTL Support ====== */
+/* Logical properties for bidirectional layout */
+.rmx-content [dir="rtl"] {
+  text-align: right;
+}
+
+.rmx-content [dir="rtl"] ul,
+.rmx-content [dir="rtl"] ol {
+  padding-left: 0;
+  padding-right: 1.5em;
+}
+
+.rmx-content [dir="rtl"] blockquote {
+  border-left: none;
+  border-right: 3px solid var(--rmx-border);
+  padding-left: 0;
+  padding-right: 16px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.rmx-content [dir="rtl"] .rmx-task-checkbox {
+  margin-left: 8px;
+  margin-right: 0;
 }
