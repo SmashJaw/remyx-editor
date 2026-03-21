@@ -19,7 +19,7 @@ function getEmbedUrl(url) {
   return null
 }
 
-export function EmbedModal({ open, onClose, engine }) {
+export function EmbedModal({ open, onClose, engine, data }) {
   const [url, setUrl] = useState('')
   const [previewUrl, setPreviewUrl] = useState(null)
   const [iframeLoaded, setIframeLoaded] = useState(false)
@@ -58,6 +58,7 @@ export function EmbedModal({ open, onClose, engine }) {
       decoded = url.trim()
     }
     if (DANGEROUS_PROTOCOL.test(decoded)) return
+    if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
     engine.executeCommand('embedMedia', { url })
     onClose()
     setUrl('')

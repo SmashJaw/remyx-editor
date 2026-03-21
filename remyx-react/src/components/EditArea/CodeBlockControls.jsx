@@ -1,5 +1,22 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { SUPPORTED_LANGUAGES } from '@remyxjs/core'
+
+/**
+ * Default language list when the syntax-highlight plugin is not installed.
+ * When installed, the plugin's SUPPORTED_LANGUAGES is used instead.
+ */
+const DEFAULT_LANGUAGES = [
+  { id: 'javascript', label: 'JavaScript' },
+  { id: 'python', label: 'Python' },
+  { id: 'html', label: 'HTML' },
+  { id: 'css', label: 'CSS' },
+  { id: 'json', label: 'JSON' },
+  { id: 'bash', label: 'Bash' },
+  { id: 'sql', label: 'SQL' },
+  { id: 'java', label: 'Java' },
+  { id: 'go', label: 'Go' },
+  { id: 'rust', label: 'Rust' },
+  { id: 'plaintext', label: 'Plain Text' },
+]
 
 /**
  * CodeBlockControls — Floating language selector that appears above a focused
@@ -50,7 +67,10 @@ export function CodeBlockControls({ codeBlock, engine, editorRect }) {
     setFilter('')
   }, [engine])
 
-  const filteredLangs = SUPPORTED_LANGUAGES.filter(
+  // Use plugin's language list if syntax-highlight is installed, else defaults
+  const languages = engine?._syntaxHighlight?.SUPPORTED_LANGUAGES || DEFAULT_LANGUAGES
+
+  const filteredLangs = languages.filter(
     lang => lang.label.toLowerCase().includes(filter.toLowerCase()) ||
             lang.id.toLowerCase().includes(filter.toLowerCase())
   )
@@ -59,7 +79,7 @@ export function CodeBlockControls({ codeBlock, engine, editorRect }) {
   const top = codeBlockRect.top - editorRect.top
   const right = editorRect.right - codeBlockRect.right
 
-  const displayLabel = SUPPORTED_LANGUAGES.find(l => l.id === currentLang)?.label || currentLang || 'Auto'
+  const displayLabel = languages.find(l => l.id === currentLang)?.label || currentLang || 'Auto'
 
   return (
     <div

@@ -33,6 +33,11 @@ export function LinkModal({ open, onClose, engine, data }) {
     // Block any protocol not in the allowlist (blocks javascript:, vbscript:, data:, mhtml:, etc.)
     if (!SAFE_PROTOCOL.test(trimmedHref) && !RELATIVE_URL.test(trimmedHref)) return
 
+    // Restore saved selection before executing command
+    if (engine._savedSelection) {
+      engine.selection.restore(engine._savedSelection)
+      engine._savedSelection = null
+    }
     if (data?.href) {
       engine.executeCommand('editLink', { href, text, target })
     } else {

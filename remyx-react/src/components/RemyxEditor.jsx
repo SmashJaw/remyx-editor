@@ -1,13 +1,10 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo, Suspense } from 'react'
-import { createPortal } from 'react-dom'
 import { useEditorEngine } from '../hooks/useEditorEngine.js'
 import { useSelection } from '../hooks/useSelection.js'
 import { useModal } from '../hooks/useModal.js'
 import { useContextMenu } from '../hooks/useContextMenu.js'
-
-import { useResolvedConfig } from '../hooks/useResolvedConfig.js'
+import { useConfigFile } from '../hooks/useConfigFile.js'
 import { useAutosave } from '../hooks/useAutosave.js'
-import { usePortalAttachment } from '../hooks/usePortalAttachment.js'
 import { useEditorRect } from '../hooks/useEditorRect.js'
 import { useDragDrop } from '../hooks/useDragDrop.js'
 import { useSwipeGesture } from '../hooks/useSwipeGesture.js'
@@ -33,37 +30,51 @@ import { Minimap } from './Minimap/Minimap.jsx'
 import { SplitPreview } from './SplitPreview/SplitPreview.jsx'
 import { useToast } from './Toast/Toast.jsx'
 
-// Lazy-loaded components — only loaded when needed
 const MenuBar = React.lazy(() => import('./MenuBar/MenuBar.jsx').then(m => ({ default: m.MenuBar })))
 const ContextMenu = React.lazy(() => import('./ContextMenu/ContextMenu.jsx').then(m => ({ default: m.ContextMenu })))
 
-// Item 22: Modals extracted to EditorModals sub-component
 import { EditorModals, FindReplacePanel } from './EditorModals.jsx'
 
+/**
+ * RemyxEditor — Config-driven rich text editor component.
+ *
+ * @param {object} props
+ * @param {string} props.config - Config name mapping to remyxjs/config/<name>.json
+ * @param {string} [props.value] - Controlled content (HTML or Markdown)
+ * @param {string} [props.defaultValue] - Initial content for uncontrolled mode
+ * @param {Function} [props.onChange] - Content change callback
+ * @param {Function} [props.onReady] - Callback when engine is ready
+ * @param {Function} [props.onError] - Error callback
+ * @param {Function} [props.onFocus] - Focus callback
+ * @param {Function} [props.onBlur] - Blur callback
+ * @param {string} [props.className] - CSS class for the wrapper
+ * @param {object} [props.style] - Inline styles for the wrapper
+ */
 export default function RemyxEditor(props) {
-  // Resolve configuration from props, context, and defaults
+  const resolved = useConfigFile(props.config, props)
+
+  if (!resolved) {
+    return <div className="rmx-editor rmx-error">Config &quot;{props.config}&quot; not found</div>
+  }
+
   const {
-    attachTo, value, defaultValue, onChange, toolbar,
+    value, defaultValue, onChange, toolbar, toolbarWrap,
     theme, placeholder, height, minHeight, maxHeight,
     readOnly, plugins, onReady, onFocus, onBlur,
     className, style, uploadHandler, outputFormat,
     showFloatingToolbar, showContextMenu, fonts, googleFonts,
     statusBar, customTheme, toolbarItemTheme, sanitize, shortcuts,
-    baseHeadingLevel, menuBarConfig, effectiveToolbar, onError, errorFallback,
+    baseHeadingLevel, menuBarConfig, onError, errorFallback,
     showCommandPalette,
     autosaveConfig,
-    emptyState: emptyStateProp,
     showBreadcrumb,
     showMinimap,
     splitViewFormat,
-    customizableToolbar: customizableToolbarProp,
-    onToolbarChange,
-  } = useResolvedConfig(props)
+  } = resolved
 
   const editAreaRef = useRef(null)
   const editorRootRef = useRef(null)
 
-  // Load Google Fonts and merge into font list
   useEffect(() => {
     if (googleFonts && googleFonts.length > 0) {
       loadGoogleFonts(googleFonts)
@@ -79,15 +90,10 @@ export default function RemyxEditor(props) {
     return [...base, ...newFonts]
   }, [fonts, googleFonts])
 
-  // Portal attachment for textarea/div binding
-  const { portalContainer, effectiveValue, effectiveOnChange } = usePortalAttachment({
-    attachTo, value, defaultValue, onChange,
-  })
-
   const { engine, ready } = useEditorEngine(editAreaRef, {
-    value: attachTo ? effectiveValue : value,
-    defaultValue: attachTo ? undefined : defaultValue,
-    onChange: effectiveOnChange,
+    value,
+    defaultValue,
+    onChange,
     outputFormat,
     placeholder,
     readOnly,
@@ -99,17 +105,15 @@ export default function RemyxEditor(props) {
     sanitize,
     shortcuts,
     baseHeadingLevel,
-  }, portalContainer)
+  })
 
   const { formatState, uiState } = useSelection(engine)
   const { modals, openModal, closeModal } = useModal()
   const { contextMenu, hideContextMenu } = useContextMenu(engine, editAreaRef)
   const { saveStatus, recoveryData, recoverContent, dismissRecovery } = useAutosave(engine, autosaveConfig)
 
-  // #39: Toast notification system
   const [toastEl, showToast] = useToast()
 
-  // Wire toast to engine events for transient feedback
   useEffect(() => {
     if (!engine) return
     const unsubs = [
@@ -119,56 +123,41 @@ export default function RemyxEditor(props) {
     return () => unsubs.forEach(unsub => typeof unsub === 'function' && unsub())
   }, [engine, showToast])
 
-  // Track editor rect for positioning overlays (ResizeObserver + rAF throttled)
   const editorRect = useEditorRect(editorRootRef)
 
-  // Expose engine on the DOM element for E2E testing and external integrations
   useEffect(() => {
     if (editorRootRef.current && engine) {
       editorRootRef.current.__engine = engine
     }
   }, [engine])
 
-  // Track drag-and-drop state for overlay rendering
   const { isExternalDrag, dragFileTypes } = useDragDrop(engine)
 
-  // Mobile & touch optimization hooks
   useSwipeGesture(engine, editAreaRef, {
     onDismissToolbar: () => {
-      // Trigger floating toolbar dismiss by clearing selection
-      if (engine?.element) {
-        window.getSelection()?.removeAllRanges()
-      }
+      if (engine?.element) window.getSelection()?.removeAllRanges()
     },
   })
 
-  // Long-press context menu on touch devices
   const handleLongPress = useCallback(({ x, y }) => {
     if (!engine) return
-    // Simulate a context menu event at the touch position
-    const fakeEvent = { clientX: x, clientY: y, preventDefault: () => {} }
-    engine.eventBus.emit('contextmenu', fakeEvent)
+    engine.eventBus.emit('contextmenu', { clientX: x, clientY: y, preventDefault: () => {} })
   }, [engine])
   useLongPress(editAreaRef, handleLongPress, { enabled: showContextMenu && !readOnly })
 
-  // Pinch-to-zoom on images and tables
   const { zoomedElement, resetZoom } = usePinchZoom(editAreaRef)
 
-  // Virtual keyboard awareness
   useVirtualKeyboard(engine, editorRootRef)
 
-  // Handle source mode toggle
   useEffect(() => {
     if (!engine) return
-    const unsub = engine.eventBus.on('mode:change', ({ sourceMode: sm }) => {
-      if (sm) {
-        openModal('source')
-      }
+    return engine.eventBus.on('mode:change', ({ sourceMode: sm }) => {
+      if (sm) openModal('source')
     })
-    return unsub
   }, [engine, openModal])
 
-  // Task 259: Merged keydown handlers (Cmd+F and Cmd+Shift+P) into a single useEffect
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+
   useEffect(() => {
     if (!engine) return
     const handleKeyDown = (e) => {
@@ -186,7 +175,6 @@ export default function RemyxEditor(props) {
     return () => engine.element?.removeEventListener('keydown', handleKeyDown)
   }, [engine, openModal, showCommandPalette])
 
-  // Wire onError callback to engine error events
   useEffect(() => {
     if (!engine || !onError) return
     const unsubs = [
@@ -202,13 +190,13 @@ export default function RemyxEditor(props) {
       setCommandPaletteOpen(true)
       return
     }
+    // Save current selection so modals can restore it before executing commands
+    if (engine?.selection) {
+      engine._savedSelection = engine.selection.save()
+    }
     openModal(name, data)
-  }, [openModal])
+  }, [openModal, engine])
 
-  // Command palette state
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
-
-  // Task 241: Consolidated content read — compute isEmpty from engine.getText() once
   const [isEmpty, setIsEmpty] = useState(true)
   useEffect(() => {
     if (!engine) return
@@ -221,21 +209,36 @@ export default function RemyxEditor(props) {
     return unsub
   }, [engine])
 
-  // Split view state
   const [splitViewActive, setSplitViewActive] = useState(false)
   useEffect(() => {
     if (!engine) return
-    const unsub = engine.eventBus.on('splitView:toggle', ({ active }) => setSplitViewActive(active))
-    return unsub
+    return engine.eventBus.on('splitView:toggle', ({ active }) => setSplitViewActive(active))
   }, [engine])
 
-  // Task 257: Memoize wordCountButton element
+  // Analytics panel toggle
+  const [analyticsVisible, setAnalyticsVisible] = useState(false)
+  const [analyticsData, setAnalyticsData] = useState(null)
+  useEffect(() => {
+    if (!engine) return
+    const unsubs = [
+      engine.eventBus.on('analytics:toggle', ({ visible }) => {
+        setAnalyticsVisible(visible)
+        if (visible && engine._analytics?.analyzeContent) {
+          setAnalyticsData(engine._analytics.analyzeContent())
+        }
+      }),
+      engine.eventBus.on('analytics:update', (data) => {
+        setAnalyticsData({ ...data })
+      }),
+    ]
+    return () => unsubs.forEach(unsub => typeof unsub === 'function' && unsub())
+  }, [engine])
+
   const wordCountBtn = useMemo(() =>
     statusBar === 'popup' ? <WordCountButton engine={engine} /> : null,
     [statusBar, engine]
   )
 
-  // Task 239: Memoize theme className
   const themeClassName = useMemo(() =>
     `rmx-editor rmx-theme-${/^[a-zA-Z0-9_-]+$/.test(theme) ? theme : 'light'} ${className || ''}`,
     [theme, className]
@@ -253,7 +256,8 @@ export default function RemyxEditor(props) {
     [customTheme, style]
   )
 
-  const editorTree = (
+  return (
+    <EditorErrorBoundary onError={onError} fallback={errorFallback}>
     <SelectionContext.Provider value={formatState}>
     <div
       ref={editorRootRef}
@@ -275,16 +279,62 @@ export default function RemyxEditor(props) {
       )}
 
       <Toolbar
-        config={effectiveToolbar || toolbar}
+        config={toolbar}
         engine={engine}
         onOpenModal={handleOpenModal}
         fonts={mergedFonts}
         statusBarMode={statusBar}
         wordCountButton={wordCountBtn}
         toolbarItemTheme={toolbarItemTheme}
-        customizableToolbar={customizableToolbarProp}
-        onToolbarChange={onToolbarChange}
+        wrap={toolbarWrap}
       />
+
+      {analyticsVisible && analyticsData && (
+        <div className="rmx-analytics-panel">
+          {analyticsData.readingTime != null && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Reading Time</span>
+              <span className="rmx-analytics-value">
+                {typeof analyticsData.readingTime === 'object'
+                  ? analyticsData.readingTime.seconds < 60
+                    ? `${analyticsData.readingTime.seconds}s`
+                    : `${Math.floor(analyticsData.readingTime.seconds / 60)}m ${analyticsData.readingTime.seconds % 60}s`
+                  : `${analyticsData.readingTime} min`}
+              </span>
+            </div>
+          )}
+          {analyticsData.fleschKincaid != null && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Grade Level</span>
+              <span className="rmx-analytics-value">{Number(analyticsData.fleschKincaid).toFixed(1)}</span>
+            </div>
+          )}
+          {analyticsData.fleschReadingEase != null && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Reading Ease</span>
+              <span className="rmx-analytics-value">{Number(analyticsData.fleschReadingEase).toFixed(1)}</span>
+            </div>
+          )}
+          {analyticsData.vocabularyLevel && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Vocabulary</span>
+              <span className="rmx-analytics-value">{String(analyticsData.vocabularyLevel)}</span>
+            </div>
+          )}
+          {analyticsData.sentenceCount != null && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Sentences</span>
+              <span className="rmx-analytics-value">{analyticsData.sentenceCount}</span>
+            </div>
+          )}
+          {analyticsData.paragraphCount != null && (
+            <div className="rmx-analytics-stat">
+              <span className="rmx-analytics-label">Paragraphs</span>
+              <span className="rmx-analytics-value">{analyticsData.paragraphCount}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {autosaveConfig.enabled && autosaveConfig.showRecoveryBanner !== false && (
         <RecoveryBanner
@@ -294,9 +344,7 @@ export default function RemyxEditor(props) {
         />
       )}
 
-      {showBreadcrumb && engine && (
-        <BreadcrumbBar engine={engine} />
-      )}
+      {showBreadcrumb && engine && <BreadcrumbBar engine={engine} />}
 
       {statusBar === 'top' && (
         <StatusBar
@@ -308,13 +356,6 @@ export default function RemyxEditor(props) {
       )}
 
       <div className="rmx-editor-body" style={{ position: 'relative' }}>
-        {emptyStateProp && isEmpty && !readOnly && (
-          <EmptyState
-            custom={emptyStateProp}
-            onClick={() => engine?.focus()}
-          />
-        )}
-
         <EditArea
           ref={editAreaRef}
           style={editAreaStyle}
@@ -341,60 +382,28 @@ export default function RemyxEditor(props) {
         )}
 
         {uiState.focusedImage && (
-          <ImageResizeHandles
-            image={uiState.focusedImage}
-            engine={engine}
-            editorRect={editorRect}
-          />
+          <ImageResizeHandles image={uiState.focusedImage} engine={engine} editorRect={editorRect} />
         )}
 
         {uiState.focusedTable && (
-          <TableControls
-            table={uiState.focusedTable}
-            engine={engine}
-            editorRect={editorRect}
-          />
+          <TableControls table={uiState.focusedTable} engine={engine} editorRect={editorRect} />
         )}
 
         {uiState.focusedCodeBlock && (
-          <CodeBlockControls
-            codeBlock={uiState.focusedCodeBlock}
-            engine={engine}
-            editorRect={editorRect}
-          />
-        )}
-
-        {!readOnly && engine && (
-          <BlockDragHandle
-            engine={engine}
-            editorRect={editorRect}
-            editAreaRef={editAreaRef}
-          />
+          <CodeBlockControls codeBlock={uiState.focusedCodeBlock} engine={engine} editorRect={editorRect} />
         )}
 
         {zoomedElement && (
-          <button
-            className="rmx-pinch-zoom-reset"
-            onClick={resetZoom}
-            type="button"
-            aria-label="Reset zoom"
-          >
+          <button className="rmx-pinch-zoom-reset" onClick={resetZoom} type="button" aria-label="Reset zoom">
             Reset Zoom
           </button>
         )}
 
-        <DropZoneOverlay
-          visible={isExternalDrag}
-          fileTypes={dragFileTypes}
-        />
+        <DropZoneOverlay visible={isExternalDrag} fileTypes={dragFileTypes} />
 
         <Suspense fallback={<div className="rmx-loading-spinner" />}>
           {modals.findReplace.open && (
-            <FindReplacePanel
-              open={modals.findReplace.open}
-              onClose={() => closeModal('findReplace')}
-              engine={engine}
-            />
+            <FindReplacePanel open={modals.findReplace.open} onClose={() => closeModal('findReplace')} engine={engine} />
           )}
         </Suspense>
       </div>
@@ -409,18 +418,12 @@ export default function RemyxEditor(props) {
 
       {showContextMenu && (
         <Suspense fallback={<div className="rmx-loading-spinner" />}>
-          <ContextMenu
-            contextMenu={contextMenu}
-            onHide={hideContextMenu}
-            onOpenModal={handleOpenModal}
-          />
+          <ContextMenu contextMenu={contextMenu} onHide={hideContextMenu} onOpenModal={handleOpenModal} />
         </Suspense>
       )}
 
-      {/* #39: Toast notifications */}
       {toastEl}
 
-      {/* Item 22: Modals extracted to EditorModals sub-component */}
       <EditorModals
         modals={modals}
         closeModal={closeModal}
@@ -432,19 +435,6 @@ export default function RemyxEditor(props) {
       />
     </div>
     </SelectionContext.Provider>
-  )
-
-  const wrappedTree = (
-    <EditorErrorBoundary onError={onError} fallback={errorFallback}>
-      {editorTree}
     </EditorErrorBoundary>
   )
-
-  // When attachTo is provided, render via portal into the target's location
-  if (attachTo) {
-    if (!portalContainer) return null
-    return createPortal(wrappedTree, portalContainer)
-  }
-
-  return wrappedTree
 }

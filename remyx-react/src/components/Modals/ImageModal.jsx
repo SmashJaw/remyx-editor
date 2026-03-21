@@ -8,7 +8,7 @@ import { ModalOverlay } from './ModalOverlay.jsx'
 const SAFE_IMAGE_URL = /^\s*(https?:\/\/|\/|\.)/i
 const SAFE_DATA_IMAGE = /^\s*data:image\/(png|jpe?g|gif|webp|avif|bmp|ico)(;base64)?,/i
 
-export function ImageModal({ open, onClose, engine }) {
+export function ImageModal({ open, onClose, engine, data }) {
   const [tab, setTab] = useState('url')
   const [src, setSrc] = useState('')
   const [alt, setAlt] = useState('')
@@ -51,6 +51,7 @@ export function ImageModal({ open, onClose, engine }) {
     const trimmedSrc = src.trim()
     // Block anything not matching the allowlist (blocks javascript:, vbscript:, data:image/svg+xml, etc.)
     if (!SAFE_IMAGE_URL.test(trimmedSrc) && !SAFE_DATA_IMAGE.test(trimmedSrc)) return
+    if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
     engine.executeCommand('insertImage', {
       src,
       alt,

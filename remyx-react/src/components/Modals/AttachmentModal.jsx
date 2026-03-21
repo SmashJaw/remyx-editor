@@ -4,7 +4,7 @@ import { ModalOverlay } from './ModalOverlay.jsx'
 
 const DANGEROUS_PROTOCOL = /^\s*(javascript|vbscript|data\s*:\s*text\/html)\s*:/i
 
-export function AttachmentModal({ open, onClose, engine }) {
+export function AttachmentModal({ open, onClose, engine, data }) {
   const [tab, setTab] = useState('url')
   const [url, setUrl] = useState('')
   const [filename, setFilename] = useState('')
@@ -26,6 +26,7 @@ export function AttachmentModal({ open, onClose, engine }) {
       decoded = url.trim()
     }
     if (DANGEROUS_PROTOCOL.test(decoded)) return
+    if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
     engine.executeCommand('insertAttachment', {
       url,
       filename: filename || 'file',

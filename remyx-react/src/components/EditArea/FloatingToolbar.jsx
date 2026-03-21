@@ -87,16 +87,10 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
     const toolbarHeight = sizeRef.current.height || ref.current?.offsetHeight || TOOLBAR_FALLBACK_HEIGHT
     const toolbarWidth = sizeRef.current.width || ref.current?.offsetWidth || TOOLBAR_FALLBACK_WIDTH
 
-    // Default: position ABOVE the selection
-    let top = selectionRect.top - editorRect.top - toolbarHeight - TOOLBAR_GAP
+    // Always position BELOW the selection to avoid covering selected text
+    let top = selectionRect.bottom - editorRect.top + TOOLBAR_GAP
     let left = selectionRect.left - editorRect.left + selectionRect.width / 2 - toolbarWidth / 2
-    let below = false
-
-    // If no space above, place BELOW the selection (avoid overlapping highlight)
-    if (top < 0) {
-      top = selectionRect.bottom - editorRect.top + TOOLBAR_GAP
-      below = true
-    }
+    let below = true
 
     // Clamp to editor bounds horizontally
     if (left < 0) left = TOOLBAR_EDGE_PADDING

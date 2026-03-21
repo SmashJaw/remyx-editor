@@ -1,4 +1,4 @@
-![Remyx Editor](https://github.com/SmashJaw/remyxjs/blob/4b6ef54f581af8193afc322e97e64d93133f68ab/docs/images/Remyx-Logo.svg)
+![Remyx Editor](./docs/screenshots/Remyx-Logo.svg)
 
 # Remyx Editor
 
@@ -47,11 +47,11 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 
 ## Packages
 
-| Package                            | Version    | Description                                                                        |
-| ---------------------------------- | ---------- | ---------------------------------------------------------------------------------- |
-| [`@remyxjs/core`](./remyx-core/)   | 1.0.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes            |
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@remyxjs/core`](./remyx-core/) | 1.0.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
 | [`@remyxjs/react`](./remyx-react/) | 1.0.0-beta | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
-| [`create-remyx`](./create-remyx/)  | 1.0.0-beta | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md))      |
+| [`create-remyx`](./create-remyx/) | 1.0.0-beta | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 
@@ -64,19 +64,18 @@ npx create-remyx-app my-editor
 ```
 
 You'll be prompted to pick:
-
 - **Language**: JavaScript (JSX) or TypeScript (TSX)
 - **Theme**: Light, Dark, Ocean, Forest, Sunset, or Rose
 - **PDF/DOCX import**: include or skip heavy document dependencies (~5 MB)
 
 ### Which package should I use?
 
-| Use case                            | Install                                              |
-| ----------------------------------- | ---------------------------------------------------- |
-| New project (interactive setup)     | `npx create-remyx-app`                               |
-| React project                       | `npm install @remyxjs/core @remyxjs/react`           |
+| Use case | Install |
+| --- | --- |
+| New project (interactive setup) | `npx create-remyx-app` |
+| React project | `npm install @remyxjs/core @remyxjs/react` |
 | Vue / Svelte / Angular / Vanilla JS | `npm install @remyxjs/core` (build your own wrapper) |
-| Server-side HTML processing         | `npm install @remyxjs/core`                          |
+| Server-side HTML processing | `npm install @remyxjs/core` |
 
 ## Quick Start (React)
 
@@ -118,7 +117,11 @@ function App() {
 ### Add a theme
 
 ```jsx
-<RemyxEditor value={content} onChange={setContent} theme="ocean" />
+<RemyxEditor
+  value={content}
+  onChange={setContent}
+  theme="ocean"
+/>
 ```
 
 Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
@@ -132,10 +135,7 @@ Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
   uploadHandler={async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const { url } = await res.json();
     return url;
   }}
@@ -145,24 +145,7 @@ Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
 ### Add plugins
 
 ```jsx
-import {
-  WordCountPlugin,
-  AutolinkPlugin,
-  PlaceholderPlugin,
-  SyntaxHighlightPlugin,
-  TablePlugin,
-  CommentsPlugin,
-  CalloutPlugin,
-  LinkPlugin,
-  TemplatePlugin,
-  KeyboardPlugin,
-  DragDropPlugin,
-  MathPlugin,
-  TocPlugin,
-  AnalyticsPlugin,
-  SpellcheckPlugin,
-  CollaborationPlugin,
-} from '@remyxjs/core';
+import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin, SyntaxHighlightPlugin, TablePlugin, CommentsPlugin, CalloutPlugin, LinkPlugin, TemplatePlugin, KeyboardPlugin, DragDropPlugin, MathPlugin, TocPlugin, AnalyticsPlugin, SpellcheckPlugin, CollaborationPlugin } from '@remyxjs/core';
 
 <RemyxEditor
   value={content}
@@ -172,20 +155,20 @@ import {
     AutolinkPlugin,
     PlaceholderPlugin('Write something...'),
     SyntaxHighlightPlugin(),
-    TablePlugin(), // Sortable columns, filters, formulas, resize handles
-    CommentsPlugin(), // Inline comment threads, @mentions, resolve/reopen
-    CalloutPlugin(), // Info/warning/error/success/tip/note/question blocks
-    LinkPlugin(), // Link previews, broken link detection, auto-link, bookmarks
-    TemplatePlugin(), // Merge tags, conditionals, loops, template library
-    KeyboardPlugin(), // Auto-pairing, multi-cursor, jump-to-heading
-    DragDropPlugin(), // Drop zones, cross-editor drag, block reorder
-    MathPlugin(), // LaTeX math rendering, symbol palette, equation numbering
-    TocPlugin(), // Auto-generated table of contents, outline, headings
-    AnalyticsPlugin(), // Readability scores, reading time, SEO hints
-    SpellcheckPlugin(), // Grammar checking, writing-style presets, dictionary
+    TablePlugin(),       // Sortable columns, filters, formulas, resize handles
+    CommentsPlugin(),    // Inline comment threads, @mentions, resolve/reopen
+    CalloutPlugin(),     // Info/warning/error/success/tip/note/question blocks
+    LinkPlugin(),        // Link previews, broken link detection, auto-link, bookmarks
+    TemplatePlugin(),    // Merge tags, conditionals, loops, template library
+    KeyboardPlugin(),    // Auto-pairing, multi-cursor, jump-to-heading
+    DragDropPlugin(),    // Drop zones, cross-editor drag, block reorder
+    MathPlugin(),        // LaTeX math rendering, symbol palette, equation numbering
+    TocPlugin(),         // Auto-generated table of contents, outline, headings
+    AnalyticsPlugin(),   // Readability scores, reading time, SEO hints
+    SpellcheckPlugin(),  // Grammar checking, writing-style presets, dictionary
     CollaborationPlugin(), // Real-time co-editing, live cursors, presence
   ]}
-/>;
+/>
 ```
 
 ### Enhanced tables
@@ -199,11 +182,10 @@ import { TablePlugin } from '@remyxjs/core';
   value={content}
   onChange={setContent}
   plugins={[TablePlugin()]}
-/>;
+/>
 ```
 
 **What you get out of the box:**
-
 - **Click a column header** to sort ascending/descending (Shift+click for multi-column sort)
 - **Filter icon** on each header cell opens a dropdown for substring filtering
 - **Drag column/row borders** to resize
@@ -215,23 +197,13 @@ Programmatic access to all features:
 
 ```js
 // Sort the first column descending with numeric comparison
-engine.executeCommand('sortTable', {
-  columnIndex: 0,
-  direction: 'desc',
-  dataType: 'numeric',
-});
+engine.executeCommand('sortTable', { columnIndex: 0, direction: 'desc', dataType: 'numeric' });
 
 // Filter column 2 to only show rows containing "active"
-engine.executeCommand('filterTable', {
-  columnIndex: 2,
-  filterValue: 'active',
-});
+engine.executeCommand('filterTable', { columnIndex: 2, filterValue: 'active' });
 
 // Format the focused cell as currency
-engine.executeCommand('formatCell', {
-  format: 'currency',
-  options: { currency: 'EUR' },
-});
+engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'EUR' } });
 
 // Toggle the first row between <thead>/<tbody>
 engine.executeCommand('toggleHeaderRow');
@@ -272,7 +244,7 @@ import { RemyxEditorFromConfig } from '@remyxjs/react';
   value={content}
   onChange={setContent}
   loadingFallback={<div>Loading editor...</div>}
-/>;
+/>
 ```
 
 Example `editor-config.json`:
@@ -296,20 +268,15 @@ Or use the hook directly for more control:
 import { useExternalConfig } from '@remyxjs/react';
 
 function MyEditor() {
-  const { config, loading, error, reload } = useExternalConfig(
-    '/editor-config.json',
-    {
-      env: process.env.NODE_ENV,
-      pollInterval: 60000, // Auto-reload every minute
-    },
-  );
+  const { config, loading, error, reload } = useExternalConfig('/editor-config.json', {
+    env: process.env.NODE_ENV,
+    pollInterval: 60000, // Auto-reload every minute
+  });
 
   if (loading) return <div>Loading...</div>;
   if (error) return <button onClick={reload}>Retry</button>;
 
-  return (
-    <RemyxEditor {...config} value={content} onChange={setContent} />
-  );
+  return <RemyxEditor {...config} value={content} onChange={setContent} />;
 }
 ```
 
@@ -366,20 +333,20 @@ See the full [@remyxjs/core README](./remyx-core/README.md) for the complete eng
 
 ### What's in each package
 
-|                  | `@remyxjs/core`                        | `@remyxjs/react`                                                                                                                                                                           |
-| ---------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Editor engine    | Yes                                    | Re-exports from core                                                                                                                                                                       |
-| Commands (75+)   | Yes                                    | Re-exports from core                                                                                                                                                                       |
-| Plugin system    | Yes                                    | Re-exports from core                                                                                                                                                                       |
-| Utilities        | Yes                                    | Re-exports from core                                                                                                                                                                       |
-| CSS themes       | Yes                                    | Additional component styles                                                                                                                                                                |
-| Multi-editor     | EditorBus + SharedResources singletons | Re-exports from core                                                                                                                                                                       |
-| Autosave engine  | AutosaveManager + 5 storage providers  | useAutosave hook, SaveStatus, RecoveryBanner                                                                                                                                               |
-| React components | —                                      | RemyxEditor, RemyxEditorFromConfig, SaveStatus, RecoveryBanner, CommentsPanel, CollaborationBar, EditorErrorBoundary, EmptyState, BreadcrumbBar, Minimap, SplitPreview, TypographyDropdown |
-| Collaboration    | CollaborationPlugin, transport API     | useCollaboration hook, CollaborationBar                                                                                                                                                    |
-| React hooks      | —                                      | useRemyxEditor, useEditorEngine, useExternalConfig, useDragDrop, useAutosave, useComments, useSpellcheck, useCollaboration, useRemyxConfig                                                 |
-| TypeScript types | —                                      | Full `.d.ts` declarations                                                                                                                                                                  |
-| Scaffolding CLI  | —                                      | `npx create-remyx-app`                                                                                                                                                                     |
+| | `@remyxjs/core` | `@remyxjs/react` |
+| --- | --- | --- |
+| Editor engine | Yes | Re-exports from core |
+| Commands (75+) | Yes | Re-exports from core |
+| Plugin system | Yes | Re-exports from core |
+| Utilities | Yes | Re-exports from core |
+| CSS themes | Yes | Additional component styles |
+| Multi-editor | EditorBus + SharedResources singletons | Re-exports from core |
+| Autosave engine | AutosaveManager + 5 storage providers | useAutosave hook, SaveStatus, RecoveryBanner |
+| React components | — | RemyxEditor, RemyxEditorFromConfig, SaveStatus, RecoveryBanner, CommentsPanel, CollaborationBar, EditorErrorBoundary, EmptyState, BreadcrumbBar, Minimap, SplitPreview, TypographyDropdown |
+| Collaboration | CollaborationPlugin, transport API | useCollaboration hook, CollaborationBar |
+| React hooks | — | useRemyxEditor, useEditorEngine, useExternalConfig, useDragDrop, useAutosave, useComments, useSpellcheck, useCollaboration, useRemyxConfig |
+| TypeScript types | — | Full `.d.ts` declarations |
+| Scaffolding CLI | — | `npx create-remyx-app` |
 
 ## Monorepo Structure
 
@@ -393,11 +360,11 @@ packages/
 
 ## Bundle Size
 
-| Package          | JS (gzipped) | CSS (gzipped) |
-| ---------------- | ------------ | ------------- |
-| `@remyxjs/core`  | ~21 KB       | ~5 KB         |
-| `@remyxjs/react` | ~14 KB       | ~2 KB         |
-| **Combined**     | **~35 KB**   | **~7 KB**     |
+| Package | JS (gzipped) | CSS (gzipped) |
+| --- | --- | --- |
+| `@remyxjs/core` | ~21 KB | ~5 KB |
+| `@remyxjs/react` | ~14 KB | ~2 KB |
+| **Combined** | **~35 KB** | **~7 KB** |
 
 Heavy dependencies (`mammoth` for DOCX, `pdfjs-dist` for PDF) are optional peer dependencies and use dynamic imports — they're only loaded when a file of that type is imported.
 
@@ -440,14 +407,14 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 
 ## Documentation
 
-| Document                                         | Description                                                                                             |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| [@remyxjs/react README](./remyx-react/README.md) | Full API — props, hooks, theming, plugins, toolbar, menu bar, error handling, engine access, forms      |
-| [@remyxjs/core README](./remyx-core/README.md)   | Full API — engine, commands, plugins, selection, history, sanitizer, theming, toolbar config, utilities |
-| [CONTRIBUTING.md](./docs/CONTRIBUTING.md)        | Setup, architecture, adding commands/plugins, PR process                                                |
-| [CHANGELOG.md](./docs/CHANGELOG.md)              | Version history and release notes                                                                       |
-| [ROADMAP.md](./docs/ROADMAP.md)                  | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard                         |
-| [BENCHMARK.md](./docs/BENCHMARK.md)              | Build, bundle, test, and lint performance metrics                                                       |
+| Document | Description |
+| --- | --- |
+| [@remyxjs/react README](./remyx-react/README.md) | Full API — props, hooks, theming, plugins, toolbar, menu bar, error handling, engine access, forms |
+| [@remyxjs/core README](./remyx-core/README.md) | Full API — engine, commands, plugins, selection, history, sanitizer, theming, toolbar config, utilities |
+| [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, architecture, adding commands/plugins, PR process |
+| [CHANGELOG.md](./docs/CHANGELOG.md) | Version history and release notes |
+| [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard |
+| [BENCHMARK.md](./docs/BENCHMARK.md) | Build, bundle, test, and lint performance metrics |
 
 ## License
 

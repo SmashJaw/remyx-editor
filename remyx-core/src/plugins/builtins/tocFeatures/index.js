@@ -1,1 +1,0 @@
-export { TocPlugin, buildOutline, flattenOutline, renderTocHTML, validateHeadingHierarchy } from './TocPlugin.js'

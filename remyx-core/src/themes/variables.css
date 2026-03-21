@@ -2,7 +2,7 @@
 
 .rmx-editor {
   /* ---- Layout Containment ---- */
-  contain: layout style;
+  contain: style;
 
   /* ---- Color Palette ---- */
   --rmx-bg: #ffffff;
@@ -96,7 +96,7 @@
   background: var(--rmx-bg);
   box-sizing: border-box;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--rmx-shadow-sm);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -309,6 +309,8 @@
 
 /* ====== Toolbar ====== */
 .rmx-toolbar {
+  display: flex;
+  align-items: center;
   background: var(--rmx-toolbar-bg);
   border-bottom: 1px solid var(--rmx-toolbar-border);
   padding: 6px 10px;
@@ -321,8 +323,9 @@
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  overflow: hidden;
   gap: 1px;
+  flex: 1;
+  min-width: 0;
 }
 
 /* ---- Toolbar Button ---- */
@@ -2028,6 +2031,7 @@
 .rmx-toolbar-overflow-container {
   position: relative;
   display: inline-flex;
+  flex-shrink: 0;
 }
 
 .rmx-toolbar-overflow-btn {
@@ -2039,19 +2043,19 @@
 
 .rmx-toolbar-overflow-menu {
   position: absolute;
-  top: 100%;
-  right: 0;
+  top: calc(100% + 4px);
+  right: -1px;
   display: flex;
   flex-wrap: wrap;
   gap: 1px;
   padding: 6px;
-  background: var(--rmx-modal-bg);
+  background: var(--rmx-toolbar-bg, var(--rmx-modal-bg));
   border: 1px solid var(--rmx-border);
   border-radius: var(--rmx-radius);
   box-shadow: var(--rmx-shadow-float);
   z-index: 200;
-  min-width: 200px;
-  max-width: 320px;
+  min-width: 180px;
+  max-width: 280px;
   animation: rmx-scale-in 0.12s ease;
 }
 

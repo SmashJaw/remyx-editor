@@ -28,62 +28,6 @@ const BUILTIN_PLUGINS = new Map([
     const { PlaceholderPlugin } = await import('../plugins/builtins/PlaceholderPlugin.js')
     return PlaceholderPlugin(opts?.placeholder)
   }],
-  ['SyntaxHighlightPlugin', async (opts) => {
-    const { SyntaxHighlightPlugin } = await import('../plugins/builtins/syntaxHighlight/index.js')
-    return SyntaxHighlightPlugin(opts)
-  }],
-  ['TablePlugin', async (opts) => {
-    const { TablePlugin } = await import('../plugins/builtins/tableFeatures/index.js')
-    return TablePlugin(opts)
-  }],
-  ['BlockTemplatePlugin', async (opts) => {
-    const { BlockTemplatePlugin } = await import('../plugins/builtins/BlockTemplatePlugin.js')
-    return BlockTemplatePlugin(opts)
-  }],
-  ['CommentsPlugin', async (opts) => {
-    const { CommentsPlugin } = await import('../plugins/builtins/commentsFeatures/index.js')
-    return CommentsPlugin(opts)
-  }],
-  ['CalloutPlugin', async (opts) => {
-    const { CalloutPlugin } = await import('../plugins/builtins/calloutFeatures/index.js')
-    return CalloutPlugin(opts)
-  }],
-  ['LinkPlugin', async (opts) => {
-    const { LinkPlugin } = await import('../plugins/builtins/linkFeatures/index.js')
-    return LinkPlugin(opts)
-  }],
-  ['TemplatePlugin', async (opts) => {
-    const { TemplatePlugin } = await import('../plugins/builtins/templateFeatures/index.js')
-    return TemplatePlugin(opts)
-  }],
-  ['KeyboardPlugin', async (opts) => {
-    const { KeyboardPlugin } = await import('../plugins/builtins/keyboardFeatures/index.js')
-    return KeyboardPlugin(opts)
-  }],
-  ['DragDropPlugin', async (opts) => {
-    const { DragDropPlugin } = await import('../plugins/builtins/dragDropFeatures/index.js')
-    return DragDropPlugin(opts)
-  }],
-  ['MathPlugin', async (opts) => {
-    const { MathPlugin } = await import('../plugins/builtins/mathFeatures/index.js')
-    return MathPlugin(opts)
-  }],
-  ['TocPlugin', async (opts) => {
-    const { TocPlugin } = await import('../plugins/builtins/tocFeatures/index.js')
-    return TocPlugin(opts)
-  }],
-  ['AnalyticsPlugin', async (opts) => {
-    const { AnalyticsPlugin } = await import('../plugins/builtins/analyticsFeatures/index.js')
-    return AnalyticsPlugin(opts)
-  }],
-  ['SpellcheckPlugin', async (opts) => {
-    const { SpellcheckPlugin } = await import('../plugins/builtins/spellcheckFeatures/index.js')
-    return SpellcheckPlugin(opts)
-  }],
-  ['CollaborationPlugin', async (opts) => {
-    const { CollaborationPlugin } = await import('../plugins/builtins/collaborationFeatures/index.js')
-    return CollaborationPlugin(opts)
-  }],
 ])
 
 /**

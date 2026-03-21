@@ -302,8 +302,10 @@ export const AttachmentIcon = icon(
 
 export const RemoveFormatIcon = icon(
   <>
-    <path d="M6 4h12l-4 16" />
-    <line x1="2" y1="21" x2="22" y2="3" strokeWidth="2" />
+    <path d="M8 4h8l-2 8" />
+    <path d="M5 12l-1 4h6" />
+    <line x1="3" y1="20" x2="21" y2="20" strokeWidth="1.5" />
+    <line x1="16" y1="4" x2="10" y2="16" strokeWidth="1.5" opacity="0.5" strokeDasharray="2 2" />
   </>
 )
 

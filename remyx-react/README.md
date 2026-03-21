@@ -1,15 +1,15 @@
-![Remyx Editor](https://raw.githubusercontent.com/SmashJaw/remyxjs/refs/heads/master/docs/images/Remyx-Logo.svg)
+![Remyx Editor](../docs/screenshots/Remyx-Logo.svg)
 
 # @remyxjs/react
 
-A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remyxjs/react`](https://www.npmjs.com/package/@remyxjs/core) engine. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
+A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remyxjs/core`](../remyx-core/) engine. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
 
 ## Packages
 
-| Package                                                          | Version    | Description                                                             |
-| ---------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------- |
-| [`@remyxjs/core`](https://www.npmjs.com/package/@remyxjs/core)   | 1.0.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyxjs/react`](https://www.npmjs.com/package/@remyxjs/react) | 1.0.0-beta | React components, hooks, and TypeScript declarations                    |
+| Package | Version | Description |
+| --- | --- | --- |
+| [`@remyxjs/core`](../remyx-core/) | 1.0.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./) | 1.0.0-beta | React components, hooks, and TypeScript declarations |
 
 Use `@remyxjs/core` directly if building a wrapper for another framework (Vue, Svelte, Angular, vanilla JS).
 
@@ -64,8 +64,8 @@ npm install @remyxjs/core @remyxjs/react
 Import both stylesheets in your app entry point:
 
 ```js
-import '@remyxjs/core/style.css'; // theme variables, light/dark themes
-import '@remyxjs/react/style.css'; // component styles (toolbar, modals, etc.)
+import '@remyxjs/core/style.css';   // theme variables, light/dark themes
+import '@remyxjs/react/style.css';  // component styles (toolbar, modals, etc.)
 ```
 
 ## Quick Start
@@ -102,15 +102,13 @@ function App() {
 ### Markdown Mode
 
 ```jsx
-const [markdown, setMarkdown] = useState(
-  '# Hello\n\nStart typing...',
-);
+const [markdown, setMarkdown] = useState('# Hello\n\nStart typing...');
 
 <RemyxEditor
   value={markdown}
   onChange={setMarkdown}
   outputFormat="markdown"
-/>;
+/>
 ```
 
 ### With Upload Handler
@@ -122,10 +120,7 @@ const [markdown, setMarkdown] = useState(
   uploadHandler={async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const { url } = await res.json();
     return url;
   }}
@@ -173,46 +168,46 @@ const [markdown, setMarkdown] = useState(
 
 ## Props
 
-| Prop                  | Type                                                             | Default       | Description                                                                          |
-| --------------------- | ---------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------ |
-| `config`              | `string`                                                         | —             | Named editor config from `defineConfig()`                                            |
-| `value`               | `string`                                                         | —             | Controlled content (HTML or Markdown)                                                |
-| `defaultValue`        | `string`                                                         | —             | Initial content for uncontrolled mode                                                |
-| `onChange`            | `(content: string) => void`                                      | —             | Called when content changes                                                          |
-| `outputFormat`        | `'html' \| 'markdown'`                                           | `'html'`      | Format passed to `onChange`                                                          |
-| `toolbar`             | `string[][]`                                                     | Full toolbar  | Custom toolbar layout                                                                |
-| `menuBar`             | `boolean \| MenuBarConfig[]`                                     | —             | Enable menu bar                                                                      |
-| `theme`               | `'light' \| 'dark' \| 'ocean' \| 'forest' \| 'sunset' \| 'rose'` | `'light'`     | Editor theme                                                                         |
-| `placeholder`         | `string`                                                         | `''`          | Placeholder text                                                                     |
-| `height`              | `number`                                                         | `300`         | Editor height in px                                                                  |
-| `minHeight`           | `number`                                                         | —             | Minimum height                                                                       |
-| `maxHeight`           | `number`                                                         | —             | Maximum height (scrolls)                                                             |
-| `readOnly`            | `boolean`                                                        | `false`       | Disable editing                                                                      |
-| `fonts`               | `string[]`                                                       | Built-in list | Custom font families                                                                 |
-| `googleFonts`         | `string[]`                                                       | —             | Google Font families to auto-load                                                    |
-| `statusBar`           | `'bottom' \| 'top' \| 'popup' \| false`                          | `'bottom'`    | Word/character count position                                                        |
-| `customTheme`         | `object`                                                         | —             | CSS variable overrides                                                               |
-| `toolbarItemTheme`    | `object`                                                         | —             | Per-item toolbar styling                                                             |
-| `floatingToolbar`     | `boolean`                                                        | `true`        | Show toolbar on text selection                                                       |
-| `contextMenu`         | `boolean`                                                        | `true`        | Show right-click context menu                                                        |
-| `commandPalette`      | `boolean`                                                        | `true`        | Enable command palette (Mod+Shift+P or toolbar button)                               |
-| `autosave`            | `boolean \| AutosaveConfig`                                      | `false`       | Enable autosave with optional config (storage provider, interval, key)               |
-| `emptyState`          | `boolean \| ReactNode`                                           | `false`       | Show empty state when editor has no content (true for default, or custom React node) |
-| `breadcrumb`          | `boolean`                                                        | `false`       | Show breadcrumb bar with DOM path to current selection                               |
-| `minimap`             | `boolean`                                                        | `false`       | Show minimap preview on right edge                                                   |
-| `splitViewFormat`     | `'html' \| 'markdown'`                                           | `'html'`      | Format for split view preview pane                                                   |
-| `customizableToolbar` | `boolean`                                                        | `false`       | Enable drag-and-drop toolbar button rearrangement                                    |
-| `onToolbarChange`     | `(order: string[]) => void`                                      | —             | Called when toolbar order changes via drag                                           |
-| `plugins`             | `Plugin[]`                                                       | —             | Custom plugins                                                                       |
-| `uploadHandler`       | `(file: File) => Promise<string>`                                | —             | File upload handler                                                                  |
-| `shortcuts`           | `object`                                                         | —             | Keyboard shortcut overrides                                                          |
-| `sanitize`            | `object`                                                         | —             | HTML sanitization options                                                            |
-| `attachTo`            | `React.RefObject`                                                | —             | Attach to an existing element                                                        |
-| `onReady`             | `(engine) => void`                                               | —             | Called when editor initializes                                                       |
-| `onFocus`             | `() => void`                                                     | —             | Called on focus                                                                      |
-| `onBlur`              | `() => void`                                                     | —             | Called on blur                                                                       |
-| `className`           | `string`                                                         | `''`          | CSS class for wrapper                                                                |
-| `style`               | `object`                                                         | —             | Inline styles for wrapper                                                            |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `config` | `string` | — | Named editor config from `defineConfig()` |
+| `value` | `string` | — | Controlled content (HTML or Markdown) |
+| `defaultValue` | `string` | — | Initial content for uncontrolled mode |
+| `onChange` | `(content: string) => void` | — | Called when content changes |
+| `outputFormat` | `'html' \| 'markdown'` | `'html'` | Format passed to `onChange` |
+| `toolbar` | `string[][]` | Full toolbar | Custom toolbar layout |
+| `menuBar` | `boolean \| MenuBarConfig[]` | — | Enable menu bar |
+| `theme` | `'light' \| 'dark' \| 'ocean' \| 'forest' \| 'sunset' \| 'rose'` | `'light'` | Editor theme |
+| `placeholder` | `string` | `''` | Placeholder text |
+| `height` | `number` | `300` | Editor height in px |
+| `minHeight` | `number` | — | Minimum height |
+| `maxHeight` | `number` | — | Maximum height (scrolls) |
+| `readOnly` | `boolean` | `false` | Disable editing |
+| `fonts` | `string[]` | Built-in list | Custom font families |
+| `googleFonts` | `string[]` | — | Google Font families to auto-load |
+| `statusBar` | `'bottom' \| 'top' \| 'popup' \| false` | `'bottom'` | Word/character count position |
+| `customTheme` | `object` | — | CSS variable overrides |
+| `toolbarItemTheme` | `object` | — | Per-item toolbar styling |
+| `floatingToolbar` | `boolean` | `true` | Show toolbar on text selection |
+| `contextMenu` | `boolean` | `true` | Show right-click context menu |
+| `commandPalette` | `boolean` | `true` | Enable command palette (Mod+Shift+P or toolbar button) |
+| `autosave` | `boolean \| AutosaveConfig` | `false` | Enable autosave with optional config (storage provider, interval, key) |
+| `emptyState` | `boolean \| ReactNode` | `false` | Show empty state when editor has no content (true for default, or custom React node) |
+| `breadcrumb` | `boolean` | `false` | Show breadcrumb bar with DOM path to current selection |
+| `minimap` | `boolean` | `false` | Show minimap preview on right edge |
+| `splitViewFormat` | `'html' \| 'markdown'` | `'html'` | Format for split view preview pane |
+| `customizableToolbar` | `boolean` | `false` | Enable drag-and-drop toolbar button rearrangement |
+| `onToolbarChange` | `(order: string[]) => void` | — | Called when toolbar order changes via drag |
+| `plugins` | `Plugin[]` | — | Custom plugins |
+| `uploadHandler` | `(file: File) => Promise<string>` | — | File upload handler |
+| `shortcuts` | `object` | — | Keyboard shortcut overrides |
+| `sanitize` | `object` | — | HTML sanitization options |
+| `attachTo` | `React.RefObject` | — | Attach to an existing element |
+| `onReady` | `(engine) => void` | — | Called when editor initializes |
+| `onFocus` | `() => void` | — | Called on focus |
+| `onBlur` | `() => void` | — | Called on blur |
+| `className` | `string` | `''` | CSS class for wrapper |
+| `style` | `object` | — | Inline styles for wrapper |
 
 ## Config File
 
@@ -235,11 +230,7 @@ export default defineConfig({
       height: 200,
     },
     comments: {
-      toolbar: [
-        ['bold', 'italic', 'strikethrough'],
-        ['orderedList', 'unorderedList'],
-        ['link'],
-      ],
+      toolbar: [['bold', 'italic', 'strikethrough'], ['orderedList', 'unorderedList'], ['link']],
       statusBar: false,
       height: 150,
       placeholder: 'Write a comment...',
@@ -257,10 +248,9 @@ import config from './remyx.config.js';
 function App() {
   return (
     <RemyxConfigProvider config={config}>
-      <RemyxEditor /> {/* default config */}
-      <RemyxEditor config="minimal" /> {/* named config */}
-      <RemyxEditor config="minimal" theme="light" />{' '}
-      {/* prop overrides config */}
+      <RemyxEditor />                              {/* default config */}
+      <RemyxEditor config="minimal" />             {/* named config */}
+      <RemyxEditor config="minimal" theme="light" /> {/* prop overrides config */}
     </RemyxConfigProvider>
   );
 }
@@ -303,17 +293,17 @@ function App() {
 }
 ```
 
-| Prop              | Type                                            | Description                                                              |
-| ----------------- | ----------------------------------------------- | ------------------------------------------------------------------------ |
-| `url`             | `string`                                        | URL to a JSON or YAML config file                                        |
-| `env`             | `string`                                        | Environment name for config merging (e.g., `'production'`)               |
-| `fetchHeaders`    | `Record<string, string>`                        | Custom headers for authenticated config endpoints                        |
-| `pollInterval`    | `number`                                        | Auto-reload interval in ms (0 = disabled)                                |
-| `onConfigLoad`    | `(config) => void`                              | Callback when config loads successfully                                  |
-| `onConfigError`   | `(error) => void`                               | Callback on load error                                                   |
-| `loadingFallback` | `ReactNode`                                     | UI shown while loading (default: null)                                   |
-| `errorFallback`   | `ReactNode \| ({ error, reload }) => ReactNode` | UI shown on error (default: retry button)                                |
-| `...rest`         | —                                               | All other props forwarded to `<RemyxEditor />` (overrides loaded config) |
+| Prop | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | URL to a JSON or YAML config file |
+| `env` | `string` | Environment name for config merging (e.g., `'production'`) |
+| `fetchHeaders` | `Record<string, string>` | Custom headers for authenticated config endpoints |
+| `pollInterval` | `number` | Auto-reload interval in ms (0 = disabled) |
+| `onConfigLoad` | `(config) => void` | Callback when config loads successfully |
+| `onConfigError` | `(error) => void` | Callback on load error |
+| `loadingFallback` | `ReactNode` | UI shown while loading (default: null) |
+| `errorFallback` | `ReactNode \| ({ error, reload }) => ReactNode` | UI shown on error (default: retry button) |
+| `...rest` | — | All other props forwarded to `<RemyxEditor />` (overrides loaded config) |
 
 #### useExternalConfig hook
 
@@ -323,31 +313,26 @@ For more control, use the hook directly:
 import { useExternalConfig, RemyxEditor } from '@remyxjs/react';
 
 function MyEditor() {
-  const { config, loading, error, reload } = useExternalConfig(
-    '/editor-config.yaml',
-    {
-      env: process.env.NODE_ENV,
-      pollInterval: 60000, // Auto-reload every 60s
-      onLoad: (cfg) => console.log('Config loaded:', cfg),
-      onError: (err) => console.error('Config error:', err),
-    },
-  );
+  const { config, loading, error, reload } = useExternalConfig('/editor-config.yaml', {
+    env: process.env.NODE_ENV,
+    pollInterval: 60000, // Auto-reload every 60s
+    onLoad: (cfg) => console.log('Config loaded:', cfg),
+    onError: (err) => console.error('Config error:', err),
+  });
 
   if (loading) return <div>Loading...</div>;
   if (error) return <button onClick={reload}>Retry</button>;
 
-  return (
-    <RemyxEditor {...config} value={content} onChange={setContent} />
-  );
+  return <RemyxEditor {...config} value={content} onChange={setContent} />;
 }
 ```
 
-| Return value | Type                  | Description                                         |
-| ------------ | --------------------- | --------------------------------------------------- |
-| `config`     | `object \| null`      | The loaded configuration, or null before first load |
-| `loading`    | `boolean`             | True while fetching                                 |
-| `error`      | `Error \| null`       | Fetch or parse error, or null                       |
-| `reload`     | `() => Promise<void>` | Re-fetch the config (cancels any in-flight request) |
+| Return value | Type | Description |
+| --- | --- | --- |
+| `config` | `object \| null` | The loaded configuration, or null before first load |
+| `loading` | `boolean` | True while fetching |
+| `error` | `Error \| null` | Fetch or parse error, or null |
+| `reload` | `() => Promise<void>` | Re-fetch the config (cancels any in-flight request) |
 
 ## Toolbar
 
@@ -362,24 +347,10 @@ function MyEditor() {
   ['alignLeft', 'alignCenter', 'alignRight', 'alignJustify'],
   ['orderedList', 'unorderedList', 'taskList'],
   ['outdent', 'indent'],
-  [
-    'link',
-    'image',
-    'table',
-    'embedMedia',
-    'blockquote',
-    'codeBlock',
-    'horizontalRule',
-  ],
+  ['link', 'image', 'table', 'embedMedia', 'blockquote', 'codeBlock', 'horizontalRule'],
   ['subscript', 'superscript'],
-  [
-    'findReplace',
-    'toggleMarkdown',
-    'sourceMode',
-    'export',
-    'fullscreen',
-  ],
-];
+  ['findReplace', 'toggleMarkdown', 'sourceMode', 'export', 'fullscreen'],
+]
 ```
 
 Each inner array is a visual group separated by a divider.
@@ -415,12 +386,7 @@ import { TOOLBAR_PRESETS } from '@remyxjs/react';
 ```jsx
 import { DEFAULT_TOOLBAR, removeToolbarItems } from '@remyxjs/react';
 
-const toolbar = removeToolbarItems(DEFAULT_TOOLBAR, [
-  'image',
-  'table',
-  'embedMedia',
-  'export',
-]);
+const toolbar = removeToolbarItems(DEFAULT_TOOLBAR, ['image', 'table', 'embedMedia', 'export']);
 ```
 
 #### `addToolbarItems(config, items, options?)`
@@ -428,14 +394,10 @@ const toolbar = removeToolbarItems(DEFAULT_TOOLBAR, [
 ```jsx
 import { TOOLBAR_PRESETS, addToolbarItems } from '@remyxjs/react';
 
-addToolbarItems(TOOLBAR_PRESETS.minimal, ['fullscreen']); // append as new group
-addToolbarItems(TOOLBAR_PRESETS.minimal, 'fullscreen', { group: -1 }); // add to last group
-addToolbarItems(TOOLBAR_PRESETS.minimal, 'taskList', {
-  after: 'unorderedList',
-});
-addToolbarItems(TOOLBAR_PRESETS.minimal, 'strikethrough', {
-  before: 'underline',
-});
+addToolbarItems(TOOLBAR_PRESETS.minimal, ['fullscreen'])              // append as new group
+addToolbarItems(TOOLBAR_PRESETS.minimal, 'fullscreen', { group: -1 }) // add to last group
+addToolbarItems(TOOLBAR_PRESETS.minimal, 'taskList', { after: 'unorderedList' })
+addToolbarItems(TOOLBAR_PRESETS.minimal, 'strikethrough', { before: 'underline' })
 ```
 
 #### `createToolbar(items)`
@@ -446,78 +408,71 @@ Build a toolbar from a flat list — items are auto-grouped by category:
 import { createToolbar } from '@remyxjs/react';
 
 const toolbar = createToolbar([
-  'bold',
-  'italic',
-  'underline',
-  'headings',
-  'link',
-  'image',
-  'orderedList',
-  'unorderedList',
-  'fullscreen',
+  'bold', 'italic', 'underline', 'headings',
+  'link', 'image', 'orderedList', 'unorderedList', 'fullscreen',
 ]);
 // Groups by category: [['headings'], ['bold', 'italic', 'underline'], ['orderedList', 'unorderedList'], ['link', 'image'], ['fullscreen']]
 ```
 
 ### Available Toolbar Items
 
-| Item                 | Type         | Description                                                          |
-| -------------------- | ------------ | -------------------------------------------------------------------- |
-| `undo`               | Button       | Undo last action                                                     |
-| `redo`               | Button       | Redo last action                                                     |
-| `headings`           | Dropdown     | Block type (Normal, H1–H6)                                           |
-| `fontFamily`         | Dropdown     | Font family selector                                                 |
-| `fontSize`           | Dropdown     | Font size selector                                                   |
-| `bold`               | Button       | Bold                                                                 |
-| `italic`             | Button       | Italic                                                               |
-| `underline`          | Button       | Underline                                                            |
-| `strikethrough`      | Button       | Strikethrough                                                        |
-| `subscript`          | Button       | Subscript                                                            |
-| `superscript`        | Button       | Superscript                                                          |
-| `foreColor`          | Color Picker | Text color                                                           |
-| `backColor`          | Color Picker | Background color                                                     |
-| `alignLeft`          | Button       | Align left                                                           |
-| `alignCenter`        | Button       | Align center                                                         |
-| `alignRight`         | Button       | Align right                                                          |
-| `alignJustify`       | Button       | Justify                                                              |
-| `orderedList`        | Button       | Numbered list                                                        |
-| `unorderedList`      | Button       | Bulleted list                                                        |
-| `taskList`           | Button       | Task/checkbox list                                                   |
-| `indent`             | Button       | Increase indent                                                      |
-| `outdent`            | Button       | Decrease indent                                                      |
-| `link`               | Button       | Insert/edit link                                                     |
-| `image`              | Button       | Insert image                                                         |
-| `attachment`         | Button       | Attach file                                                          |
-| `importDocument`     | Button       | Import (PDF, DOCX, MD, CSV)                                          |
-| `table`              | Button       | Insert table                                                         |
-| `embedMedia`         | Button       | Embed video/media                                                    |
-| `blockquote`         | Button       | Block quote                                                          |
-| `codeBlock`          | Button       | Code block                                                           |
-| `horizontalRule`     | Button       | Horizontal divider                                                   |
-| `findReplace`        | Button       | Find and replace                                                     |
-| `toggleMarkdown`     | Button       | Toggle markdown mode                                                 |
-| `sourceMode`         | Button       | View/edit HTML source                                                |
-| `export`             | Button       | Export (PDF, MD, DOCX)                                               |
-| `commandPalette`     | Button       | Open command palette                                                 |
-| `fullscreen`         | Button       | Toggle fullscreen                                                    |
-| `insertCallout`      | Button       | Insert callout block                                                 |
-| `insertMath`         | Button       | Insert math equation                                                 |
-| `insertToc`          | Button       | Insert table of contents                                             |
-| `insertBookmark`     | Button       | Insert bookmark anchor                                               |
-| `insertMergeTag`     | Button       | Insert merge tag                                                     |
-| `toggleAnalytics`    | Button       | Toggle analytics panel                                               |
-| `toggleSpellcheck`   | Button       | Toggle spellcheck                                                    |
-| `checkGrammar`       | Button       | Run grammar check                                                    |
-| `addComment`         | Button       | Add inline comment on selection                                      |
-| `removeFormat`       | Button       | Remove all inline formatting                                         |
-| `distractionFree`    | Button       | Toggle distraction-free mode (Mod+Shift+D)                           |
-| `toggleSplitView`    | Button       | Toggle side-by-side preview (Mod+Shift+V)                            |
-| `typography`         | Dropdown     | Typography controls (line height, letter spacing, paragraph spacing) |
-| `lineHeight`         | Dropdown     | Line height adjustment                                               |
-| `letterSpacing`      | Dropdown     | Letter spacing adjustment                                            |
-| `paragraphSpacing`   | Dropdown     | Paragraph spacing adjustment                                         |
-| `startCollaboration` | Button       | Start real-time collaboration session                                |
-| `stopCollaboration`  | Button       | Stop collaboration session                                           |
+| Item | Type | Description |
+| --- | --- | --- |
+| `undo` | Button | Undo last action |
+| `redo` | Button | Redo last action |
+| `headings` | Dropdown | Block type (Normal, H1–H6) |
+| `fontFamily` | Dropdown | Font family selector |
+| `fontSize` | Dropdown | Font size selector |
+| `bold` | Button | Bold |
+| `italic` | Button | Italic |
+| `underline` | Button | Underline |
+| `strikethrough` | Button | Strikethrough |
+| `subscript` | Button | Subscript |
+| `superscript` | Button | Superscript |
+| `foreColor` | Color Picker | Text color |
+| `backColor` | Color Picker | Background color |
+| `alignLeft` | Button | Align left |
+| `alignCenter` | Button | Align center |
+| `alignRight` | Button | Align right |
+| `alignJustify` | Button | Justify |
+| `orderedList` | Button | Numbered list |
+| `unorderedList` | Button | Bulleted list |
+| `taskList` | Button | Task/checkbox list |
+| `indent` | Button | Increase indent |
+| `outdent` | Button | Decrease indent |
+| `link` | Button | Insert/edit link |
+| `image` | Button | Insert image |
+| `attachment` | Button | Attach file |
+| `importDocument` | Button | Import (PDF, DOCX, MD, CSV) |
+| `table` | Button | Insert table |
+| `embedMedia` | Button | Embed video/media |
+| `blockquote` | Button | Block quote |
+| `codeBlock` | Button | Code block |
+| `horizontalRule` | Button | Horizontal divider |
+| `findReplace` | Button | Find and replace |
+| `toggleMarkdown` | Button | Toggle markdown mode |
+| `sourceMode` | Button | View/edit HTML source |
+| `export` | Button | Export (PDF, MD, DOCX) |
+| `commandPalette` | Button | Open command palette |
+| `fullscreen` | Button | Toggle fullscreen |
+| `insertCallout` | Button | Insert callout block |
+| `insertMath` | Button | Insert math equation |
+| `insertToc` | Button | Insert table of contents |
+| `insertBookmark` | Button | Insert bookmark anchor |
+| `insertMergeTag` | Button | Insert merge tag |
+| `toggleAnalytics` | Button | Toggle analytics panel |
+| `toggleSpellcheck` | Button | Toggle spellcheck |
+| `checkGrammar` | Button | Run grammar check |
+| `addComment` | Button | Add inline comment on selection |
+| `removeFormat` | Button | Remove all inline formatting |
+| `distractionFree` | Button | Toggle distraction-free mode (Mod+Shift+D) |
+| `toggleSplitView` | Button | Toggle side-by-side preview (Mod+Shift+V) |
+| `typography` | Dropdown | Typography controls (line height, letter spacing, paragraph spacing) |
+| `lineHeight` | Dropdown | Line height adjustment |
+| `letterSpacing` | Dropdown | Letter spacing adjustment |
+| `paragraphSpacing` | Dropdown | Paragraph spacing adjustment |
+| `startCollaboration` | Button | Start real-time collaboration session |
+| `stopCollaboration` | Button | Stop collaboration session |
 
 ## Menu Bar
 
@@ -531,13 +486,13 @@ Add an application-style menu bar above the toolbar. Both the toolbar and menu b
 
 **Default menus:**
 
-| Menu       | Items                                                                                                                                                                         |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **File**   | Import Document, Export Document                                                                                                                                              |
-| **Edit**   | Undo, Redo, Find & Replace                                                                                                                                                    |
-| **View**   | Fullscreen, Distraction-Free Mode, Split View, Toggle Markdown, Source Mode, Toggle Analytics                                                                                 |
+| Menu | Items |
+| --- | --- |
+| **File** | Import Document, Export Document |
+| **Edit** | Undo, Redo, Find & Replace |
+| **View** | Fullscreen, Distraction-Free Mode, Split View, Toggle Markdown, Source Mode, Toggle Analytics |
 | **Insert** | Link, Image, Table, Attachment, Embed Media, Blockquote, Code Block, Horizontal Rule, Insert Callout, Insert Math, Insert TOC, Insert Bookmark, Insert Merge Tag, Add Comment |
-| **Format** | Bold, Italic, Underline, Strikethrough, Subscript, Superscript, Alignment, Lists, Colors, Typography (Line Height, Letter Spacing, Paragraph Spacing), Remove Formatting      |
+| **Format** | Bold, Italic, Underline, Strikethrough, Subscript, Superscript, Alignment, Lists, Colors, Typography (Line Height, Letter Spacing, Paragraph Spacing), Remove Formatting |
 
 ### Custom Menu Bar
 
@@ -546,24 +501,11 @@ Add an application-style menu bar above the toolbar. Both the toolbar and menu b
   menuBar={[
     { label: 'File', items: ['importDocument', 'export'] },
     { label: 'Edit', items: ['undo', 'redo', '---', 'findReplace'] },
-    {
-      label: 'Format',
-      items: [
-        'bold',
-        'italic',
-        'underline',
-        '---',
-        {
-          label: 'Alignment',
-          items: [
-            'alignLeft',
-            'alignCenter',
-            'alignRight',
-            'alignJustify',
-          ],
-        },
-      ],
-    },
+    { label: 'Format', items: [
+      'bold', 'italic', 'underline',
+      '---',
+      { label: 'Alignment', items: ['alignLeft', 'alignCenter', 'alignRight', 'alignJustify'] },
+    ]},
   ]}
 />
 ```
@@ -614,31 +556,25 @@ Multiple `<RemyxEditor />` instances work on the same page without any additiona
 
 ### What's Isolated Per Instance
 
-| Feature                | Isolation                                                         |
-| ---------------------- | ----------------------------------------------------------------- |
-| **Content & state**    | Separate undo/redo history, content, and selection                |
-| **Toolbar**            | Independent dropdowns, color pickers, and active states           |
-| **Menu bar**           | Menus open/close independently per editor                         |
-| **Modals**             | Each editor has its own modals (link, image, table, find/replace) |
-| **Floating toolbar**   | Appears only for the editor with an active selection              |
-| **Context menu**       | Scoped to the clicked editor                                      |
-| **Fullscreen**         | Each editor enters/exits fullscreen independently                 |
-| **Plugins**            | Per-editor plugin instances with separate state                   |
-| **Events**             | Separate `EventBus` per instance                                  |
-| **Keyboard shortcuts** | Fire only for the focused editor                                  |
+| Feature | Isolation |
+| --- | --- |
+| **Content & state** | Separate undo/redo history, content, and selection |
+| **Toolbar** | Independent dropdowns, color pickers, and active states |
+| **Menu bar** | Menus open/close independently per editor |
+| **Modals** | Each editor has its own modals (link, image, table, find/replace) |
+| **Floating toolbar** | Appears only for the editor with an active selection |
+| **Context menu** | Scoped to the clicked editor |
+| **Fullscreen** | Each editor enters/exits fullscreen independently |
+| **Plugins** | Per-editor plugin instances with separate state |
+| **Events** | Separate `EventBus` per instance |
+| **Keyboard shortcuts** | Fire only for the focused editor |
 
 ### Mixed Configurations
 
 ```jsx
 <RemyxConfigProvider config={config}>
   <RemyxEditor menuBar={true} height={400} />
-  <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 16,
-    }}
-  >
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
     <RemyxEditor config="minimal" />
     <RemyxEditor config="comments" />
   </div>
@@ -653,9 +589,7 @@ No hard limit on editor count. Performance scales linearly. Editors in a `RemyxC
 ### Custom Font List
 
 ```jsx
-<RemyxEditor
-  fonts={['Arial', 'Georgia', 'Courier New', 'My Custom Font']}
-/>
+<RemyxEditor fonts={['Arial', 'Georgia', 'Courier New', 'My Custom Font']} />
 ```
 
 ### Google Fonts
@@ -675,12 +609,7 @@ Google Fonts are auto-loaded via CDN and merged into the font dropdown.
 ### Font Helper Functions
 
 ```jsx
-import {
-  DEFAULT_FONTS,
-  removeFonts,
-  addFonts,
-  loadGoogleFonts,
-} from '@remyxjs/react';
+import { DEFAULT_FONTS, removeFonts, addFonts, loadGoogleFonts } from '@remyxjs/react';
 
 // Remove fonts
 const fonts = removeFonts(DEFAULT_FONTS, ['Comic Sans MS', 'Impact']);
@@ -729,15 +658,13 @@ const brandTheme = createTheme({
   contentFontSize: '18px',
 });
 
-<RemyxEditor theme="dark" customTheme={brandTheme} />;
+<RemyxEditor theme="dark" customTheme={brandTheme} />
 ```
 
 Or pass raw CSS variables directly:
 
 ```jsx
-<RemyxEditor
-  customTheme={{ '--rmx-primary': '#e94560', '--rmx-bg': '#1a1a2e' }}
-/>
+<RemyxEditor customTheme={{ '--rmx-primary': '#e94560', '--rmx-bg': '#1a1a2e' }} />
 ```
 
 ### Theme Presets
@@ -758,48 +685,45 @@ Override individual variables on top of any theme with `customTheme`:
 ```jsx
 import { createTheme } from '@remyxjs/react';
 
-<RemyxEditor
-  theme="ocean"
-  customTheme={createTheme({ primary: '#ff6b6b' })}
-/>;
+<RemyxEditor theme="ocean" customTheme={createTheme({ primary: '#ff6b6b' })} />
 ```
 
 ### Available Theme Variables
 
-| Key                   | CSS Variable                  | Description                 |
-| --------------------- | ----------------------------- | --------------------------- |
-| `bg`                  | `--rmx-bg`                    | Editor background           |
-| `text`                | `--rmx-text`                  | Primary text color          |
-| `textSecondary`       | `--rmx-text-secondary`        | Muted text color            |
-| `border`              | `--rmx-border`                | Border color                |
-| `borderSubtle`        | `--rmx-border-subtle`         | Subtle border color         |
-| `toolbarBg`           | `--rmx-toolbar-bg`            | Toolbar background          |
-| `toolbarBorder`       | `--rmx-toolbar-border`        | Toolbar border              |
-| `toolbarButtonHover`  | `--rmx-toolbar-button-hover`  | Button hover background     |
-| `toolbarButtonActive` | `--rmx-toolbar-button-active` | Button active background    |
-| `toolbarIcon`         | `--rmx-toolbar-icon`          | Icon color                  |
-| `toolbarIconActive`   | `--rmx-toolbar-icon-active`   | Active icon color           |
-| `primary`             | `--rmx-primary`               | Primary accent color        |
-| `primaryHover`        | `--rmx-primary-hover`         | Primary hover color         |
-| `primaryLight`        | `--rmx-primary-light`         | Light primary (backgrounds) |
-| `focusRing`           | `--rmx-focus-ring`            | Focus outline color         |
-| `selection`           | `--rmx-selection`             | Text selection color        |
-| `danger`              | `--rmx-danger`                | Error/danger color          |
-| `dangerLight`         | `--rmx-danger-light`          | Light danger color          |
-| `placeholder`         | `--rmx-placeholder`           | Placeholder text color      |
-| `modalBg`             | `--rmx-modal-bg`              | Modal background            |
-| `modalOverlay`        | `--rmx-modal-overlay`         | Modal overlay               |
-| `statusbarBg`         | `--rmx-statusbar-bg`          | Status bar background       |
-| `statusbarText`       | `--rmx-statusbar-text`        | Status bar text             |
-| `fontFamily`          | `--rmx-font-family`           | UI font stack               |
-| `fontSize`            | `--rmx-font-size`             | UI font size                |
-| `contentFontSize`     | `--rmx-content-font-size`     | Content font size           |
-| `contentLineHeight`   | `--rmx-content-line-height`   | Content line height         |
-| `radius`              | `--rmx-radius`                | Border radius               |
-| `radiusSm`            | `--rmx-radius-sm`             | Small border radius         |
-| `spacingXs`           | `--rmx-spacing-xs`            | Extra small spacing         |
-| `spacingSm`           | `--rmx-spacing-sm`            | Small spacing               |
-| `spacingMd`           | `--rmx-spacing-md`            | Medium spacing              |
+| Key | CSS Variable | Description |
+| --- | --- | --- |
+| `bg` | `--rmx-bg` | Editor background |
+| `text` | `--rmx-text` | Primary text color |
+| `textSecondary` | `--rmx-text-secondary` | Muted text color |
+| `border` | `--rmx-border` | Border color |
+| `borderSubtle` | `--rmx-border-subtle` | Subtle border color |
+| `toolbarBg` | `--rmx-toolbar-bg` | Toolbar background |
+| `toolbarBorder` | `--rmx-toolbar-border` | Toolbar border |
+| `toolbarButtonHover` | `--rmx-toolbar-button-hover` | Button hover background |
+| `toolbarButtonActive` | `--rmx-toolbar-button-active` | Button active background |
+| `toolbarIcon` | `--rmx-toolbar-icon` | Icon color |
+| `toolbarIconActive` | `--rmx-toolbar-icon-active` | Active icon color |
+| `primary` | `--rmx-primary` | Primary accent color |
+| `primaryHover` | `--rmx-primary-hover` | Primary hover color |
+| `primaryLight` | `--rmx-primary-light` | Light primary (backgrounds) |
+| `focusRing` | `--rmx-focus-ring` | Focus outline color |
+| `selection` | `--rmx-selection` | Text selection color |
+| `danger` | `--rmx-danger` | Error/danger color |
+| `dangerLight` | `--rmx-danger-light` | Light danger color |
+| `placeholder` | `--rmx-placeholder` | Placeholder text color |
+| `modalBg` | `--rmx-modal-bg` | Modal background |
+| `modalOverlay` | `--rmx-modal-overlay` | Modal overlay |
+| `statusbarBg` | `--rmx-statusbar-bg` | Status bar background |
+| `statusbarText` | `--rmx-statusbar-text` | Status bar text |
+| `fontFamily` | `--rmx-font-family` | UI font stack |
+| `fontSize` | `--rmx-font-size` | UI font size |
+| `contentFontSize` | `--rmx-content-font-size` | Content font size |
+| `contentLineHeight` | `--rmx-content-line-height` | Content line height |
+| `radius` | `--rmx-radius` | Border radius |
+| `radiusSm` | `--rmx-radius-sm` | Small border radius |
+| `spacingXs` | `--rmx-spacing-xs` | Extra small spacing |
+| `spacingSm` | `--rmx-spacing-sm` | Small spacing |
+| `spacingMd` | `--rmx-spacing-md` | Medium spacing |
 
 ### Per-Item Toolbar Theming
 
@@ -809,53 +733,40 @@ Style individual toolbar buttons independently using `toolbarItemTheme`.
 import { createToolbarItemTheme } from '@remyxjs/react';
 
 const itemTheme = createToolbarItemTheme({
-  bold: {
-    color: '#e11d48',
-    activeColor: '#be123c',
-    activeBackground: '#ffe4e6',
-    borderRadius: '50%',
-  },
-  italic: {
-    color: '#7c3aed',
-    activeColor: '#6d28d9',
-    activeBackground: '#ede9fe',
-  },
-  underline: {
-    color: '#0891b2',
-    activeColor: '#0e7490',
-    activeBackground: '#cffafe',
-  },
+  bold:      { color: '#e11d48', activeColor: '#be123c', activeBackground: '#ffe4e6', borderRadius: '50%' },
+  italic:    { color: '#7c3aed', activeColor: '#6d28d9', activeBackground: '#ede9fe' },
+  underline: { color: '#0891b2', activeColor: '#0e7490', activeBackground: '#cffafe' },
   _separator: { color: '#c4b5fd', width: '2px' },
 });
 
-<RemyxEditor toolbarItemTheme={itemTheme} />;
+<RemyxEditor toolbarItemTheme={itemTheme} />
 ```
 
 Both `customTheme` and `toolbarItemTheme` can be used together — `customTheme` sets global styles, `toolbarItemTheme` overrides specific items.
 
 **Per-item style properties:**
 
-| Key                | CSS Variable            | Description            |
-| ------------------ | ----------------------- | ---------------------- |
-| `color`            | `--rmx-tb-color`        | Icon/text color        |
-| `background`       | `--rmx-tb-bg`           | Default background     |
-| `hoverColor`       | `--rmx-tb-hover-color`  | Color on hover         |
-| `hoverBackground`  | `--rmx-tb-hover-bg`     | Background on hover    |
-| `activeColor`      | `--rmx-tb-active-color` | Color when active      |
-| `activeBackground` | `--rmx-tb-active-bg`    | Background when active |
-| `border`           | `--rmx-tb-border`       | Border shorthand       |
-| `borderRadius`     | `--rmx-tb-radius`       | Border radius          |
-| `size`             | `--rmx-tb-size`         | Button width & height  |
-| `iconSize`         | `--rmx-tb-icon-size`    | Icon size              |
-| `padding`          | `--rmx-tb-padding`      | Button padding         |
-| `opacity`          | `--rmx-tb-opacity`      | Button opacity         |
+| Key | CSS Variable | Description |
+| --- | --- | --- |
+| `color` | `--rmx-tb-color` | Icon/text color |
+| `background` | `--rmx-tb-bg` | Default background |
+| `hoverColor` | `--rmx-tb-hover-color` | Color on hover |
+| `hoverBackground` | `--rmx-tb-hover-bg` | Background on hover |
+| `activeColor` | `--rmx-tb-active-color` | Color when active |
+| `activeBackground` | `--rmx-tb-active-bg` | Background when active |
+| `border` | `--rmx-tb-border` | Border shorthand |
+| `borderRadius` | `--rmx-tb-radius` | Border radius |
+| `size` | `--rmx-tb-size` | Button width & height |
+| `iconSize` | `--rmx-tb-icon-size` | Icon size |
+| `padding` | `--rmx-tb-padding` | Button padding |
+| `opacity` | `--rmx-tb-opacity` | Button opacity |
 
 **Separator properties** (via `_separator` key):
 
-| Key      | CSS Variable          | Description      |
-| -------- | --------------------- | ---------------- |
-| `color`  | `--rmx-tb-sep-color`  | Separator color  |
-| `width`  | `--rmx-tb-sep-width`  | Separator width  |
+| Key | CSS Variable | Description |
+| --- | --- | --- |
+| `color` | `--rmx-tb-sep-color` | Separator color |
+| `width` | `--rmx-tb-sep-width` | Separator width |
 | `height` | `--rmx-tb-sep-height` | Separator height |
 | `margin` | `--rmx-tb-sep-margin` | Separator margin |
 
@@ -863,15 +774,15 @@ Both `customTheme` and `toolbarItemTheme` can be used together — `customTheme`
 
 The editor cleans and normalizes pasted content automatically.
 
-| Source             | Handling                                                                                                    |
-| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Source | Handling |
+| --- | --- |
 | **Microsoft Word** | Strips Office XML, `mso-*` styles, conditional comments. Converts Word-style lists to proper `<ul>`/`<ol>`. |
-| **Google Docs**    | Removes internal IDs/classes. Converts styled spans to semantic tags (`<strong>`, `<em>`, `<s>`).           |
-| **LibreOffice**    | Strips namespace tags and auto-generated class names.                                                       |
-| **Apple Pages**    | Removes iWork-specific attributes.                                                                          |
-| **Markdown**       | Auto-detects and converts to rich HTML (headings, lists, bold, links, code fences, etc.).                   |
-| **Plain text**     | Wraps in `<p>` tags with `<br>` for line breaks.                                                            |
-| **Images**         | Inserted as base64 data URIs, or uploaded via `uploadHandler` if configured.                                |
+| **Google Docs** | Removes internal IDs/classes. Converts styled spans to semantic tags (`<strong>`, `<em>`, `<s>`). |
+| **LibreOffice** | Strips namespace tags and auto-generated class names. |
+| **Apple Pages** | Removes iWork-specific attributes. |
+| **Markdown** | Auto-detects and converts to rich HTML (headings, lists, bold, links, code fences, etc.). |
+| **Plain text** | Wraps in `<p>` tags with `<br>` for line breaks. |
+| **Images** | Inserted as base64 data URIs, or uploaded via `uploadHandler` if configured. |
 
 All paste paths (keyboard, drag-and-drop, context menu) share the same pipeline: HTML goes through `cleanPastedHTML()` then `Sanitizer.sanitize()`. Plain text is checked by `looksLikeMarkdown()` and converted if detected.
 
@@ -895,10 +806,7 @@ Without an `uploadHandler`, images are inserted as base64 data URIs and the atta
   uploadHandler={async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const { url } = await res.json();
     return url;
   }}
@@ -913,17 +821,10 @@ Without an `uploadHandler`, images are inserted as base64 data URIs and the atta
     const res = await fetch('/api/presign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type,
-      }),
+      body: JSON.stringify({ filename: file.name, contentType: file.type }),
     });
     const { uploadUrl, publicUrl } = await res.json();
-    await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file,
-    });
+    await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
     return publicUrl;
   }}
 />
@@ -933,12 +834,12 @@ Without an `uploadHandler`, images are inserted as base64 data URIs and the atta
 
 The handler is called consistently across all upload surfaces:
 
-| Path                            | Result                                 |
-| ------------------------------- | -------------------------------------- |
-| Image toolbar (Upload tab)      | Inserted as `<img>`                    |
-| Attachment toolbar (Upload tab) | Inserted as attachment chip            |
-| Drag & drop image/file          | Image as `<img>`, others as attachment |
-| Paste image/file                | Same as drag & drop                    |
+| Path | Result |
+| --- | --- |
+| Image toolbar (Upload tab) | Inserted as `<img>` |
+| Attachment toolbar (Upload tab) | Inserted as attachment chip |
+| Drag & drop image/file | Image as `<img>`, others as attachment |
+| Paste image/file | Same as drag & drop |
 
 ## Output Formats
 
@@ -992,15 +893,12 @@ import { useRemyxEditor } from '@remyxjs/react';
 
 function MyEditor() {
   const targetRef = useRef(null);
-  const { engine, containerRef, editableRef, ready } = useRemyxEditor(
-    targetRef,
-    {
-      onChange: (content) => console.log(content),
-      placeholder: 'Type here...',
-      theme: 'light',
-      height: 400,
-    },
-  );
+  const { engine, containerRef, editableRef, ready } = useRemyxEditor(targetRef, {
+    onChange: (content) => console.log(content),
+    placeholder: 'Type here...',
+    theme: 'light',
+    height: 400,
+  });
 
   return <textarea ref={targetRef} />;
 }
@@ -1050,55 +948,29 @@ Fifteen built-in plugins are available:
 - **SpellcheckPlugin** — built-in grammar engine with passive voice detection, wordiness patterns, cliche detection, and punctuation checks. Inline red wavy (spelling), blue wavy (grammar), and green dotted (style) underlines. Right-click context menu with correction suggestions, "Ignore", and "Add to Dictionary". Writing-style presets (formal, casual, technical, academic). BCP 47 multi-language support. Optional `customService` interface for LanguageTool/Grammarly. Persistent dictionary via localStorage. `onError`/`onCorrection` callbacks + `spellcheck:update`/`grammar:check` events. Adds 6 commands: `toggleSpellcheck`, `checkGrammar`, `addToDictionary`, `ignoreWord`, `setWritingStyle`, `getSpellcheckStats`.
 
 ```jsx
-import {
-  SyntaxHighlightPlugin,
-  TablePlugin,
-  CommentsPlugin,
-  CalloutPlugin,
-  LinkPlugin,
-  TemplatePlugin,
-  KeyboardPlugin,
-  DragDropPlugin,
-  MathPlugin,
-  TocPlugin,
-  AnalyticsPlugin,
-  SpellcheckPlugin,
-} from '@remyxjs/react';
+import { SyntaxHighlightPlugin, TablePlugin, CommentsPlugin, CalloutPlugin, LinkPlugin, TemplatePlugin, KeyboardPlugin, DragDropPlugin, MathPlugin, TocPlugin, AnalyticsPlugin, SpellcheckPlugin } from '@remyxjs/react';
 
 <RemyxEditor
-  plugins={[
-    SyntaxHighlightPlugin(),
-    TablePlugin(),
-    CommentsPlugin(),
-    CalloutPlugin(),
-    LinkPlugin(),
-    TemplatePlugin(),
-    KeyboardPlugin(),
-    DragDropPlugin(),
-    MathPlugin(),
-    TocPlugin(),
-    AnalyticsPlugin(),
-    SpellcheckPlugin(),
-  ]}
-/>;
+  plugins={[SyntaxHighlightPlugin(), TablePlugin(), CommentsPlugin(), CalloutPlugin(), LinkPlugin(), TemplatePlugin(), KeyboardPlugin(), DragDropPlugin(), MathPlugin(), TocPlugin(), AnalyticsPlugin(), SpellcheckPlugin()]}
+/>
 ```
 
 #### TablePlugin in depth
 
 When `TablePlugin()` is active, every `<table class="rmx-table">` in the editor automatically gains:
 
-| Feature               | How it works                                                                                                                                                                                                                                                                                                                                                                |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sortable columns**  | Click any `<th>` to cycle through ascending → descending → unsorted. Rows are physically reordered in the DOM so the sort persists in HTML output.                                                                                                                                                                                                                          |
-| **Multi-column sort** | Hold **Shift** and click additional headers. A small priority number appears on each sorted header.                                                                                                                                                                                                                                                                         |
-| **Sort data types**   | The sort auto-detects numeric, date, or alphabetical data. Pass `dataType` explicitly or provide a custom comparator via the `tableSortComparator` engine option.                                                                                                                                                                                                           |
-| **Sort indicators**   | ▲/▼ triangles rendered via CSS `::after` on `<th>` elements with `data-sort-dir` attributes.                                                                                                                                                                                                                                                                                |
-| **Filterable rows**   | A small ▽ icon appears in each header cell. Click it to open a filter dropdown with a text input. Rows not matching the filter are hidden (non-destructive — they reappear when the filter is cleared). Multiple columns can be filtered simultaneously (AND logic).                                                                                                        |
-| **Column/row resize** | Invisible 6px drag handles appear at column and row borders. Drag to resize. The resize is smooth (rAF-driven) and creates an undo snapshot on mouseup.                                                                                                                                                                                                                     |
-| **Inline formulas**   | Type `=SUM(A1:A5)` in any cell. On blur, the formula is stored in a `data-formula` attribute and the computed result is displayed. On focus, the formula text is shown for editing. Supports SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT, cell references (A1 notation), ranges, arithmetic, and comparison operators. Circular references are detected and display `#CIRC!`. |
-| **Cell formatting**   | Right-click a cell to format as Number, Currency, Percentage, or Date. The raw value is preserved in `data-raw-value`; the display uses `Intl.NumberFormat` / `Intl.DateTimeFormat`.                                                                                                                                                                                        |
-| **Sticky header**     | `<thead><th>` cells use `position: sticky` so the header row stays visible when scrolling tall tables.                                                                                                                                                                                                                                                                      |
-| **Clipboard interop** | Copying table content produces both HTML and TSV (tab-separated values). Pasting TSV or HTML tables from Excel / Google Sheets inserts data into the grid starting at the caret cell, auto-expanding rows and columns as needed.                                                                                                                                            |
+| Feature | How it works |
+| --- | --- |
+| **Sortable columns** | Click any `<th>` to cycle through ascending → descending → unsorted. Rows are physically reordered in the DOM so the sort persists in HTML output. |
+| **Multi-column sort** | Hold **Shift** and click additional headers. A small priority number appears on each sorted header. |
+| **Sort data types** | The sort auto-detects numeric, date, or alphabetical data. Pass `dataType` explicitly or provide a custom comparator via the `tableSortComparator` engine option. |
+| **Sort indicators** | ▲/▼ triangles rendered via CSS `::after` on `<th>` elements with `data-sort-dir` attributes. |
+| **Filterable rows** | A small ▽ icon appears in each header cell. Click it to open a filter dropdown with a text input. Rows not matching the filter are hidden (non-destructive — they reappear when the filter is cleared). Multiple columns can be filtered simultaneously (AND logic). |
+| **Column/row resize** | Invisible 6px drag handles appear at column and row borders. Drag to resize. The resize is smooth (rAF-driven) and creates an undo snapshot on mouseup. |
+| **Inline formulas** | Type `=SUM(A1:A5)` in any cell. On blur, the formula is stored in a `data-formula` attribute and the computed result is displayed. On focus, the formula text is shown for editing. Supports SUM, AVERAGE, COUNT, MIN, MAX, IF, CONCAT, cell references (A1 notation), ranges, arithmetic, and comparison operators. Circular references are detected and display `#CIRC!`. |
+| **Cell formatting** | Right-click a cell to format as Number, Currency, Percentage, or Date. The raw value is preserved in `data-raw-value`; the display uses `Intl.NumberFormat` / `Intl.DateTimeFormat`. |
+| **Sticky header** | `<thead><th>` cells use `position: sticky` so the header row stays visible when scrolling tall tables. |
+| **Clipboard interop** | Copying table content produces both HTML and TSV (tab-separated values). Pasting TSV or HTML tables from Excel / Google Sheets inserts data into the grid starting at the caret cell, auto-expanding rows and columns as needed. |
 
 **Custom sort comparator:**
 
@@ -1144,9 +1016,7 @@ function MyEditor() {
       <button onClick={handleFilter}>Show active only</button>
       <RemyxEditor
         plugins={[TablePlugin()]}
-        onReady={(engine) => {
-          engineRef.current = engine;
-        }}
+        onReady={(engine) => { engineRef.current = engine; }}
       />
     </>
   );
@@ -1154,7 +1024,6 @@ function MyEditor() {
 ```
 
 **Context menu additions** (appear when right-clicking inside a table):
-
 - Toggle Header Row
 - Format as Number / Currency / Percentage / Date
 - Clear Filters
@@ -1166,7 +1035,7 @@ The `CalloutPlugin` adds styled callout/alert/admonition blocks with collapsible
 ```jsx
 import { CalloutPlugin } from '@remyxjs/react';
 
-<RemyxEditor plugins={[CalloutPlugin()]} />;
+<RemyxEditor plugins={[CalloutPlugin()]} />
 ```
 
 **Insert callouts programmatically:**
@@ -1176,11 +1045,7 @@ import { CalloutPlugin } from '@remyxjs/react';
 engine.executeCommand('insertCallout', { type: 'warning' });
 
 // Collapsible with custom title
-engine.executeCommand('insertCallout', {
-  type: 'tip',
-  collapsible: true,
-  title: 'Pro tip',
-});
+engine.executeCommand('insertCallout', { type: 'tip', collapsible: true, title: 'Pro tip' });
 
 // With pre-populated content
 engine.executeCommand('insertCallout', {
@@ -1193,12 +1058,7 @@ engine.executeCommand('changeCalloutType', 'error');
 
 // Register a custom callout type
 import { registerCalloutType } from '@remyxjs/react';
-registerCalloutType({
-  type: 'security',
-  label: 'Security',
-  icon: '🔒',
-  color: '#dc2626',
-});
+registerCalloutType({ type: 'security', label: 'Security', icon: '🔒', color: '#dc2626' });
 ```
 
 **GitHub-flavored alerts** — blockquotes with `> [!NOTE]`, `> [!WARNING]`, etc. are automatically converted to callout blocks on paste or typing.
@@ -1213,22 +1073,22 @@ The `CommentsPlugin` adds inline comment threads — highlight text, attach disc
 import { CommentsPlugin } from '@remyxjs/react';
 
 <RemyxEditor
-  plugins={[
-    CommentsPlugin({
-      onComment: (thread) => saveToServer(thread),
-      onResolve: ({ thread, resolved }) => updateServer(thread),
-      onDelete: (thread) => deleteFromServer(thread),
-      onReply: ({ thread, reply }) => notifyUser(reply),
-      mentionUsers: ['alice', 'bob', 'charlie'],
-    }),
-  ]}
-/>;
+  plugins={[CommentsPlugin({
+    onComment: (thread) => saveToServer(thread),
+    onResolve: ({ thread, resolved }) => updateServer(thread),
+    onDelete: (thread) => deleteFromServer(thread),
+    onReply: ({ thread, reply }) => notifyUser(reply),
+    mentionUsers: ['alice', 'bob', 'charlie'],
+  })]}
+/>
 ```
 
 **Comment-only mode** — make the editor read-only but still allow annotations:
 
 ```jsx
-<RemyxEditor plugins={[CommentsPlugin({ commentOnly: true })]} />
+<RemyxEditor
+  plugins={[CommentsPlugin({ commentOnly: true })]}
+/>
 ```
 
 #### useComments hook
@@ -1269,29 +1129,29 @@ function AnnotatedEditor() {
 
 #### CommentsPanel props
 
-| Prop           | Type                                   | Description                           |
-| -------------- | -------------------------------------- | ------------------------------------- |
-| `threads`      | `CommentThread[]`                      | All threads (from `useComments`)      |
-| `activeThread` | `CommentThread \| null`                | Currently focused thread              |
-| `onNavigate`   | `(threadId) => void`                   | Called when a thread card is clicked  |
-| `onResolve`    | `(threadId, resolved) => void`         | Called when Resolve/Reopen is clicked |
-| `onDelete`     | `(threadId) => void`                   | Called when Delete is clicked         |
-| `onReply`      | `(threadId, { author, body }) => void` | Called when a reply is submitted      |
-| `filter`       | `'all' \| 'open' \| 'resolved'`        | Which threads to display              |
-| `className`    | `string`                               | Additional CSS class                  |
+| Prop | Type | Description |
+| --- | --- | --- |
+| `threads` | `CommentThread[]` | All threads (from `useComments`) |
+| `activeThread` | `CommentThread \| null` | Currently focused thread |
+| `onNavigate` | `(threadId) => void` | Called when a thread card is clicked |
+| `onResolve` | `(threadId, resolved) => void` | Called when Resolve/Reopen is clicked |
+| `onDelete` | `(threadId) => void` | Called when Delete is clicked |
+| `onReply` | `(threadId, { author, body }) => void` | Called when a reply is submitted |
+| `filter` | `'all' \| 'open' \| 'resolved'` | Which threads to display |
+| `className` | `string` | Additional CSS class |
 
 #### Engine events
 
-| Event               | Payload                | When                        |
-| ------------------- | ---------------------- | --------------------------- |
-| `comment:created`   | `{ thread }`           | New comment added           |
-| `comment:resolved`  | `{ thread, resolved }` | Thread resolved or reopened |
-| `comment:deleted`   | `{ thread }`           | Thread deleted              |
-| `comment:replied`   | `{ thread, reply }`    | Reply added to thread       |
-| `comment:updated`   | `{ thread }`           | Thread body edited          |
-| `comment:clicked`   | `{ thread, element }`  | Comment highlight clicked   |
-| `comment:navigated` | `{ threadId }`         | Scrolled to comment         |
-| `comment:imported`  | `{ count }`            | Threads imported            |
+| Event | Payload | When |
+| --- | --- | --- |
+| `comment:created` | `{ thread }` | New comment added |
+| `comment:resolved` | `{ thread, resolved }` | Thread resolved or reopened |
+| `comment:deleted` | `{ thread }` | Thread deleted |
+| `comment:replied` | `{ thread, reply }` | Reply added to thread |
+| `comment:updated` | `{ thread }` | Thread body edited |
+| `comment:clicked` | `{ thread, element }` | Comment highlight clicked |
+| `comment:navigated` | `{ threadId }` | Scrolled to comment |
+| `comment:imported` | `{ count }` | Threads imported |
 
 ### Custom Plugins
 
@@ -1313,35 +1173,18 @@ const MyPlugin = createPlugin({
   },
 
   // Traditional init/destroy
-  init(api) {
-    /* called once on mount */
-  },
-  destroy(api) {
-    /* called on unmount */
-  },
+  init(api) { /* called once on mount */ },
+  destroy(api) { /* called on unmount */ },
 
   // Dependencies — ensures 'other-plugin' is initialized first
   dependencies: ['other-plugin'],
 
   // Scoped settings with validation
   settingsSchema: [
-    {
-      key: 'maxLength',
-      type: 'number',
-      label: 'Max Length',
-      defaultValue: 5000,
-      validate: (v) => v > 0,
-    },
-    {
-      key: 'mode',
-      type: 'select',
-      label: 'Mode',
-      defaultValue: 'auto',
-      options: [
-        { label: 'Auto', value: 'auto' },
-        { label: 'Manual', value: 'manual' },
-      ],
-    },
+    { key: 'maxLength', type: 'number', label: 'Max Length', defaultValue: 5000, validate: (v) => v > 0 },
+    { key: 'mode', type: 'select', label: 'Mode', defaultValue: 'auto', options: [
+      { label: 'Auto', value: 'auto' }, { label: 'Manual', value: 'manual' },
+    ]},
   ],
   defaultSettings: { maxLength: 5000, mode: 'auto' },
 });
@@ -1423,11 +1266,11 @@ Catch errors from plugins, the engine, and file uploads without crashing the app
 
 Error sources:
 
-| Source     | Info Fields  | Description                 |
-| ---------- | ------------ | --------------------------- |
+| Source | Info Fields | Description |
+|---|---|---|
 | `'plugin'` | `pluginName` | Plugin init/destroy failure |
-| `'engine'` | `phase`      | Engine initialization error |
-| `'upload'` | `file`       | Upload handler rejection    |
+| `'engine'` | `phase` | Engine initialization error |
+| `'upload'` | `file` | Upload handler rejection |
 
 ### Custom Error Fallback
 
@@ -1455,26 +1298,13 @@ function App() {
 
   return (
     <>
-      <button
-        onClick={() => engineRef.current?.executeCommand('bold')}
-      >
+      <button onClick={() => engineRef.current?.executeCommand('bold')}>
         Bold
       </button>
-      <button
-        onClick={() =>
-          engineRef.current?.executeCommand(
-            'insertLink',
-            'https://example.com',
-          )
-        }
-      >
+      <button onClick={() => engineRef.current?.executeCommand('insertLink', 'https://example.com')}>
         Insert Link
       </button>
-      <RemyxEditor
-        onReady={(engine) => {
-          engineRef.current = engine;
-        }}
-      />
+      <RemyxEditor onReady={(engine) => { engineRef.current = engine }} />
     </>
   );
 }
@@ -1519,45 +1349,41 @@ function App() {
 
 ### Engine Methods
 
-| Method                          | Returns    | Description                        |
-| ------------------------------- | ---------- | ---------------------------------- |
-| `getHTML()`                     | `string`   | Sanitized HTML content             |
-| `setHTML(html)`                 | `void`     | Set editor content                 |
-| `getText()`                     | `string`   | Plain text content                 |
-| `isEmpty()`                     | `boolean`  | True if no meaningful text         |
-| `focus()`                       | `void`     | Focus the editor                   |
-| `blur()`                        | `void`     | Blur the editor                    |
-| `executeCommand(name, ...args)` | `any`      | Execute a registered command       |
-| `on(event, handler)`            | `Function` | Subscribe (returns unsubscribe fn) |
-| `off(event, handler)`           | `void`     | Unsubscribe from event             |
-| `getWordCount()`                | `number`   | Word count                         |
-| `getCharCount()`                | `number`   | Character count                    |
-| `destroy()`                     | `void`     | Clean up the engine                |
+| Method | Returns | Description |
+|---|---|---|
+| `getHTML()` | `string` | Sanitized HTML content |
+| `setHTML(html)` | `void` | Set editor content |
+| `getText()` | `string` | Plain text content |
+| `isEmpty()` | `boolean` | True if no meaningful text |
+| `focus()` | `void` | Focus the editor |
+| `blur()` | `void` | Blur the editor |
+| `executeCommand(name, ...args)` | `any` | Execute a registered command |
+| `on(event, handler)` | `Function` | Subscribe (returns unsubscribe fn) |
+| `off(event, handler)` | `void` | Unsubscribe from event |
+| `getWordCount()` | `number` | Word count |
+| `getCharCount()` | `number` | Character count |
+| `destroy()` | `void` | Clean up the engine |
 
 ### Engine Events
 
-| Event                | Payload            | When                            |
-| -------------------- | ------------------ | ------------------------------- |
-| `'content:change'`   | —                  | Content was modified            |
-| `'selection:change'` | `{ formats }`      | Selection or formatting changed |
-| `'focus'`            | —                  | Editor gained focus             |
-| `'blur'`             | —                  | Editor lost focus               |
-| `'mode:change'`      | —                  | Switched markdown/source mode   |
-| `'command:executed'` | `{ name }`         | After a command runs            |
-| `'plugin:error'`     | `{ name, error }`  | Plugin failed                   |
-| `'editor:error'`     | `{ phase, error }` | Engine error                    |
-| `'upload:error'`     | `{ file, error }`  | Upload failed                   |
+| Event | Payload | When |
+|---|---|---|
+| `'content:change'` | — | Content was modified |
+| `'selection:change'` | `{ formats }` | Selection or formatting changed |
+| `'focus'` | — | Editor gained focus |
+| `'blur'` | — | Editor lost focus |
+| `'mode:change'` | — | Switched markdown/source mode |
+| `'command:executed'` | `{ name }` | After a command runs |
+| `'plugin:error'` | `{ name, error }` | Plugin failed |
+| `'editor:error'` | `{ phase, error }` | Engine error |
+| `'upload:error'` | `{ file, error }` | Upload failed |
 
 ## Import & Export Documents
 
 ### Programmatic Export
 
 ```jsx
-import {
-  exportAsPDF,
-  exportAsDocx,
-  exportAsMarkdown,
-} from '@remyxjs/react';
+import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyxjs/react';
 
 function ExportButtons({ content }) {
   return (
@@ -1568,9 +1394,7 @@ function ExportButtons({ content }) {
       <button onClick={() => exportAsDocx(content, 'document.doc')}>
         Export Word
       </button>
-      <button
-        onClick={() => exportAsMarkdown(content, 'document.md')}
-      >
+      <button onClick={() => exportAsMarkdown(content, 'document.md')}>
         Export Markdown
       </button>
     </>
@@ -1610,7 +1434,7 @@ The editor ships with built-in toolbar buttons for both:
 <RemyxEditor
   toolbar={[
     ['bold', 'italic', 'underline'],
-    ['importDocument', 'export'], // import & export buttons
+    ['importDocument', 'export'],  // import & export buttons
   ]}
 />
 ```
@@ -1633,23 +1457,15 @@ Control which HTML tags, attributes, and CSS properties are allowed in editor co
       em: [],
       a: ['href', 'target', 'rel', 'title'],
       img: ['src', 'alt', 'width', 'height'],
-      h1: ['class'],
-      h2: ['class'],
-      h3: ['class'],
-      ul: [],
-      ol: [],
-      li: [],
+      h1: ['class'], h2: ['class'], h3: ['class'],
+      ul: [], ol: [], li: [],
       blockquote: ['class'],
       code: ['class'],
       pre: ['class'],
     },
     allowedStyles: [
-      'color',
-      'background-color',
-      'font-size',
-      'text-align',
-      'font-weight',
-      'font-style',
+      'color', 'background-color', 'font-size', 'text-align',
+      'font-weight', 'font-style',
     ],
   }}
 />
@@ -1670,27 +1486,27 @@ Without custom sanitization, the editor applies these protections by default:
 
 `mod` = `Cmd` on Mac, `Ctrl` on Windows/Linux.
 
-| Shortcut      | Action          |
-| ------------- | --------------- |
-| `mod+B`       | Bold            |
-| `mod+I`       | Italic          |
-| `mod+U`       | Underline       |
-| `mod+Shift+X` | Strikethrough   |
-| `mod+Z`       | Undo            |
-| `mod+Shift+Z` | Redo            |
-| `mod+K`       | Insert link     |
-| `mod+F`       | Find & replace  |
-| `mod+Shift+7` | Numbered list   |
-| `mod+Shift+8` | Bulleted list   |
-| `mod+Shift+9` | Blockquote      |
-| `mod+Shift+C` | Code block      |
-| `Tab`         | Indent          |
-| `Shift+Tab`   | Outdent         |
-| `mod+Shift+F` | Fullscreen      |
-| `mod+Shift+U` | Source mode     |
+| Shortcut | Action |
+| --- | --- |
+| `mod+B` | Bold |
+| `mod+I` | Italic |
+| `mod+U` | Underline |
+| `mod+Shift+X` | Strikethrough |
+| `mod+Z` | Undo |
+| `mod+Shift+Z` | Redo |
+| `mod+K` | Insert link |
+| `mod+F` | Find & replace |
+| `mod+Shift+7` | Numbered list |
+| `mod+Shift+8` | Bulleted list |
+| `mod+Shift+9` | Blockquote |
+| `mod+Shift+C` | Code block |
+| `Tab` | Indent |
+| `Shift+Tab` | Outdent |
+| `mod+Shift+F` | Fullscreen |
+| `mod+Shift+U` | Source mode |
 | `mod+Shift+P` | Command palette |
-| `mod+,`       | Subscript       |
-| `mod+.`       | Superscript     |
+| `mod+,` | Subscript |
+| `mod+.` | Superscript |
 
 ### Custom Shortcuts
 
@@ -1699,8 +1515,8 @@ Override default shortcuts by passing a `shortcuts` object:
 ```jsx
 <RemyxEditor
   shortcuts={{
-    bold: 'mod+shift+b', // remap bold
-    insertLink: 'mod+l', // remap link
+    bold: 'mod+shift+b',      // remap bold
+    insertLink: 'mod+l',      // remap link
   }}
 />
 ```
@@ -1730,10 +1546,10 @@ When embedding the editor in a page that already has an `<h1>`, use `baseHeading
 ```
 
 | `baseHeadingLevel` | Editor H1 | Editor H2 | Editor H3 |
-| ------------------ | --------- | --------- | --------- |
-| `1` (default)      | `<h1>`    | `<h2>`    | `<h3>`    |
-| `2`                | `<h2>`    | `<h3>`    | `<h4>`    |
-| `3`                | `<h3>`    | `<h4>`    | `<h5>`    |
+|---|---|---|---|
+| `1` (default) | `<h1>` | `<h2>` | `<h3>` |
+| `2` | `<h2>` | `<h3>` | `<h4>` |
+| `3` | `<h3>` | `<h4>` | `<h5>` |
 
 All heading levels are clamped to a maximum of `<h6>`.
 
@@ -1793,10 +1609,7 @@ Commands are organized by category (Text, Lists, Media, Layout, Advanced, Comman
 **Custom command items** can be registered from anywhere in your application:
 
 ```jsx
-import {
-  registerCommandItems,
-  unregisterCommandItem,
-} from '@remyxjs/react';
+import { registerCommandItems, unregisterCommandItem } from '@remyxjs/react';
 
 // Register custom commands that appear in the palette
 registerCommandItems({
@@ -1817,7 +1630,10 @@ To add the command palette button to a custom toolbar:
 
 ```jsx
 <RemyxEditor
-  toolbar={[['bold', 'italic', 'underline'], ['commandPalette']]}
+  toolbar={[
+    ['bold', 'italic', 'underline'],
+    ['commandPalette'],
+  ]}
 />
 ```
 
@@ -1845,8 +1661,8 @@ This saves to `localStorage` every 30 seconds and 2 seconds after each content c
       headers: { Authorization: `Bearer ${token}` },
     },
     key: 'doc-123',
-    interval: 60000, // save every 60s
-    debounce: 3000, // 3s after last edit
+    interval: 60000,       // save every 60s
+    debounce: 3000,        // 3s after last edit
   }}
 />
 ```
@@ -1891,16 +1707,16 @@ autosave={{
 
 ### AutosaveConfig Options
 
-| Option               | Type               | Default          | Description                               |
-| -------------------- | ------------------ | ---------------- | ----------------------------------------- |
-| `enabled`            | `boolean`          | `true`           | Toggle autosave on/off                    |
-| `interval`           | `number`           | `30000`          | Periodic save interval in ms              |
-| `debounce`           | `number`           | `2000`           | Debounce delay after content change in ms |
-| `provider`           | `string \| object` | `'localStorage'` | Storage provider config                   |
-| `key`                | `string`           | `'rmx-default'`  | Storage key for this editor instance      |
-| `onRecover`          | `(data) => void`   | —                | Callback when recovery data is found      |
-| `showRecoveryBanner` | `boolean`          | `true`           | Show the recovery banner UI               |
-| `showSaveStatus`     | `boolean`          | `true`           | Show save status in the status bar        |
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `true` | Toggle autosave on/off |
+| `interval` | `number` | `30000` | Periodic save interval in ms |
+| `debounce` | `number` | `2000` | Debounce delay after content change in ms |
+| `provider` | `string \| object` | `'localStorage'` | Storage provider config |
+| `key` | `string` | `'rmx-default'` | Storage key for this editor instance |
+| `onRecover` | `(data) => void` | — | Callback when recovery data is found |
+| `showRecoveryBanner` | `boolean` | `true` | Show the recovery banner UI |
+| `showSaveStatus` | `boolean` | `true` | Show save status in the status bar |
 
 ### useAutosave Hook
 
@@ -1910,13 +1726,8 @@ For custom UIs, use the `useAutosave` hook directly:
 import { useAutosave } from '@remyxjs/react';
 
 function MyEditor({ engine }) {
-  const {
-    saveStatus,
-    lastSaved,
-    recoveryData,
-    recoverContent,
-    dismissRecovery,
-  } = useAutosave(engine, { enabled: true, key: 'doc-123' });
+  const { saveStatus, lastSaved, recoveryData, recoverContent, dismissRecovery } =
+    useAutosave(engine, { enabled: true, key: 'doc-123' });
 
   return (
     <div>
@@ -1937,7 +1748,6 @@ function MyEditor({ engine }) {
 ### Empty State
 
 Show a configurable empty state when the editor has no content:
-
 ```jsx
 // Default illustration + "Start typing..." message
 <RemyxEditor emptyState />
@@ -1949,64 +1759,51 @@ Show a configurable empty state when the editor has no content:
 ### Breadcrumb Bar
 
 Display the DOM path to the current cursor position:
-
 ```jsx
 <RemyxEditor breadcrumb />
 ```
-
 Shows a bar like "Blockquote > List > Item 2" or "Table > Row 3 > Cell 1" that updates on every selection change.
 
 ### Minimap
 
 Show a scaled-down document preview on the right edge:
-
 ```jsx
 <RemyxEditor minimap />
 ```
-
 Click anywhere on the minimap to scroll to that position. Updates automatically on content changes.
 
 ### Split View
 
 Side-by-side edit + preview pane:
-
 ```jsx
 <RemyxEditor splitViewFormat="html" />    // HTML preview
 <RemyxEditor splitViewFormat="markdown" /> // Markdown preview
 ```
-
 Toggle via `Mod+Shift+V` or the toolbar button. The preview updates in real time.
 
 ### Distraction-Free Mode
 
 Hide all editor chrome (toolbar, menu bar, status bar) for focused writing:
-
 ```jsx
 // Trigger via command
 engine.executeCommand('distractionFree');
 ```
-
 Shortcut: `Mod+Shift+D`. Chrome reappears on mouse movement and auto-hides after 3 seconds.
 
 ### Toolbar Customization
 
 Let users drag-and-drop toolbar buttons to rearrange them:
-
 ```jsx
 <RemyxEditor
   customizableToolbar
-  onToolbarChange={(newOrder) =>
-    console.log('Toolbar reordered:', newOrder)
-  }
+  onToolbarChange={(newOrder) => console.log('Toolbar reordered:', newOrder)}
 />
 ```
-
 The custom order is persisted in `localStorage` and restored on next load.
 
 ### Typography Controls
 
 Fine-tune line height, letter spacing, and paragraph spacing via the `typography` toolbar dropdown or programmatically:
-
 ```jsx
 // Add 'typography' to your toolbar config
 <RemyxEditor toolbar={[['bold', 'italic'], ['typography']]} />
@@ -2028,31 +1825,27 @@ import { useSpellcheck, SpellcheckPlugin } from '@remyxjs/react';
 function MyEditor() {
   const engineRef = useRef(null);
   const {
-    errors, // Array of current spellcheck/grammar errors
-    stats, // { total, grammar, style, byRule }
-    enabled, // boolean — whether spellcheck is active
-    stylePreset, // current writing style preset
-    language, // current BCP 47 language tag
+    errors,           // Array of current spellcheck/grammar errors
+    stats,            // { total, grammar, style, byRule }
+    enabled,          // boolean — whether spellcheck is active
+    stylePreset,      // current writing style preset
+    language,         // current BCP 47 language tag
     toggleSpellcheck, // () => boolean — toggle on/off
-    checkGrammar, // () => Promise<Array> — run grammar check
-    addToDictionary, // (word) => void
-    ignoreWord, // (word) => void
-    setWritingStyle, // ('formal'|'casual'|'technical'|'academic') => void
-    setLanguage, // (lang) => void
-    getDictionary, // () => string[]
+    checkGrammar,     // () => Promise<Array> — run grammar check
+    addToDictionary,  // (word) => void
+    ignoreWord,       // (word) => void
+    setWritingStyle,  // ('formal'|'casual'|'technical'|'academic') => void
+    setLanguage,      // (lang) => void
+    getDictionary,    // () => string[]
   } = useSpellcheck(engineRef.current);
 
   return (
     <div>
       <span>{stats.total} issues found</span>
-      <button onClick={toggleSpellcheck}>
-        {enabled ? 'Disable' : 'Enable'}
-      </button>
+      <button onClick={toggleSpellcheck}>{enabled ? 'Disable' : 'Enable'}</button>
       <RemyxEditor
         plugins={[SpellcheckPlugin({ stylePreset: 'formal' })]}
-        onReady={(engine) => {
-          engineRef.current = engine;
-        }}
+        onReady={(engine) => { engineRef.current = engine }}
       />
     </div>
   );
@@ -2064,38 +1857,22 @@ function MyEditor() {
 For real-time collaborative editing, use the `useCollaboration` hook:
 
 ```jsx
-import {
-  useCollaboration,
-  CollaborationBar,
-  CollaborationPlugin,
-} from '@remyxjs/react';
+import { useCollaboration, CollaborationBar, CollaborationPlugin } from '@remyxjs/react';
 
 function CollaborativeEditor() {
   const engineRef = useRef(null);
-  const { status, peers, connect, disconnect } = useCollaboration(
-    engineRef.current,
-  );
+  const { status, peers, connect, disconnect } = useCollaboration(engineRef.current);
 
   return (
     <div>
       <CollaborationBar status={status} peers={peers} />
-      <button
-        onClick={() =>
-          connect({
-            serverUrl: 'wss://signal.example.com',
-            roomId: 'room-1',
-            userName: 'Alice',
-          })
-        }
-      >
+      <button onClick={() => connect({ serverUrl: 'wss://signal.example.com', roomId: 'room-1', userName: 'Alice' })}>
         Join
       </button>
       <button onClick={disconnect}>Leave</button>
       <RemyxEditor
         plugins={[CollaborationPlugin({ autoConnect: false })]}
-        onReady={(engine) => {
-          engineRef.current = engine;
-        }}
+        onReady={(engine) => { engineRef.current = engine; }}
       />
     </div>
   );
@@ -2104,21 +1881,21 @@ function CollaborativeEditor() {
 
 #### useCollaboration return value
 
-| Property     | Type                                                       | Description                     |
-| ------------ | ---------------------------------------------------------- | ------------------------------- |
-| `status`     | `'connected' \| 'disconnected' \| 'connecting' \| 'error'` | Current connection state        |
-| `peers`      | `Array<{ id, name, color, cursor, isActive }>`             | List of connected peers         |
-| `connect`    | `(opts: { serverUrl, roomId, userName }) => void`          | Connect to a collaboration room |
-| `disconnect` | `() => void`                                               | Disconnect from the room        |
+| Property | Type | Description |
+| --- | --- | --- |
+| `status` | `'connected' \| 'disconnected' \| 'connecting' \| 'error'` | Current connection state |
+| `peers` | `Array<{ id, name, color, cursor, isActive }>` | List of connected peers |
+| `connect` | `(opts: { serverUrl, roomId, userName }) => void` | Connect to a collaboration room |
+| `disconnect` | `() => void` | Disconnect from the room |
 
 #### CollaborationBar props
 
-| Prop          | Type      | Description                                 |
-| ------------- | --------- | ------------------------------------------- |
-| `status`      | `string`  | Connection status (from `useCollaboration`) |
-| `peers`       | `Array`   | Peer list (from `useCollaboration`)         |
-| `className`   | `string`  | Additional CSS class                        |
-| `showAvatars` | `boolean` | Show peer avatar circles (default: `true`)  |
+| Prop | Type | Description |
+| --- | --- | --- |
+| `status` | `string` | Connection status (from `useCollaboration`) |
+| `peers` | `Array` | Peer list (from `useCollaboration`) |
+| `className` | `string` | Additional CSS class |
+| `showAvatars` | `boolean` | Show peer avatar circles (default: `true`) |
 
 ## Form Integration
 
@@ -2131,11 +1908,7 @@ function ArticleForm() {
   return (
     <form method="post" action="/api/articles">
       <input type="text" name="title" placeholder="Title" />
-      <RemyxEditor
-        value={content}
-        onChange={setContent}
-        height={400}
-      />
+      <RemyxEditor value={content} onChange={setContent} height={400} />
       <input type="hidden" name="body" value={content} />
       <button type="submit">Publish</button>
     </form>
@@ -2193,13 +1966,8 @@ function ValidatedEditor() {
     <div>
       <RemyxEditor
         value={content}
-        onChange={(html) => {
-          setContent(html);
-          setError('');
-        }}
-        onReady={(engine) => {
-          engineRef.current = engine;
-        }}
+        onChange={(html) => { setContent(html); setError(''); }}
+        onReady={(engine) => { engineRef.current = engine }}
         onBlur={validate}
       />
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -2217,174 +1985,81 @@ function ValidatedEditor() {
 
 ```js
 // React components & hooks
-import {
-  RemyxEditor,
-  useRemyxEditor,
-  useEditorEngine,
-} from '@remyxjs/react';
+import { RemyxEditor, useRemyxEditor, useEditorEngine } from '@remyxjs/react';
 import { RemyxConfigProvider, useRemyxConfig } from '@remyxjs/react';
 
 // External config
-import {
-  RemyxEditorFromConfig,
-  useExternalConfig,
-} from '@remyxjs/react';
+import { RemyxEditorFromConfig, useExternalConfig } from '@remyxjs/react';
 import { loadConfig } from '@remyxjs/react'; // re-exported from core
 
 // Toolbar
-import {
-  TOOLBAR_PRESETS,
-  DEFAULT_TOOLBAR,
-  removeToolbarItems,
-  addToolbarItems,
-  createToolbar,
-} from '@remyxjs/react';
+import { TOOLBAR_PRESETS, DEFAULT_TOOLBAR, removeToolbarItems, addToolbarItems, createToolbar } from '@remyxjs/react';
 
 // Defaults
-import {
-  DEFAULT_FONTS,
-  DEFAULT_FONT_SIZES,
-  DEFAULT_COLORS,
-  DEFAULT_KEYBINDINGS,
-  DEFAULT_MENU_BAR,
-} from '@remyxjs/react';
+import { DEFAULT_FONTS, DEFAULT_FONT_SIZES, DEFAULT_COLORS, DEFAULT_KEYBINDINGS, DEFAULT_MENU_BAR } from '@remyxjs/react';
 
 // Fonts
-import {
-  removeFonts,
-  addFonts,
-  loadGoogleFonts,
-} from '@remyxjs/react';
+import { removeFonts, addFonts, loadGoogleFonts } from '@remyxjs/react';
 
 // Theming
-import {
-  createTheme,
-  THEME_VARIABLES,
-  THEME_PRESETS,
-} from '@remyxjs/react';
-import {
-  createToolbarItemTheme,
-  resolveToolbarItemStyle,
-  TOOLBAR_ITEM_STYLE_KEYS,
-} from '@remyxjs/react';
+import { createTheme, THEME_VARIABLES, THEME_PRESETS } from '@remyxjs/react';
+import { createToolbarItemTheme, resolveToolbarItemStyle, TOOLBAR_ITEM_STYLE_KEYS } from '@remyxjs/react';
 
 // Markdown & paste
-import {
-  htmlToMarkdown,
-  markdownToHtml,
-  cleanPastedHTML,
-  looksLikeMarkdown,
-} from '@remyxjs/react';
+import { htmlToMarkdown, markdownToHtml, cleanPastedHTML, looksLikeMarkdown } from '@remyxjs/react';
 
 // Document conversion
-import {
-  convertDocument,
-  isImportableFile,
-  getSupportedExtensions,
-  getSupportedFormatNames,
-} from '@remyxjs/react';
+import { convertDocument, isImportableFile, getSupportedExtensions, getSupportedFormatNames } from '@remyxjs/react';
 
 // Export
-import {
-  exportAsPDF,
-  exportAsDocx,
-  exportAsMarkdown,
-} from '@remyxjs/react';
+import { exportAsPDF, exportAsDocx, exportAsMarkdown } from '@remyxjs/react';
 
 // Plugins
-import {
-  createPlugin,
-  WordCountPlugin,
-  AutolinkPlugin,
-  PlaceholderPlugin,
-  SyntaxHighlightPlugin,
-} from '@remyxjs/react';
+import { createPlugin, WordCountPlugin, AutolinkPlugin, PlaceholderPlugin, SyntaxHighlightPlugin } from '@remyxjs/react';
 
 // Syntax highlighting utilities
-import {
-  SUPPORTED_LANGUAGES,
-  LANGUAGE_MAP,
-  detectLanguage,
-  tokenize,
-} from '@remyxjs/react';
+import { SUPPORTED_LANGUAGES, LANGUAGE_MAP, detectLanguage, tokenize } from '@remyxjs/react';
 
 // Command palette
-import {
-  SLASH_COMMAND_ITEMS,
-  filterSlashItems,
-} from '@remyxjs/react';
+import { SLASH_COMMAND_ITEMS, filterSlashItems } from '@remyxjs/react';
 
 // Advanced Link Management
 import { LinkPlugin, detectLinks, slugify } from '@remyxjs/react';
 
 // Templates, Keyboard, Drag & Drop
-import {
-  TemplatePlugin,
-  renderTemplate,
-  getTemplateLibrary,
-} from '@remyxjs/react';
+import { TemplatePlugin, renderTemplate, getTemplateLibrary } from '@remyxjs/react';
 import { KeyboardPlugin, getHeadings } from '@remyxjs/react';
 import { DragDropPlugin } from '@remyxjs/react';
 
 // Math & Equations
-import {
-  MathPlugin,
-  getSymbolPalette,
-  parseMathExpressions,
-  latexToMathML,
-} from '@remyxjs/react';
+import { MathPlugin, getSymbolPalette, parseMathExpressions, latexToMathML } from '@remyxjs/react';
 
 // Table of Contents
-import {
-  TocPlugin,
-  buildOutline,
-  renderTocHTML,
-  validateHeadingHierarchy,
-} from '@remyxjs/react';
+import { TocPlugin, buildOutline, renderTocHTML, validateHeadingHierarchy } from '@remyxjs/react';
 
 // Content Analytics
-import {
-  AnalyticsPlugin,
-  analyzeContent,
-  keywordDensity,
-  seoAnalysis,
-} from '@remyxjs/react';
+import { AnalyticsPlugin, analyzeContent, keywordDensity, seoAnalysis } from '@remyxjs/react';
 
 // Callouts & Alerts
-import {
-  CalloutPlugin,
-  registerCalloutType,
-  getCalloutTypes,
-  parseGFMAlert,
-} from '@remyxjs/react';
+import { CalloutPlugin, registerCalloutType, getCalloutTypes, parseGFMAlert } from '@remyxjs/react';
 
 // Comments & Annotations
-import { CommentsPlugin, parseMentions } from '@remyxjs/react'; // core exports
-import { useComments, CommentsPanel } from '@remyxjs/react'; // React-specific
+import { CommentsPlugin, parseMentions } from '@remyxjs/react';    // core exports
+import { useComments, CommentsPanel } from '@remyxjs/react';        // React-specific
 
 // Spelling & Grammar
-import {
-  SpellcheckPlugin,
-  analyzeGrammar,
-  STYLE_PRESETS,
-} from '@remyxjs/react'; // core exports
-import { useSpellcheck } from '@remyxjs/react'; // React-specific
+import { SpellcheckPlugin, analyzeGrammar, STYLE_PRESETS } from '@remyxjs/react';  // core exports
+import { useSpellcheck } from '@remyxjs/react';                                     // React-specific
 
 // Collaboration
-import { CollaborationPlugin } from '@remyxjs/react'; // core export
+import { CollaborationPlugin } from '@remyxjs/react';              // core export
 import { useCollaboration, CollaborationBar } from '@remyxjs/react'; // React-specific
 
 // Config
 import { defineConfig } from '@remyxjs/react';
 
 // Core engine (advanced)
-import {
-  EditorEngine,
-  EventBus,
-  CommandRegistry,
-  Selection,
-  History,
-} from '@remyxjs/react';
+import { EditorEngine, EventBus, CommandRegistry, Selection, History } from '@remyxjs/react';
 ```
 
 ## TypeScript
@@ -2426,10 +2101,7 @@ const element = document.querySelector('#editor');
 const engine = new EditorEngine(element, { outputFormat: 'html' });
 
 // Register commands
-import {
-  registerFormattingCommands,
-  registerListCommands,
-} from '@remyxjs/core';
+import { registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 registerFormattingCommands(engine);
 registerListCommands(engine);
 
@@ -2475,11 +2147,11 @@ engine.destroy();
 
 ## Peer Dependencies
 
-| Package         | Version   |
-| --------------- | --------- |
+| Package | Version |
+| --- | --- |
 | `@remyxjs/core` | >= 0.34.0 |
-| `react`         | >= 18.0.0 |
-| `react-dom`     | >= 18.0.0 |
+| `react` | >= 18.0.0 |
+| `react-dom` | >= 18.0.0 |
 
 ## License
 

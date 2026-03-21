@@ -4,7 +4,7 @@ import { ModalOverlay } from './ModalOverlay.jsx'
 
 const MAX_SIZE = 10
 
-export function TablePickerModal({ open, onClose, engine }) {
+export function TablePickerModal({ open, onClose, engine, data }) {
   const [hover, setHover] = useState({ row: 0, col: 0 })
   const [rows, setRows] = useState(3)
   const [cols, setCols] = useState(3)
@@ -13,6 +13,7 @@ export function TablePickerModal({ open, onClose, engine }) {
   const handleInsert = () => {
     try {
       setError(null)
+      if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
       engine.executeCommand('insertTable', { rows, cols })
       onClose()
     } catch (err) {
@@ -38,6 +39,7 @@ export function TablePickerModal({ open, onClose, engine }) {
     const c = parseInt(cell.dataset.col, 10) + 1
     try {
       setError(null)
+      if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
       engine.executeCommand('insertTable', { rows: r, cols: c })
       onClose()
     } catch (err) {

@@ -1,6 +1,4 @@
 // Re-export everything from core for convenience.
-// For better tree-shaking in production, import specialized plugins
-// directly from '@remyxjs/core' instead of from '@remyxjs/react'.
 export * from '@remyxjs/core'
 
 // React component
@@ -9,14 +7,6 @@ export { default as RemyxEditor } from './components/RemyxEditor.jsx'
 // React hooks
 export { useRemyxEditor } from './hooks/useRemyxEditor.js'
 export { useEditorEngine } from './hooks/useEditorEngine.js'
-
-// React config provider
-export { RemyxConfigProvider } from './config/RemyxConfigProvider.jsx'
-export { useRemyxConfig } from './hooks/useRemyxConfig.js'
-
-// External config loading
-export { useExternalConfig } from './hooks/useExternalConfig.js'
-export { RemyxEditorFromConfig } from './components/RemyxEditorFromConfig.jsx'
 
 // Drag and drop
 export { useDragDrop } from './hooks/useDragDrop.js'
@@ -49,4 +39,3 @@ export { BreadcrumbBar } from './components/BreadcrumbBar/BreadcrumbBar.jsx'
 export { Minimap } from './components/Minimap/Minimap.jsx'
 export { SplitPreview } from './components/SplitPreview/SplitPreview.jsx'
 export { TypographyDropdown } from './components/TypographyDropdown/TypographyDropdown.jsx'
-

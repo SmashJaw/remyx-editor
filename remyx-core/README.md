@@ -1,102 +1,82 @@
-![Remyx Editor](https://raw.githubusercontent.com/SmashJaw/remyxjs/refs/heads/master/docs/images/Remyx-Logo.svg)
+![Remyx Editor](../docs/screenshots/Remyx-Logo.svg)
 
 # @remyxjs/core
 
 Framework-agnostic core engine for the Remyx Editor. Provides the editor engine, commands, plugin system, utilities, and CSS themes — with zero framework dependencies.
 
-Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyxjs/react`](https://www.npmjs.com/package/@remyxjs/react), which includes this package plus React components and hooks.
+Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyxjs/react`](../remyx-react/), which includes this package plus React components and hooks.
 
 ## Table of Contents
 
-- [@remyxjs/core](#remyxjscore)
-  - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
-  - [Quick Start](#quick-start)
-  - [Architecture](#architecture)
-  - [EditorEngine](#editorengine)
-    - [Constructor Options](#constructor-options)
-    - [Methods](#methods)
-    - [Events](#events)
-  - [Commands](#commands)
-    - [Formatting](#formatting)
-    - [Headings](#headings)
-    - [Lists](#lists)
-    - [Alignment](#alignment)
-    - [Links](#links)
-    - [Images](#images)
-    - [Tables](#tables)
-      - [Table command reference](#table-command-reference)
-      - [Sort data types](#sort-data-types)
-      - [Formulas](#formulas)
-      - [Cell formatting](#cell-formatting)
-      - [Clipboard interop](#clipboard-interop)
-    - [Blocks](#blocks)
-    - [Fonts](#fonts)
-    - [Media Embeds](#media-embeds)
-    - [Find \& Replace](#find--replace)
-    - [Source Mode](#source-mode)
-    - [Fullscreen](#fullscreen)
-    - [Distraction-Free Mode](#distraction-free-mode)
-    - [Split View](#split-view)
-    - [Color Presets](#color-presets)
-    - [Typography Controls](#typography-controls)
-    - [Sticky Toolbar](#sticky-toolbar)
-    - [Markdown Toggle](#markdown-toggle)
-    - [Attachments](#attachments)
-    - [Document Import](#document-import)
-    - [Command Palette](#command-palette)
-      - [Recently-used commands](#recently-used-commands)
-      - [Custom command items](#custom-command-items)
-  - [Autosave](#autosave)
-    - [Storage Providers](#storage-providers)
-    - [AutosaveManager API](#autosavemanager-api)
-    - [Autosave Events](#autosave-events)
-  - [Plugin System](#plugin-system)
-    - [Creating Plugins](#creating-plugins)
-    - [Lifecycle Hooks](#lifecycle-hooks)
-    - [Plugin Dependencies](#plugin-dependencies)
-    - [Scoped Plugin Settings](#scoped-plugin-settings)
-    - [Plugin Registry](#plugin-registry)
-    - [Plugin Metadata](#plugin-metadata)
-    - [Plugin API (Restricted)](#plugin-api-restricted)
-    - [Built-in Plugins](#built-in-plugins)
-      - [Line numbers](#line-numbers)
-      - [Copy-to-clipboard](#copy-to-clipboard)
-      - [Inline code highlighting](#inline-code-highlighting)
-      - [Custom language registration](#custom-language-registration)
-  - [Selection API](#selection-api)
-  - [History (Undo/Redo)](#history-undoredo)
-  - [Keyboard Shortcuts](#keyboard-shortcuts)
-  - [Sanitizer](#sanitizer)
-  - [Utilities](#utilities)
-    - [HTML Helpers](#html-helpers)
-    - [Markdown Conversion](#markdown-conversion)
-    - [Document Conversion](#document-conversion)
-    - [Export](#export)
-    - [Paste Cleaning](#paste-cleaning)
-    - [Font Management](#font-management)
-    - [DOM Utilities](#dom-utilities)
-    - [HTML Formatting](#html-formatting)
-    - [Platform Detection](#platform-detection)
-  - [Theming](#theming)
-    - [Theme Variables](#theme-variables)
-    - [Built-in Themes](#built-in-themes)
-    - [Custom Themes](#custom-themes)
-  - [Toolbar Configuration](#toolbar-configuration)
-    - [Toolbar Presets](#toolbar-presets)
-    - [Custom Toolbars](#custom-toolbars)
-    - [Toolbar Item Theming](#toolbar-item-theming)
-  - [Configuration](#configuration)
-    - [defineConfig](#defineconfig)
-    - [loadConfig](#loadconfig)
-  - [Multi-Editor Support](#multi-editor-support)
-    - [EditorBus](#editorbus)
-    - [SharedResources](#sharedresources)
-  - [Constants](#constants)
-  - [Tree-Shaking](#tree-shaking)
-  - [CSS](#css)
-  - [Building Framework Wrappers](#building-framework-wrappers)
-  - [License](#license)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [EditorEngine](#editorengine)
+  - [Constructor Options](#constructor-options)
+  - [Methods](#methods)
+  - [Events](#events)
+- [Commands](#commands)
+  - [Formatting](#formatting)
+  - [Headings](#headings)
+  - [Lists](#lists)
+  - [Alignment](#alignment)
+  - [Links](#links)
+  - [Images](#images)
+  - [Tables](#tables)
+  - [Blocks](#blocks)
+  - [Fonts](#fonts)
+  - [Media Embeds](#media-embeds)
+  - [Find & Replace](#find--replace)
+  - [Source Mode](#source-mode)
+  - [Fullscreen](#fullscreen)
+  - [Distraction-Free Mode](#distraction-free-mode)
+  - [Split View](#split-view)
+  - [Color Presets](#color-presets)
+  - [Typography Controls](#typography-controls)
+  - [Sticky Toolbar](#sticky-toolbar)
+  - [Markdown Toggle](#markdown-toggle)
+  - [Attachments](#attachments)
+  - [Document Import](#document-import)
+- [Plugin System](#plugin-system)
+  - [Creating Plugins](#creating-plugins)
+  - [Plugin API (Restricted)](#plugin-api-restricted)
+  - [Built-in Plugins](#built-in-plugins)
+  - [Syntax Highlighting](#syntax-highlighting)
+- [Autosave](#autosave)
+  - [Storage Providers](#storage-providers)
+  - [AutosaveManager API](#autosavemanager-api)
+  - [Autosave Events](#autosave-events)
+- [Selection API](#selection-api)
+- [History (Undo/Redo)](#history-undoredo)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
+- [Sanitizer](#sanitizer)
+- [Utilities](#utilities)
+  - [Markdown Conversion](#markdown-conversion)
+  - [Document Conversion](#document-conversion)
+  - [Export](#export)
+  - [Paste Cleaning](#paste-cleaning)
+  - [Font Management](#font-management)
+  - [DOM Utilities](#dom-utilities)
+  - [HTML Formatting](#html-formatting)
+  - [Platform Detection](#platform-detection)
+- [Theming](#theming)
+  - [Theme Variables](#theme-variables)
+  - [Theme Presets](#theme-presets)
+  - [Custom Themes](#custom-themes)
+- [Toolbar Configuration](#toolbar-configuration)
+  - [Toolbar Presets](#toolbar-presets)
+  - [Custom Toolbars](#custom-toolbars)
+  - [Toolbar Item Theming](#toolbar-item-theming)
+- [Configuration](#configuration)
+  - [defineConfig](#defineconfig)
+- [Multi-Editor Support](#multi-editor-support)
+  - [EditorBus](#editorbus)
+  - [SharedResources](#sharedresources)
+- [Constants](#constants)
+- [Tree-Shaking](#tree-shaking)
+- [CSS](#css)
+- [Building Framework Wrappers](#building-framework-wrappers)
+- [License](#license)
 
 ## Installation
 
@@ -196,51 +176,51 @@ const engine = new EditorEngine(element, {
 
 ### Methods
 
-| Method                          | Returns    | Description                                                      |
-| ------------------------------- | ---------- | ---------------------------------------------------------------- |
-| `init()`                        | `void`     | Initialize the editor — binds event listeners, starts subsystems |
-| `destroy()`                     | `void`     | Clean up all listeners, disconnect observers, destroy plugins    |
-| `getHTML()`                     | `string`   | Get sanitized HTML content                                       |
-| `setHTML(html)`                 | `void`     | Set content (sanitized before insertion)                         |
-| `getText()`                     | `string`   | Get plain text content                                           |
-| `isEmpty()`                     | `boolean`  | `true` when editor has no meaningful content                     |
-| `focus()`                       | `void`     | Focus the editor element                                         |
-| `blur()`                        | `void`     | Blur the editor element                                          |
-| `executeCommand(name, ...args)` | `any`      | Execute a registered command by name                             |
-| `on(event, handler)`            | `Function` | Subscribe to an event; returns an unsubscribe function           |
-| `off(event, handler)`           | `void`     | Unsubscribe from an event                                        |
-| `getWordCount()`                | `number`   | Current word count                                               |
-| `getCharCount()`                | `number`   | Current character count                                          |
+| Method | Returns | Description |
+| --- | --- | --- |
+| `init()` | `void` | Initialize the editor — binds event listeners, starts subsystems |
+| `destroy()` | `void` | Clean up all listeners, disconnect observers, destroy plugins |
+| `getHTML()` | `string` | Get sanitized HTML content |
+| `setHTML(html)` | `void` | Set content (sanitized before insertion) |
+| `getText()` | `string` | Get plain text content |
+| `isEmpty()` | `boolean` | `true` when editor has no meaningful content |
+| `focus()` | `void` | Focus the editor element |
+| `blur()` | `void` | Blur the editor element |
+| `executeCommand(name, ...args)` | `any` | Execute a registered command by name |
+| `on(event, handler)` | `Function` | Subscribe to an event; returns an unsubscribe function |
+| `off(event, handler)` | `void` | Unsubscribe from an event |
+| `getWordCount()` | `number` | Current word count |
+| `getCharCount()` | `number` | Current character count |
 
 ### Events
 
-| Event                       | Data                              | Description                             |
-| --------------------------- | --------------------------------- | --------------------------------------- |
-| `content:change`            | —                                 | Content was modified                    |
-| `selection:change`          | `ActiveFormats`                   | Selection or formatting state changed   |
-| `focus`                     | —                                 | Editor received focus                   |
-| `blur`                      | —                                 | Editor lost focus                       |
-| `command:executed`          | `{ name, args, result }`          | A command was executed                  |
-| `paste`                     | `{ html, text }`                  | Paste occurred                          |
-| `drop`                      | `{ files, html }`                 | Drop occurred                           |
-| `upload:error`              | `{ file, error }`                 | Upload handler rejected                 |
-| `file:too-large`            | `{ file, maxSize }`               | Dropped/pasted file exceeded size limit |
-| `editor:error`              | `{ phase, error }`                | Initialization error                    |
-| `mode:change`               | `{ sourceMode }`                  | Source mode toggled                     |
-| `mode:change:markdown`      | `{ markdownMode }`                | Markdown mode toggled                   |
-| `fullscreen:toggle`         | `{ fullscreen }`                  | Fullscreen toggled                      |
-| `find:results`              | `{ total, current }`              | Find/replace results updated            |
-| `history:undo`              | —                                 | Undo performed                          |
-| `history:redo`              | —                                 | Redo performed                          |
-| `plugin:registered`         | `{ name }`                        | Plugin was registered                   |
-| `plugin:error`              | `{ name, error }`                 | Plugin init/destroy error               |
-| `codeblock:created`         | `{ element, language }`           | Code block was created                  |
-| `codeblock:language-change` | `{ language, element }`           | Code block language was changed         |
-| `wordcount:update`          | `{ wordCount, charCount }`        | Word/char count changed                 |
-| `autosave:saving`           | —                                 | Autosave started                        |
-| `autosave:saved`            | `{ timestamp }`                   | Autosave succeeded                      |
-| `autosave:error`            | `{ error }`                       | Autosave failed                         |
-| `autosave:recovered`        | `{ recoveredContent, timestamp }` | Recovery data found on init             |
+| Event | Data | Description |
+| --- | --- | --- |
+| `content:change` | — | Content was modified |
+| `selection:change` | `ActiveFormats` | Selection or formatting state changed |
+| `focus` | — | Editor received focus |
+| `blur` | — | Editor lost focus |
+| `command:executed` | `{ name, args, result }` | A command was executed |
+| `paste` | `{ html, text }` | Paste occurred |
+| `drop` | `{ files, html }` | Drop occurred |
+| `upload:error` | `{ file, error }` | Upload handler rejected |
+| `file:too-large` | `{ file, maxSize }` | Dropped/pasted file exceeded size limit |
+| `editor:error` | `{ phase, error }` | Initialization error |
+| `mode:change` | `{ sourceMode }` | Source mode toggled |
+| `mode:change:markdown` | `{ markdownMode }` | Markdown mode toggled |
+| `fullscreen:toggle` | `{ fullscreen }` | Fullscreen toggled |
+| `find:results` | `{ total, current }` | Find/replace results updated |
+| `history:undo` | — | Undo performed |
+| `history:redo` | — | Redo performed |
+| `plugin:registered` | `{ name }` | Plugin was registered |
+| `plugin:error` | `{ name, error }` | Plugin init/destroy error |
+| `codeblock:created` | `{ element, language }` | Code block was created |
+| `codeblock:language-change` | `{ language, element }` | Code block language was changed |
+| `wordcount:update` | `{ wordCount, charCount }` | Word/char count changed |
+| `autosave:saving` | — | Autosave started |
+| `autosave:saved` | `{ timestamp }` | Autosave succeeded |
+| `autosave:error` | `{ error }` | Autosave failed |
+| `autosave:recovered` | `{ recoveredContent, timestamp }` | Recovery data found on init |
 
 **Example — listening to events:**
 
@@ -267,40 +247,40 @@ unsub(); // stop listening
 
 Each register function adds commands to the engine. Call only the ones you need — unused commands are tree-shaken from the bundle.
 
-| Function                          | Commands Added                                                                                                                                                                                                        |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `registerFormattingCommands`      | bold, italic, underline, strikethrough, subscript, superscript, removeFormat                                                                                                                                          |
-| `registerHeadingCommands`         | heading, h1–h6, paragraph                                                                                                                                                                                             |
-| `registerAlignmentCommands`       | alignLeft, alignCenter, alignRight, alignJustify                                                                                                                                                                      |
-| `registerListCommands`            | orderedList, unorderedList, taskList, indent, outdent                                                                                                                                                                 |
-| `registerLinkCommands`            | insertLink, editLink, removeLink                                                                                                                                                                                      |
-| `registerImageCommands`           | insertImage, resizeImage, alignImage, removeImage                                                                                                                                                                     |
-| `registerTableCommands`           | insertTable, addRowBefore, addRowAfter, addColBefore, addColAfter, deleteRow, deleteCol, deleteTable, mergeCells, splitCell, toggleHeaderRow, sortTable, filterTable, clearTableFilters, formatCell, evaluateFormulas |
-| `registerBlockCommands`           | blockquote, codeBlock, horizontalRule                                                                                                                                                                                 |
-| `registerFontCommands`            | fontFamily, fontSize, foreColor, backColor, lineHeight, letterSpacing, paragraphSpacing                                                                                                                               |
-| `registerMediaCommands`           | embedMedia, removeEmbed                                                                                                                                                                                               |
-| `registerFindReplaceCommands`     | find, findNext, findPrev, replace, replaceAll                                                                                                                                                                         |
-| `registerSourceModeCommands`      | sourceMode                                                                                                                                                                                                            |
-| `registerFullscreenCommands`      | fullscreen                                                                                                                                                                                                            |
-| `registerDistractionFreeCommands` | distractionFree                                                                                                                                                                                                       |
-| `registerSplitViewCommands`       | toggleSplitView                                                                                                                                                                                                       |
-| `registerColorPresetCommands`     | saveColorPreset, loadColorPresets, deleteColorPreset                                                                                                                                                                  |
-| `registerMarkdownToggleCommands`  | toggleMarkdown                                                                                                                                                                                                        |
-| `registerAttachmentCommands`      | insertAttachment, removeAttachment                                                                                                                                                                                    |
-| `registerImportDocumentCommands`  | importDocument                                                                                                                                                                                                        |
+| Function | Commands Added |
+| --- | --- |
+| `registerFormattingCommands` | bold, italic, underline, strikethrough, subscript, superscript, removeFormat |
+| `registerHeadingCommands` | heading, h1–h6, paragraph |
+| `registerAlignmentCommands` | alignLeft, alignCenter, alignRight, alignJustify |
+| `registerListCommands` | orderedList, unorderedList, taskList, indent, outdent |
+| `registerLinkCommands` | insertLink, editLink, removeLink |
+| `registerImageCommands` | insertImage, resizeImage, alignImage, removeImage |
+| `registerTableCommands` | insertTable, addRowBefore, addRowAfter, addColBefore, addColAfter, deleteRow, deleteCol, deleteTable, mergeCells, splitCell, toggleHeaderRow, sortTable, filterTable, clearTableFilters, formatCell, evaluateFormulas |
+| `registerBlockCommands` | blockquote, codeBlock, horizontalRule |
+| `registerFontCommands` | fontFamily, fontSize, foreColor, backColor, lineHeight, letterSpacing, paragraphSpacing |
+| `registerMediaCommands` | embedMedia, removeEmbed |
+| `registerFindReplaceCommands` | find, findNext, findPrev, replace, replaceAll |
+| `registerSourceModeCommands` | sourceMode |
+| `registerFullscreenCommands` | fullscreen |
+| `registerDistractionFreeCommands` | distractionFree |
+| `registerSplitViewCommands` | toggleSplitView |
+| `registerColorPresetCommands` | saveColorPreset, loadColorPresets, deleteColorPreset |
+| `registerMarkdownToggleCommands` | toggleMarkdown |
+| `registerAttachmentCommands` | insertAttachment, removeAttachment |
+| `registerImportDocumentCommands` | importDocument |
 
 ### Formatting
 
 ```js
 registerFormattingCommands(engine);
 
-engine.executeCommand('bold'); // Toggle bold (Mod+B)
-engine.executeCommand('italic'); // Toggle italic (Mod+I)
-engine.executeCommand('underline'); // Toggle underline (Mod+U)
+engine.executeCommand('bold');          // Toggle bold (Mod+B)
+engine.executeCommand('italic');        // Toggle italic (Mod+I)
+engine.executeCommand('underline');     // Toggle underline (Mod+U)
 engine.executeCommand('strikethrough'); // Toggle strikethrough (Mod+Shift+X)
-engine.executeCommand('subscript'); // Toggle subscript (Mod+,)
-engine.executeCommand('superscript'); // Toggle superscript (Mod+.)
-engine.executeCommand('removeFormat'); // Strip all inline formatting
+engine.executeCommand('subscript');     // Toggle subscript (Mod+,)
+engine.executeCommand('superscript');   // Toggle superscript (Mod+.)
+engine.executeCommand('removeFormat');  // Strip all inline formatting
 ```
 
 ### Headings
@@ -308,11 +288,11 @@ engine.executeCommand('removeFormat'); // Strip all inline formatting
 ```js
 registerHeadingCommands(engine);
 
-engine.executeCommand('heading', 1); // Apply H1
-engine.executeCommand('heading', 3); // Apply H3
+engine.executeCommand('heading', 1);   // Apply H1
+engine.executeCommand('heading', 3);   // Apply H3
 engine.executeCommand('heading', 'p'); // Reset to paragraph
-engine.executeCommand('h2'); // Shorthand for heading level 2
-engine.executeCommand('paragraph'); // Shorthand for normal text
+engine.executeCommand('h2');           // Shorthand for heading level 2
+engine.executeCommand('paragraph');    // Shorthand for normal text
 ```
 
 If `baseHeadingLevel` is set in options, heading levels are offset. For example, with `baseHeadingLevel: 2`, `heading(1)` renders as `<h2>`.
@@ -322,11 +302,11 @@ If `baseHeadingLevel` is set in options, heading levels are offset. For example,
 ```js
 registerListCommands(engine);
 
-engine.executeCommand('orderedList'); // Toggle numbered list (Mod+Shift+7)
+engine.executeCommand('orderedList');   // Toggle numbered list (Mod+Shift+7)
 engine.executeCommand('unorderedList'); // Toggle bullet list (Mod+Shift+8)
-engine.executeCommand('taskList'); // Toggle task list with checkboxes
-engine.executeCommand('indent'); // Increase indentation
-engine.executeCommand('outdent'); // Decrease indentation
+engine.executeCommand('taskList');      // Toggle task list with checkboxes
+engine.executeCommand('indent');        // Increase indentation
+engine.executeCommand('outdent');       // Decrease indentation
 ```
 
 ### Alignment
@@ -348,15 +328,15 @@ registerLinkCommands(engine);
 // Insert a new link (Mod+K)
 engine.executeCommand('insertLink', {
   href: 'https://example.com',
-  text: 'Example', // optional — uses selection if omitted
-  target: '_blank', // optional
+  text: 'Example',           // optional — uses selection if omitted
+  target: '_blank',           // optional
 });
 
 // Edit an existing link
 engine.executeCommand('editLink', {
   href: 'https://new-url.com',
-  text: 'New text', // optional
-  target: '_self', // optional
+  text: 'New text',          // optional
+  target: '_self',            // optional
 });
 
 // Remove link, keep text
@@ -371,9 +351,9 @@ registerImageCommands(engine);
 // Insert image
 engine.executeCommand('insertImage', {
   src: 'https://example.com/photo.jpg',
-  alt: 'A photo', // optional
-  width: 400, // optional
-  height: 300, // optional
+  alt: 'A photo',            // optional
+  width: 400,                // optional
+  height: 300,               // optional
 });
 
 // Resize an existing image
@@ -415,15 +395,8 @@ engine.executeCommand('deleteCol');
 engine.executeCommand('toggleHeaderRow');
 
 // Sort by column (physically reorders rows, sets data-sort-dir on <th>)
-engine.executeCommand('sortTable', {
-  columnIndex: 0,
-  direction: 'asc',
-});
-engine.executeCommand('sortTable', {
-  columnIndex: 0,
-  direction: 'desc',
-  dataType: 'numeric',
-});
+engine.executeCommand('sortTable', { columnIndex: 0, direction: 'asc' });
+engine.executeCommand('sortTable', { columnIndex: 0, direction: 'desc', dataType: 'numeric' });
 
 // Multi-column sort
 engine.executeCommand('sortTable', {
@@ -434,23 +407,14 @@ engine.executeCommand('sortTable', {
 });
 
 // Filter rows (non-destructive, hides non-matching rows)
-engine.executeCommand('filterTable', {
-  columnIndex: 0,
-  filterValue: 'search term',
-});
+engine.executeCommand('filterTable', { columnIndex: 0, filterValue: 'search term' });
 engine.executeCommand('clearTableFilters');
 
 // Cell formatting (stores raw value in data-raw-value, displays formatted)
 engine.executeCommand('formatCell', { format: 'number' });
-engine.executeCommand('formatCell', {
-  format: 'currency',
-  options: { currency: 'EUR' },
-});
+engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'EUR' } });
 engine.executeCommand('formatCell', { format: 'percentage' });
-engine.executeCommand('formatCell', {
-  format: 'date',
-  options: { dateStyle: 'long' },
-});
+engine.executeCommand('formatCell', { format: 'date', options: { dateStyle: 'long' } });
 
 // Formula evaluation (cells with data-formula attribute)
 engine.executeCommand('evaluateFormulas');
@@ -462,29 +426,28 @@ engine.executeCommand('splitCell');
 
 #### Table command reference
 
-| Command             | Arguments                                                   | Description                                                                                                                                                         |
-| ------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `insertTable`       | `{ rows, cols }`                                            | Insert a table with `<thead>` header row. Default 3x3.                                                                                                              |
-| `addRowBefore`      | —                                                           | Insert a row above the current cell                                                                                                                                 |
-| `addRowAfter`       | —                                                           | Insert a row below the current cell                                                                                                                                 |
-| `addColBefore`      | —                                                           | Insert a column to the left                                                                                                                                         |
-| `addColAfter`       | —                                                           | Insert a column to the right                                                                                                                                        |
-| `deleteRow`         | —                                                           | Delete the current row (removes table if last row)                                                                                                                  |
-| `deleteCol`         | —                                                           | Delete the current column (removes table if last column)                                                                                                            |
-| `deleteTable`       | —                                                           | Delete the entire table                                                                                                                                             |
-| `mergeCells`        | `{ cells: [el, el, ...] }`                                  | Merge an array of cell elements                                                                                                                                     |
-| `splitCell`         | —                                                           | Split a merged cell back into individual cells                                                                                                                      |
-| `toggleHeaderRow`   | —                                                           | Convert first row to/from `<thead>` with `<th>` cells                                                                                                               |
-| `sortTable`         | `{ columnIndex, direction, dataType }` or `{ keys: [...] }` | Sort rows. Direction: `'asc'` or `'desc'`. DataType: `'alphabetical'`, `'numeric'`, or `'date'` (auto-detected if omitted). Use `keys` array for multi-column sort. |
-| `filterTable`       | `{ columnIndex, filterValue }`                              | Hide rows where the cell at `columnIndex` doesn't contain `filterValue` (case-insensitive substring match). Pass empty string to clear a single column filter.      |
-| `clearTableFilters` | —                                                           | Remove all column filters and show all rows                                                                                                                         |
-| `formatCell`        | `{ format, options }`                                       | Format the focused cell. Format: `'number'`, `'currency'`, `'percentage'`, `'date'`. Options: `{ decimals, currency, dateStyle }`.                                  |
-| `evaluateFormulas`  | —                                                           | Re-evaluate all formula cells in the focused table                                                                                                                  |
+| Command | Arguments | Description |
+| --- | --- | --- |
+| `insertTable` | `{ rows, cols }` | Insert a table with `<thead>` header row. Default 3x3. |
+| `addRowBefore` | — | Insert a row above the current cell |
+| `addRowAfter` | — | Insert a row below the current cell |
+| `addColBefore` | — | Insert a column to the left |
+| `addColAfter` | — | Insert a column to the right |
+| `deleteRow` | — | Delete the current row (removes table if last row) |
+| `deleteCol` | — | Delete the current column (removes table if last column) |
+| `deleteTable` | — | Delete the entire table |
+| `mergeCells` | `{ cells: [el, el, ...] }` | Merge an array of cell elements |
+| `splitCell` | — | Split a merged cell back into individual cells |
+| `toggleHeaderRow` | — | Convert first row to/from `<thead>` with `<th>` cells |
+| `sortTable` | `{ columnIndex, direction, dataType }` or `{ keys: [...] }` | Sort rows. Direction: `'asc'` or `'desc'`. DataType: `'alphabetical'`, `'numeric'`, or `'date'` (auto-detected if omitted). Use `keys` array for multi-column sort. |
+| `filterTable` | `{ columnIndex, filterValue }` | Hide rows where the cell at `columnIndex` doesn't contain `filterValue` (case-insensitive substring match). Pass empty string to clear a single column filter. |
+| `clearTableFilters` | — | Remove all column filters and show all rows |
+| `formatCell` | `{ format, options }` | Format the focused cell. Format: `'number'`, `'currency'`, `'percentage'`, `'date'`. Options: `{ decimals, currency, dateStyle }`. |
+| `evaluateFormulas` | — | Re-evaluate all formula cells in the focused table |
 
 #### Sort data types
 
 The sort command auto-detects the data type of a column by sampling its values:
-
 - **numeric** — if >70% of values parse as numbers
 - **date** — if >70% of values parse as valid dates
 - **alphabetical** — default, uses locale-aware `localeCompare`
@@ -492,12 +455,7 @@ The sort command auto-detects the data type of a column by sampling its values:
 You can override auto-detection by passing `dataType` explicitly, or provide a global custom comparator via `engine.options.tableSortComparator`:
 
 ```js
-engine.options.tableSortComparator = (
-  a,
-  b,
-  dataType,
-  columnIndex,
-) => {
+engine.options.tableSortComparator = (a, b, dataType, columnIndex) => {
   // Custom comparison — return negative, zero, or positive
   return a.localeCompare(b, 'de'); // German locale sort
 };
@@ -509,15 +467,15 @@ Cells starting with `=` are treated as formulas when the `TablePlugin` is active
 
 **Supported functions:**
 
-| Function  | Description               | Example                     |
-| --------- | ------------------------- | --------------------------- |
-| `SUM`     | Sum all values in a range | `=SUM(A1:A10)`              |
-| `AVERAGE` | Arithmetic mean of values | `=AVERAGE(B2:B8)`           |
-| `COUNT`   | Count non-empty cells     | `=COUNT(A1:A20)`            |
-| `MIN`     | Smallest value in a range | `=MIN(C1:C5)`               |
-| `MAX`     | Largest value in a range  | `=MAX(C1:C5)`               |
-| `IF`      | Conditional value         | `=IF(A1>10, "high", "low")` |
-| `CONCAT`  | Join values into a string | `=CONCAT(A1, " ", B1)`      |
+| Function | Description | Example |
+| --- | --- | --- |
+| `SUM` | Sum all values in a range | `=SUM(A1:A10)` |
+| `AVERAGE` | Arithmetic mean of values | `=AVERAGE(B2:B8)` |
+| `COUNT` | Count non-empty cells | `=COUNT(A1:A20)` |
+| `MIN` | Smallest value in a range | `=MIN(C1:C5)` |
+| `MAX` | Largest value in a range | `=MAX(C1:C5)` |
+| `IF` | Conditional value | `=IF(A1>10, "high", "low")` |
+| `CONCAT` | Join values into a string | `=CONCAT(A1, " ", B1)` |
 
 **Cell references:** A1 notation (e.g., `A1`, `B3`, `AA1`), ranges (e.g., `A1:A5`, `B2:D4`)
 
@@ -552,34 +510,19 @@ The `formatCell` command uses the browser's built-in `Intl` APIs for locale-awar
 
 ```js
 // Number: "1,234.50"
-engine.executeCommand('formatCell', {
-  format: 'number',
-  options: { decimals: 2 },
-});
+engine.executeCommand('formatCell', { format: 'number', options: { decimals: 2 } });
 
 // Currency: "$1,234.50" (or locale equivalent)
-engine.executeCommand('formatCell', {
-  format: 'currency',
-  options: { currency: 'USD' },
-});
+engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'USD' } });
 
 // Euro: "1.234,50 €"
-engine.executeCommand('formatCell', {
-  format: 'currency',
-  options: { currency: 'EUR' },
-});
+engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'EUR' } });
 
 // Percentage: "75.0%" (raw value 0.75 × 100)
-engine.executeCommand('formatCell', {
-  format: 'percentage',
-  options: { decimals: 1 },
-});
+engine.executeCommand('formatCell', { format: 'percentage', options: { decimals: 1 } });
 
 // Date: locale-formatted date
-engine.executeCommand('formatCell', {
-  format: 'date',
-  options: { dateStyle: 'long' },
-});
+engine.executeCommand('formatCell', { format: 'date', options: { dateStyle: 'long' } });
 ```
 
 The raw value is preserved in the `data-raw-value` attribute so it can be used for sorting and formula calculations even after formatting.
@@ -587,12 +530,10 @@ The raw value is preserved in the `data-raw-value` attribute so it can be used f
 #### Clipboard interop
 
 When copying from a Remyx table, the clipboard contains both:
-
 - `text/html` — clean `<table>` markup
 - `text/plain` — TSV (tab-separated values) for pasting into spreadsheets
 
 When pasting into a table cell:
-
 - **TSV data** (from Excel, Sheets, or tab-separated text) is detected and inserted into the grid starting at the caret cell
 - **HTML tables** (from Excel or Sheets) are converted to TSV and inserted the same way
 - Rows and columns are automatically added if the pasted data exceeds the current table dimensions
@@ -604,8 +545,8 @@ Google Sheets `<google-sheets-html-origin>` tags and Excel `mso-*` styles are au
 ```js
 registerBlockCommands(engine);
 
-engine.executeCommand('blockquote'); // Toggle blockquote (Mod+Shift+9)
-engine.executeCommand('codeBlock'); // Toggle code block (Mod+Shift+C)
+engine.executeCommand('blockquote');    // Toggle blockquote (Mod+Shift+9)
+engine.executeCommand('codeBlock');     // Toggle code block (Mod+Shift+C)
 engine.executeCommand('codeBlock', { language: 'javascript' }); // Code block with language
 engine.executeCommand('horizontalRule'); // Insert <hr>
 ```
@@ -616,7 +557,7 @@ engine.executeCommand('horizontalRule'); // Insert <hr>
 registerFontCommands(engine);
 
 engine.executeCommand('fontFamily', 'Georgia');
-engine.executeCommand('fontSize', '18px'); // Accepts px, pt, em, rem, %
+engine.executeCommand('fontSize', '18px');  // Accepts px, pt, em, rem, %
 engine.executeCommand('foreColor', '#ff0000');
 engine.executeCommand('backColor', '#ffff00');
 ```
@@ -643,7 +584,7 @@ registerFindReplaceCommands(engine);
 // Search (Mod+F)
 engine.executeCommand('find', {
   text: 'hello',
-  caseSensitive: false, // optional, default false
+  caseSensitive: false,     // optional, default false
 });
 
 engine.executeCommand('findNext');
@@ -691,37 +632,29 @@ engine.on('fullscreen:toggle', ({ fullscreen }) => {
 ```
 
 ### Distraction-Free Mode
-
 ```js
 registerDistractionFreeCommands(engine);
 
 // Toggle distraction-free mode (Mod+Shift+D)
 engine.executeCommand('distractionFree');
 ```
-
 Hides toolbar, status bar, and menu bar. Chrome reappears on mouse movement and auto-hides after 3 seconds of inactivity. Adds `.rmx-distraction-free` class to the editor root.
 
 ### Split View
-
 ```js
 registerSplitViewCommands(engine);
 
 // Toggle split view (Mod+Shift+V)
 engine.executeCommand('toggleSplitView');
 ```
-
 Opens a side-by-side preview pane showing rendered HTML or markdown output. Adds `.rmx-split-view` class to the editor root.
 
 ### Color Presets
-
 ```js
 registerColorPresetCommands(engine);
 
 // Save a named color preset (persisted in localStorage)
-engine.executeCommand('saveColorPreset', {
-  name: 'Brand',
-  colors: ['#e11d48', '#3b82f6', '#22c55e'],
-});
+engine.executeCommand('saveColorPreset', { name: 'Brand', colors: ['#e11d48', '#3b82f6', '#22c55e'] });
 
 // Load all saved presets
 const presets = engine.executeCommand('loadColorPresets');
@@ -731,7 +664,6 @@ engine.executeCommand('deleteColorPreset', 'Brand');
 ```
 
 ### Typography Controls
-
 ```js
 // Line height (applied as inline style to selected text)
 engine.executeCommand('lineHeight', '1.8');
@@ -742,11 +674,9 @@ engine.executeCommand('letterSpacing', '0.05em');
 // Paragraph spacing (margin-bottom on block elements)
 engine.executeCommand('paragraphSpacing', '1.5em');
 ```
-
 These commands are registered by `registerFontCommands(engine)`. A `typography` toolbar dropdown provides UI access to all three.
 
 ### Sticky Toolbar
-
 The toolbar uses `position: sticky; top: 0` by default, remaining visible when scrolling long documents. No configuration needed.
 
 ### Markdown Toggle
@@ -770,12 +700,10 @@ registerAttachmentCommands(engine);
 engine.executeCommand('insertAttachment', {
   url: 'https://example.com/report.pdf',
   filename: 'report.pdf',
-  filesize: '2.4 MB', // optional, displayed in UI
+  filesize: '2.4 MB',       // optional, displayed in UI
 });
 
-engine.executeCommand('removeAttachment', {
-  element: attachmentElement,
-});
+engine.executeCommand('removeAttachment', { element: attachmentElement });
 ```
 
 ### Document Import
@@ -812,11 +740,7 @@ Each item has the shape `{ id, label, description, icon, keywords, category, act
 The last 5 executed commands are tracked in `localStorage` and pinned to the top of the palette under a "Recent" category when no search query is active:
 
 ```js
-import {
-  getRecentCommands,
-  recordRecentCommand,
-  clearRecentCommands,
-} from '@remyxjs/core';
+import { getRecentCommands, recordRecentCommand, clearRecentCommands } from '@remyxjs/core';
 
 // Commands are recorded automatically when executed via the palette.
 // You can also record manually:
@@ -829,7 +753,7 @@ getRecentCommands(); // → ['heading1']
 clearRecentCommands();
 
 // filterSlashItems pins recent items by default (disable with { pinRecent: false })
-filterSlashItems(SLASH_COMMAND_ITEMS, ''); // recent items at top
+filterSlashItems(SLASH_COMMAND_ITEMS, '');            // recent items at top
 filterSlashItems(SLASH_COMMAND_ITEMS, '', { pinRecent: false }); // no pinning
 ```
 
@@ -838,11 +762,7 @@ filterSlashItems(SLASH_COMMAND_ITEMS, '', { pinRecent: false }); // no pinning
 Register custom command items that appear alongside built-in commands in the palette:
 
 ```js
-import {
-  registerCommandItems,
-  unregisterCommandItem,
-  getCustomCommandItems,
-} from '@remyxjs/core';
+import { registerCommandItems, unregisterCommandItem, getCustomCommandItems } from '@remyxjs/core';
 
 // Register a single item
 registerCommandItems({
@@ -852,37 +772,17 @@ registerCommandItems({
   icon: '✍️',
   keywords: ['signature', 'sign', 'email'],
   category: 'Custom',
-  action: (engine) =>
-    engine.executeCommand('insertHTML', '<p>— John Doe</p>'),
+  action: (engine) => engine.executeCommand('insertHTML', '<p>— John Doe</p>'),
 });
 
 // Register multiple items at once
 registerCommandItems([
-  {
-    id: 'draft',
-    label: 'Save Draft',
-    description: 'Save as draft',
-    icon: '💾',
-    keywords: ['save', 'draft'],
-    category: 'Custom',
-    action: (engine) => saveDraft(engine.getHTML()),
-  },
-  {
-    id: 'publish',
-    label: 'Publish',
-    description: 'Publish document',
-    icon: '🚀',
-    keywords: ['publish', 'post'],
-    category: 'Custom',
-    action: (engine) => publish(engine.getHTML()),
-  },
+  { id: 'draft', label: 'Save Draft', description: 'Save as draft', icon: '💾', keywords: ['save', 'draft'], category: 'Custom', action: (engine) => saveDraft(engine.getHTML()) },
+  { id: 'publish', label: 'Publish', description: 'Publish document', icon: '🚀', keywords: ['publish', 'post'], category: 'Custom', action: (engine) => publish(engine.getHTML()) },
 ]);
 
 // Re-registering the same id replaces the previous item
-registerCommandItems({
-  id: 'insertSignature',
-  label: 'Insert Sig (updated)' /* ... */,
-});
+registerCommandItems({ id: 'insertSignature', label: 'Insert Sig (updated)', /* ... */ });
 
 // Remove a custom item
 unregisterCommandItem('insertSignature');
@@ -910,28 +810,26 @@ import {
 } from '@remyxjs/core';
 ```
 
-| Provider                 | Use Case                  | Config Shorthand                |
-| ------------------------ | ------------------------- | ------------------------------- |
-| `LocalStorageProvider`   | Browser apps (default)    | `'localStorage'` or omit        |
-| `SessionStorageProvider` | Tab-scoped saves          | `'sessionStorage'`              |
-| `FileSystemProvider`     | Node / Electron / Tauri   | `{ writeFn, readFn, deleteFn }` |
-| `CloudProvider`          | AWS S3, GCP, any HTTP API | `{ endpoint, headers, ... }`    |
-| `CustomProvider`         | Full consumer control     | `{ save, load, clear }`         |
+| Provider | Use Case | Config Shorthand |
+| --- | --- | --- |
+| `LocalStorageProvider` | Browser apps (default) | `'localStorage'` or omit |
+| `SessionStorageProvider` | Tab-scoped saves | `'sessionStorage'` |
+| `FileSystemProvider` | Node / Electron / Tauri | `{ writeFn, readFn, deleteFn }` |
+| `CloudProvider` | AWS S3, GCP, any HTTP API | `{ endpoint, headers, ... }` |
+| `CustomProvider` | Full consumer control | `{ save, load, clear }` |
 
 Each provider implements `save(key, content)`, `load(key)`, and `clear(key)`. Content is wrapped in a JSON envelope with `{ content, timestamp, version }`.
 
 **Factory function** — `createStorageProvider(config)` resolves shorthand strings or objects into provider instances:
 
 ```js
-const local = createStorageProvider(); // LocalStorageProvider
-const session = createStorageProvider('sessionStorage'); // SessionStorageProvider
-const cloud = createStorageProvider({
-  // CloudProvider
+const local = createStorageProvider();                      // LocalStorageProvider
+const session = createStorageProvider('sessionStorage');     // SessionStorageProvider
+const cloud = createStorageProvider({                       // CloudProvider
   endpoint: 'https://api.example.com/autosave',
   headers: { Authorization: 'Bearer token123' },
 });
-const fs = createStorageProvider({
-  // FileSystemProvider
+const fs = createStorageProvider({                          // FileSystemProvider
   writeFn: async (key, data) => writeFile(`/saves/${key}.json`, data),
   readFn: async (key) => readFile(`/saves/${key}.json`),
   deleteFn: async (key) => unlink(`/saves/${key}.json`),
@@ -943,7 +841,7 @@ const fs = createStorageProvider({
 ```js
 const s3Provider = new CloudProvider({
   endpoint: 'https://my-bucket.s3.amazonaws.com',
-  buildUrl: (key) => getPresignedUploadUrl(key), // S3 presigned URL
+  buildUrl: (key) => getPresignedUploadUrl(key),   // S3 presigned URL
   buildLoadUrl: (key) => getPresignedDownloadUrl(key),
   method: 'PUT',
   headers: { 'Content-Type': 'application/json' },
@@ -957,20 +855,20 @@ const s3Provider = new CloudProvider({
 import { AutosaveManager } from '@remyxjs/core';
 
 const manager = new AutosaveManager(engine, {
-  provider: 'localStorage', // or any provider config
-  key: 'doc-123', // storage key (default: 'rmx-default')
-  interval: 30000, // periodic save interval in ms (default: 30s)
-  debounce: 2000, // debounce delay after content change (default: 2s)
-  enabled: true, // toggle on/off (default: true)
+  provider: 'localStorage',  // or any provider config
+  key: 'doc-123',            // storage key (default: 'rmx-default')
+  interval: 30000,           // periodic save interval in ms (default: 30s)
+  debounce: 2000,            // debounce delay after content change (default: 2s)
+  enabled: true,             // toggle on/off (default: true)
 });
 
-manager.init(); // start listening to content:change
+manager.init();              // start listening to content:change
 
-await manager.save(); // force an immediate save
-await manager.checkRecovery(engine.getHTML()); // check for recoverable content
-await manager.clearRecovery(); // clear stored recovery data
+await manager.save();        // force an immediate save
+await manager.checkRecovery(engine.getHTML());  // check for recoverable content
+await manager.clearRecovery();                  // clear stored recovery data
 
-manager.destroy(); // cleanup timers, listeners, final save
+manager.destroy();           // cleanup timers, listeners, final save
 ```
 
 ### Autosave Events
@@ -988,14 +886,11 @@ engine.eventBus.on('autosave:error', ({ error }) => {
   console.error('Autosave failed:', error.message);
 });
 
-engine.eventBus.on(
-  'autosave:recovered',
-  ({ recoveredContent, timestamp }) => {
-    if (confirm('Unsaved changes found. Restore?')) {
-      engine.setHTML(recoveredContent);
-    }
-  },
-);
+engine.eventBus.on('autosave:recovered', ({ recoveredContent, timestamp }) => {
+  if (confirm('Unsaved changes found. Restore?')) {
+    engine.setHTML(recoveredContent);
+  }
+});
 ```
 
 ## Plugin System
@@ -1027,9 +922,7 @@ const HighlightPlugin = createPlugin({
         document.execCommand('hiliteColor', false, 'yellow');
       },
       isActive(engine) {
-        return (
-          engine.selection.getActiveFormats().backColor === 'yellow'
-        );
+        return engine.selection.getActiveFormats().backColor === 'yellow';
       },
       shortcut: 'mod+shift+h',
     },
@@ -1050,8 +943,7 @@ const HighlightPlugin = createPlugin({
   statusBarItems: [
     {
       name: 'highlight-status',
-      render: (engine) =>
-        engine.selection.getActiveFormats().backColor || 'none',
+      render: (engine) => engine.selection.getActiveFormats().backColor || 'none',
     },
   ],
 
@@ -1111,19 +1003,12 @@ Each lifecycle callback is sandboxed — if it throws, the error is caught, logg
 Declare dependencies to control initialization order:
 
 ```js
-const BasePlugin = createPlugin({
-  name: 'base',
-  init() {
-    /* ... */
-  },
-});
+const BasePlugin = createPlugin({ name: 'base', init() { /* ... */ } });
 
 const ExtensionPlugin = createPlugin({
   name: 'extension',
   dependencies: ['base'], // initialized after 'base'
-  init(api) {
-    /* can safely use base's commands */
-  },
+  init(api) { /* can safely use base's commands */ },
 });
 ```
 
@@ -1137,35 +1022,14 @@ Plugins can define a settings schema with type validation:
 const ThemePlugin = createPlugin({
   name: 'custom-theme',
   settingsSchema: [
-    {
-      key: 'fontSize',
-      type: 'number',
-      label: 'Font Size',
-      defaultValue: 16,
-      validate: (v) => v >= 8 && v <= 72,
-    },
-    {
-      key: 'fontFamily',
-      type: 'string',
-      label: 'Font Family',
-      defaultValue: 'sans-serif',
-    },
-    {
-      key: 'mode',
-      type: 'select',
-      label: 'Mode',
-      defaultValue: 'light',
-      options: [
-        { label: 'Light', value: 'light' },
-        { label: 'Dark', value: 'dark' },
-      ],
-    },
+    { key: 'fontSize', type: 'number', label: 'Font Size', defaultValue: 16, validate: (v) => v >= 8 && v <= 72 },
+    { key: 'fontFamily', type: 'string', label: 'Font Family', defaultValue: 'sans-serif' },
+    { key: 'mode', type: 'select', label: 'Mode', defaultValue: 'light', options: [
+      { label: 'Light', value: 'light' },
+      { label: 'Dark', value: 'dark' },
+    ]},
   ],
-  defaultSettings: {
-    fontSize: 16,
-    fontFamily: 'sans-serif',
-    mode: 'light',
-  },
+  defaultSettings: { fontSize: 16, fontFamily: 'sans-serif', mode: 'light' },
   init(api) {
     const size = api.getSetting('fontSize');
     api.element.style.fontSize = `${size}px`;
@@ -1183,11 +1047,7 @@ engine.plugins.getPluginSettings('custom-theme'); // { fontSize: 18, fontFamily:
 A global registry for plugin discovery and marketplace concepts:
 
 ```js
-import {
-  registerPluginInRegistry,
-  searchPluginRegistry,
-  listRegisteredPlugins,
-} from '@remyxjs/core';
+import { registerPluginInRegistry, searchPluginRegistry, listRegisteredPlugins } from '@remyxjs/core';
 
 // Register a plugin for discovery
 registerPluginInRegistry({
@@ -1200,9 +1060,9 @@ registerPluginInRegistry({
 });
 
 // Search the registry
-searchPluginRegistry('math'); // → [{ name: 'math-equations', ... }]
+searchPluginRegistry('math');  // → [{ name: 'math-equations', ... }]
 searchPluginRegistry('latex'); // → [{ name: 'math-equations', ... }] (matches tags)
-listRegisteredPlugins(); // → all registered entries
+listRegisteredPlugins();       // → all registered entries
 
 // Install from registry
 const entry = searchPluginRegistry('math')[0];
@@ -1227,21 +1087,21 @@ const MyPlugin = createPlugin({
 
 Plugins without `requiresFullAccess` receive a sandboxed API:
 
-| Property/Method                 | Description                                         |
-| ------------------------------- | --------------------------------------------------- |
-| `element`                       | Editor DOM element (read-only)                      |
-| `options`                       | Engine options (read-only copy)                     |
-| `executeCommand(name, ...args)` | Execute a command                                   |
-| `on(event, handler)`            | Subscribe to events                                 |
-| `off(event, handler)`           | Unsubscribe                                         |
-| `getSelection()`                | Browser Selection object                            |
-| `getRange()`                    | Current Range in editor                             |
-| `getActiveFormats()`            | Current formatting state                            |
-| `getHTML()`                     | Get content as HTML                                 |
-| `getText()`                     | Get content as plain text                           |
-| `isEmpty()`                     | Check if editor is empty                            |
-| `getSetting(key)`               | Get a plugin-scoped setting value                   |
-| `setSetting(key, value)`        | Set a plugin-scoped setting value (with validation) |
+| Property/Method | Description |
+| --- | --- |
+| `element` | Editor DOM element (read-only) |
+| `options` | Engine options (read-only copy) |
+| `executeCommand(name, ...args)` | Execute a command |
+| `on(event, handler)` | Subscribe to events |
+| `off(event, handler)` | Unsubscribe |
+| `getSelection()` | Browser Selection object |
+| `getRange()` | Current Range in editor |
+| `getActiveFormats()` | Current formatting state |
+| `getHTML()` | Get content as HTML |
+| `getText()` | Get content as plain text |
+| `isEmpty()` | Check if editor is empty |
+| `getSetting(key)` | Get a plugin-scoped setting value |
+| `setSetting(key, value)` | Set a plugin-scoped setting value (with validation) |
 
 ### Built-in Plugins
 
@@ -1273,13 +1133,8 @@ engine.plugins.register(PlaceholderPlugin('Start writing...'));
 
 ```js
 import {
-  SyntaxHighlightPlugin,
-  SUPPORTED_LANGUAGES,
-  detectLanguage,
-  tokenize,
-  registerLanguage,
-  unregisterLanguage,
-  runRules,
+  SyntaxHighlightPlugin, SUPPORTED_LANGUAGES, detectLanguage, tokenize,
+  registerLanguage, unregisterLanguage, runRules,
 } from '@remyxjs/core';
 
 // Register the plugin
@@ -1336,41 +1191,26 @@ The inline code element will be tokenized with the same `rmx-syn-*` classes used
 Register custom language tokenizers at runtime. The new language immediately becomes available for highlighting and appears in `SUPPORTED_LANGUAGES`.
 
 ```js
-import {
-  registerLanguage,
-  unregisterLanguage,
-  runRules,
-} from '@remyxjs/core';
+import { registerLanguage, unregisterLanguage, runRules } from '@remyxjs/core';
 
 // Define tokenizer rules (same format used by all built-in tokenizers)
 const RUBY_RULES = [
   [/#[^\n]*/g, 'rmx-syn-comment'],
   [/"(?:[^"\\]|\\.)*"/g, 'rmx-syn-string'],
   [/'(?:[^'\\]|\\.)*'/g, 'rmx-syn-string'],
-  [
-    /\b(?:def|end|class|module|if|else|elsif|unless|do|while|for|return|yield|begin|rescue|ensure)\b/g,
-    'rmx-syn-keyword',
-  ],
-  [
-    /\b(?:puts|print|require|include|attr_accessor|attr_reader)\b/g,
-    'rmx-syn-builtin',
-  ],
+  [/\b(?:def|end|class|module|if|else|elsif|unless|do|while|for|return|yield|begin|rescue|ensure)\b/g, 'rmx-syn-keyword'],
+  [/\b(?:puts|print|require|include|attr_accessor|attr_reader)\b/g, 'rmx-syn-builtin'],
   [/:\w+/g, 'rmx-syn-entity'],
   [/\b\d[\d_.]*\b/g, 'rmx-syn-number'],
 ];
 
 // Register with the built-in rule engine
-registerLanguage(
-  'ruby',
-  'Ruby',
-  (code) => runRules(code, RUBY_RULES),
-  ['rb'],
-);
+registerLanguage('ruby', 'Ruby', (code) => runRules(code, RUBY_RULES), ['rb']);
 
 // Now works everywhere
-tokenize('puts "hello"', 'ruby'); // tokenize API
-tokenize('puts "hello"', 'rb'); // alias works too
-engine.executeCommand('setCodeLanguage', { language: 'ruby' }); // in editor
+tokenize('puts "hello"', 'ruby');          // tokenize API
+tokenize('puts "hello"', 'rb');            // alias works too
+engine.executeCommand('setCodeLanguage', { language: 'ruby' });  // in editor
 
 // Remove later if needed
 unregisterLanguage('ruby', ['rb']);
@@ -1401,33 +1241,25 @@ evaluateTableFormulas(tableElement);
 import { CommentsPlugin, parseMentions } from '@remyxjs/core';
 
 // Register the plugin
-engine.plugins.register(
-  CommentsPlugin({
-    onComment: (thread) => saveToServer(thread),
-    onResolve: ({ thread, resolved }) => updateServer(thread),
-    onDelete: (thread) => deleteFromServer(thread),
-    onReply: ({ thread, reply }) => saveReply(thread.id, reply),
-    mentionUsers: ['alice', 'bob', 'charlie'],
-    commentOnly: false, // true = read-only editor with comment support
-  }),
-);
+engine.plugins.register(CommentsPlugin({
+  onComment: (thread) => saveToServer(thread),
+  onResolve: ({ thread, resolved }) => updateServer(thread),
+  onDelete: (thread) => deleteFromServer(thread),
+  onReply: ({ thread, reply }) => saveReply(thread.id, reply),
+  mentionUsers: ['alice', 'bob', 'charlie'],
+  commentOnly: false, // true = read-only editor with comment support
+}));
 
 // The plugin exposes engine._comments API:
-engine._comments.addComment({
-  author: 'Alice',
-  body: 'This needs clarification @bob',
-});
+engine._comments.addComment({ author: 'Alice', body: 'This needs clarification @bob' });
 engine._comments.resolveComment(threadId, true);
-engine._comments.replyToComment(threadId, {
-  author: 'Bob',
-  body: 'Fixed!',
-});
+engine._comments.replyToComment(threadId, { author: 'Bob', body: 'Fixed!' });
 engine._comments.deleteComment(threadId);
 engine._comments.navigateToComment(threadId); // scroll to + select
-engine._comments.getAllThreads(); // all threads (newest first)
+engine._comments.getAllThreads();     // all threads (newest first)
 engine._comments.getUnresolvedThreads();
 engine._comments.getResolvedThreads();
-engine._comments.exportThreads(); // JSON-serializable array
+engine._comments.exportThreads();    // JSON-serializable array
 engine._comments.importThreads(data); // load from server
 
 // Parse @mentions from text
@@ -1437,27 +1269,15 @@ parseMentions('Hello @alice and @bob'); // → ['alice', 'bob']
 **CalloutPlugin** — Styled callout/alert/admonition blocks with 7 built-in types, custom type registration, collapsible toggle, nested content, and GitHub-flavored alert syntax auto-conversion.
 
 ```js
-import {
-  CalloutPlugin,
-  registerCalloutType,
-  getCalloutTypes,
-  parseGFMAlert,
-} from '@remyxjs/core';
+import { CalloutPlugin, registerCalloutType, getCalloutTypes, parseGFMAlert } from '@remyxjs/core';
 
 // Register the plugin
 engine.plugins.register(CalloutPlugin());
 
 // Insert a callout at the cursor
 engine.executeCommand('insertCallout', { type: 'warning' });
-engine.executeCommand('insertCallout', {
-  type: 'tip',
-  collapsible: true,
-  title: 'Pro tip',
-});
-engine.executeCommand('insertCallout', {
-  type: 'info',
-  content: '<p>Custom HTML content</p>',
-});
+engine.executeCommand('insertCallout', { type: 'tip', collapsible: true, title: 'Pro tip' });
+engine.executeCommand('insertCallout', { type: 'info', content: '<p>Custom HTML content</p>' });
 
 // Change type of the focused callout
 engine.executeCommand('changeCalloutType', 'error');
@@ -1469,12 +1289,7 @@ engine.executeCommand('toggleCalloutCollapse');
 engine.executeCommand('removeCallout');
 
 // Register a custom callout type
-registerCalloutType({
-  type: 'security',
-  label: 'Security',
-  icon: '🔒',
-  color: '#dc2626',
-});
+registerCalloutType({ type: 'security', label: 'Security', icon: '🔒', color: '#dc2626' });
 
 // List all types
 getCalloutTypes(); // → [{ type: 'info', ... }, { type: 'warning', ... }, ..., { type: 'security', ... }]
@@ -1488,31 +1303,24 @@ parseGFMAlert('[!WARNING]\nBe careful'); // → { type: 'warning', body: 'Be car
 ```js
 import { LinkPlugin, detectLinks, slugify } from '@remyxjs/core';
 
-engine.plugins.register(
-  LinkPlugin({
-    onLinkClick: ({ href, text, timestamp }) => trackClick(href),
-    onUnfurl: async (url) => {
-      const res = await fetch(
-        `/api/unfurl?url=${encodeURIComponent(url)}`,
-      );
-      return res.json(); // { title, description, image }
-    },
-    validateLink: async (url) => {
-      const res = await fetch(url, { method: 'HEAD' });
-      return res.ok;
-    },
-    onBrokenLink: (url, el) => console.warn('Broken:', url),
-    autoLink: true, // auto-convert URLs/emails/phones on Space/Enter
-    showPreviews: true, // hover tooltips on links
-    scanInterval: 60000, // broken link scan interval (ms)
-  }),
-);
+engine.plugins.register(LinkPlugin({
+  onLinkClick: ({ href, text, timestamp }) => trackClick(href),
+  onUnfurl: async (url) => {
+    const res = await fetch(`/api/unfurl?url=${encodeURIComponent(url)}`);
+    return res.json(); // { title, description, image }
+  },
+  validateLink: async (url) => {
+    const res = await fetch(url, { method: 'HEAD' });
+    return res.ok;
+  },
+  onBrokenLink: (url, el) => console.warn('Broken:', url),
+  autoLink: true,        // auto-convert URLs/emails/phones on Space/Enter
+  showPreviews: true,    // hover tooltips on links
+  scanInterval: 60000,   // broken link scan interval (ms)
+}));
 
 // Bookmark anchors for intra-document linking
-engine.executeCommand('insertBookmark', {
-  name: 'Introduction',
-  id: 'intro',
-});
+engine.executeCommand('insertBookmark', { name: 'Introduction', id: 'intro' });
 engine.executeCommand('linkToBookmark', 'intro'); // link selected text to #intro
 engine.executeCommand('getBookmarks'); // → [{ id, name, element }]
 engine.executeCommand('scanBrokenLinks'); // manual scan
@@ -1526,12 +1334,7 @@ slugify('Section #1: Overview!'); // → 'section-1-overview'
 **TemplatePlugin** — Merge tags, conditional blocks, repeatable sections, live preview, and pre-built template library.
 
 ```js
-import {
-  TemplatePlugin,
-  renderTemplate,
-  extractTags,
-  getTemplateLibrary,
-} from '@remyxjs/core';
+import { TemplatePlugin, renderTemplate, extractTags, getTemplateLibrary } from '@remyxjs/core';
 
 engine.plugins.register(TemplatePlugin());
 
@@ -1542,10 +1345,7 @@ engine.executeCommand('insertMergeTag', 'recipient_name');
 engine.executeCommand('loadTemplate', 'email');
 
 // Preview with sample data (read-only mode)
-engine.executeCommand('previewTemplate', {
-  recipient_name: 'Alice',
-  body: 'Welcome!',
-});
+engine.executeCommand('previewTemplate', { recipient_name: 'Alice', body: 'Welcome!' });
 engine.executeCommand('exitPreview');
 
 // Export as JSON
@@ -1555,9 +1355,7 @@ const exported = engine.executeCommand('exportTemplate');
 // Render template string with data
 renderTemplate('Hello {{name}}!', { name: 'World' }); // → 'Hello World!'
 renderTemplate('{{#if show}}visible{{/if}}', { show: true }); // → 'visible'
-renderTemplate('{{#each items}}{{name}} {{/each}}', {
-  items: [{ name: 'A' }, { name: 'B' }],
-}); // → 'A B '
+renderTemplate('{{#each items}}{{name}} {{/each}}', { items: [{name:'A'},{name:'B'}] }); // → 'A B '
 ```
 
 **KeyboardPlugin** — Vim/Emacs modes, auto-pairing, multi-cursor, jump-to-heading.
@@ -1572,12 +1370,10 @@ engine.plugins.register(KeyboardPlugin({ mode: 'vim' }));
 engine.plugins.register(KeyboardPlugin({ mode: 'emacs' }));
 
 // Default with auto-pair and custom bindings
-engine.plugins.register(
-  KeyboardPlugin({
-    autoPair: true,
-    keyBindings: { 'ctrl+shift+l': 'insertLink' },
-  }),
-);
+engine.plugins.register(KeyboardPlugin({
+  autoPair: true,
+  keyBindings: { 'ctrl+shift+l': 'insertLink' },
+}));
 
 // Multi-cursor: Cmd+D selects next occurrence
 // Jump-to-heading: Cmd+Shift+G
@@ -1589,49 +1385,33 @@ engine.plugins.register(
 ```js
 import { DragDropPlugin } from '@remyxjs/core';
 
-engine.plugins.register(
-  DragDropPlugin({
-    onDrop: (event, data) => console.log('Dropped:', data.type),
-    onFileDrop: (files) => uploadFiles(files),
-    allowExternalDrop: true,
-    showDropZone: true,
-    enableReorder: true,
-  }),
-);
+engine.plugins.register(DragDropPlugin({
+  onDrop: (event, data) => console.log('Dropped:', data.type),
+  onFileDrop: (files) => uploadFiles(files),
+  allowExternalDrop: true,
+  showDropZone: true,
+  enableReorder: true,
+}));
 
 // Keyboard shortcuts for block reorder
-engine.executeCommand('moveBlockUp'); // Cmd+Shift+ArrowUp
+engine.executeCommand('moveBlockUp');   // Cmd+Shift+ArrowUp
 engine.executeCommand('moveBlockDown'); // Cmd+Shift+ArrowDown
 ```
 
 **MathPlugin** — LaTeX/KaTeX math rendering with inline and block equations, symbol palette, equation numbering, and MathML export.
 
 ```js
-import {
-  MathPlugin,
-  getSymbolPalette,
-  parseMathExpressions,
-  latexToMathML,
-} from '@remyxjs/core';
+import { MathPlugin, getSymbolPalette, parseMathExpressions, latexToMathML } from '@remyxjs/core';
 
-engine.plugins.register(
-  MathPlugin({
-    renderMath: (latex, displayMode) =>
-      katex.renderToString(latex, { displayMode }), // plug in KaTeX
-  }),
-);
+engine.plugins.register(MathPlugin({
+  renderMath: (latex, displayMode) => katex.renderToString(latex, { displayMode }), // plug in KaTeX
+}));
 
 // Insert inline math
-engine.executeCommand('insertMath', {
-  latex: 'E = mc^2',
-  displayMode: false,
-});
+engine.executeCommand('insertMath', { latex: 'E = mc^2', displayMode: false });
 
 // Insert block equation (auto-numbered)
-engine.executeCommand('insertMath', {
-  latex: '\\sum_{i=1}^{n} x_i',
-  displayMode: true,
-});
+engine.executeCommand('insertMath', { latex: '\\sum_{i=1}^{n} x_i', displayMode: true });
 
 // Symbol palette for building UIs
 getSymbolPalette(); // → [{ category: 'Greek', symbols: [{ label: 'α', latex: '\\alpha' }, ...] }, ...]
@@ -1647,20 +1427,12 @@ latexToMathML('\\frac{a}{b}'); // → '<math ...><mfrac>...</mfrac></math>'
 **TocPlugin** — Auto-generated table of contents, document outline, heading validation, and click-to-scroll navigation.
 
 ```js
-import {
-  TocPlugin,
-  buildOutline,
-  flattenOutline,
-  renderTocHTML,
-  validateHeadingHierarchy,
-} from '@remyxjs/core';
+import { TocPlugin, buildOutline, flattenOutline, renderTocHTML, validateHeadingHierarchy } from '@remyxjs/core';
 
-engine.plugins.register(
-  TocPlugin({
-    numbering: true,
-    onOutlineChange: (outline) => updateSidebar(outline),
-  }),
-);
+engine.plugins.register(TocPlugin({
+  numbering: true,
+  onOutlineChange: (outline) => updateSidebar(outline),
+}));
 
 // Insert a rendered TOC into the document
 engine.executeCommand('insertToc');
@@ -1679,21 +1451,14 @@ engine.executeCommand('validateHeadings');
 **AnalyticsPlugin** — Readability scores, reading time, vocabulary level, sentence warnings, goal tracking, keyword density, and SEO hints.
 
 ```js
-import {
-  AnalyticsPlugin,
-  analyzeContent,
-  keywordDensity,
-  seoAnalysis,
-} from '@remyxjs/core';
+import { AnalyticsPlugin, analyzeContent, keywordDensity, seoAnalysis } from '@remyxjs/core';
 
-engine.plugins.register(
-  AnalyticsPlugin({
-    wordsPerMinute: 200,
-    targetWordCount: 1000,
-    maxSentenceLength: 30,
-    onAnalytics: (stats) => updateDashboard(stats),
-  }),
-);
+engine.plugins.register(AnalyticsPlugin({
+  wordsPerMinute: 200,
+  targetWordCount: 1000,
+  maxSentenceLength: 30,
+  onAnalytics: (stats) => updateDashboard(stats),
+}));
 
 // Toggle analytics panel visibility (emits 'analytics:toggle' event)
 engine.executeCommand('toggleAnalytics');
@@ -1719,28 +1484,21 @@ engine.executeCommand('getKeywordDensity', 'editor');
 **SpellcheckPlugin** — Spelling & grammar checking with inline underlines, writing-style presets, custom service integration, and persistent dictionary.
 
 ```js
-import {
-  SpellcheckPlugin,
-  analyzeGrammar,
-  STYLE_PRESETS,
-} from '@remyxjs/core';
+import { SpellcheckPlugin, analyzeGrammar, STYLE_PRESETS } from '@remyxjs/core';
 
-engine.plugins.register(
-  SpellcheckPlugin({
-    language: 'en-US', // BCP 47 language tag
-    enabled: true, // enable on init
-    grammarRules: true, // enable built-in grammar checking
-    stylePreset: 'formal', // 'formal'|'casual'|'technical'|'academic'
-    customService: {
-      // optional external service
-      check: async (text) => [...suggestions],
-    },
-    dictionary: ['Remyx', 'WYSIWYG'], // custom words to ignore
-    persistent: true, // persist dictionary in localStorage
-    onError: (errors) => {},
-    onCorrection: ({ original, replacement }) => {},
-  }),
-);
+engine.plugins.register(SpellcheckPlugin({
+  language: 'en-US',                    // BCP 47 language tag
+  enabled: true,                        // enable on init
+  grammarRules: true,                   // enable built-in grammar checking
+  stylePreset: 'formal',               // 'formal'|'casual'|'technical'|'academic'
+  customService: {                      // optional external service
+    check: async (text) => [...suggestions],
+  },
+  dictionary: ['Remyx', 'WYSIWYG'],   // custom words to ignore
+  persistent: true,                     // persist dictionary in localStorage
+  onError: (errors) => {},
+  onCorrection: ({ original, replacement }) => {},
+}));
 
 // Toggle spellcheck on/off
 engine.executeCommand('toggleSpellcheck');
@@ -1775,22 +1533,20 @@ engine.executeCommand('getSpellcheckStats');
 ```js
 import { CollaborationPlugin } from '@remyxjs/core';
 
-engine.plugins.register(
-  CollaborationPlugin({
-    serverUrl: 'wss://signal.example.com',
-    roomId: 'my-document-123',
-    userName: 'Alice',
-    userColor: '#6366f1',
-    autoConnect: true, // connect on init (default: true)
-    transport: 'websocket', // 'websocket' | 'webrtc' | custom transport
-    offlineQueue: true, // queue changes while disconnected (default: true)
-    awarenessTimeout: 30000, // ms before marking a peer as inactive
-    onPeerJoined: (peer) => console.log(`${peer.name} joined`),
-    onPeerLeft: (peer) => console.log(`${peer.name} left`),
-    onSync: () => console.log('Document synced'),
-    onError: (err) => console.error('Collaboration error:', err),
-  }),
-);
+engine.plugins.register(CollaborationPlugin({
+  serverUrl: 'wss://signal.example.com',
+  roomId: 'my-document-123',
+  userName: 'Alice',
+  userColor: '#6366f1',
+  autoConnect: true,           // connect on init (default: true)
+  transport: 'websocket',      // 'websocket' | 'webrtc' | custom transport
+  offlineQueue: true,          // queue changes while disconnected (default: true)
+  awarenessTimeout: 30000,     // ms before marking a peer as inactive
+  onPeerJoined: (peer) => console.log(`${peer.name} joined`),
+  onPeerLeft: (peer) => console.log(`${peer.name} left`),
+  onSync: () => console.log('Document synced'),
+  onError: (err) => console.error('Collaboration error:', err),
+}));
 
 // Connect / disconnect manually (when autoConnect is false)
 engine.executeCommand('collaborationConnect', {
@@ -1810,14 +1566,14 @@ engine.executeCommand('collaborationGetPeers');
 
 **Events:**
 
-| Event                        | Payload              | When                           |
-| ---------------------------- | -------------------- | ------------------------------ |
-| `collaboration:connected`    | `{ roomId, peerId }` | Successfully connected to room |
-| `collaboration:disconnected` | `{ reason }`         | Disconnected from room         |
-| `collaboration:peer-joined`  | `{ peer }`           | A new peer joined the room     |
-| `collaboration:peer-left`    | `{ peer }`           | A peer left the room           |
-| `collaboration:sync`         | `{ documentState }`  | Document state synchronized    |
-| `collaboration:error`        | `{ error, code }`    | Connection or sync error       |
+| Event | Payload | When |
+| --- | --- | --- |
+| `collaboration:connected` | `{ roomId, peerId }` | Successfully connected to room |
+| `collaboration:disconnected` | `{ reason }` | Disconnected from room |
+| `collaboration:peer-joined` | `{ peer }` | A new peer joined the room |
+| `collaboration:peer-left` | `{ peer }` | A peer left the room |
+| `collaboration:sync` | `{ documentState }` | Document state synchronized |
+| `collaboration:error` | `{ error, code }` | Connection or sync error |
 
 **Custom transport interface:**
 
@@ -1828,24 +1584,15 @@ const myTransport = {
     // handlers.onConnect() — call when connected
     // handlers.onDisconnect(reason) — call when disconnected
     // Return a connection object with send(data) and close() methods
-    return {
-      send(data) {
-        /* ... */
-      },
-      close() {
-        /* ... */
-      },
-    };
+    return { send(data) { /* ... */ }, close() { /* ... */ } };
   },
 };
 
-engine.plugins.register(
-  CollaborationPlugin({
-    transport: myTransport,
-    roomId: 'room-1',
-    userName: 'Charlie',
-  }),
-);
+engine.plugins.register(CollaborationPlugin({
+  transport: myTransport,
+  roomId: 'room-1',
+  userName: 'Charlie',
+}));
 ```
 
 ## Selection API
@@ -1856,10 +1603,10 @@ Access the selection subsystem via `engine.selection`:
 const sel = engine.selection;
 
 // Read selection state
-sel.isCollapsed(); // true if cursor (no range selected)
-sel.getSelectedText(); // selected plain text
-sel.getSelectedHTML(); // selected HTML fragment
-sel.getBoundingRect(); // DOMRect for positioning floating UI
+sel.isCollapsed();           // true if cursor (no range selected)
+sel.getSelectedText();       // selected plain text
+sel.getSelectedHTML();       // selected HTML fragment
+sel.getBoundingRect();       // DOMRect for positioning floating UI
 
 // Inspect formatting at cursor
 const formats = sel.getActiveFormats();
@@ -1876,9 +1623,9 @@ const formats = sel.getActiveFormats();
 // }
 
 // Navigate the DOM
-sel.getParentElement(); // nearest element containing cursor
-sel.getParentBlock(); // nearest block element (div, p, li, etc.)
-sel.getClosestElement('a'); // find ancestor by tag name
+sel.getParentElement();      // nearest element containing cursor
+sel.getParentBlock();        // nearest block element (div, p, li, etc.)
+sel.getClosestElement('a');  // find ancestor by tag name
 
 // Manipulate content at cursor
 sel.insertHTML('<strong>injected</strong>');
@@ -1892,8 +1639,8 @@ const bookmark = sel.save();
 sel.restore(bookmark);
 
 // Collapse cursor
-sel.collapse(); // collapse to start
-sel.collapse(true); // collapse to end
+sel.collapse();              // collapse to start
+sel.collapse(true);          // collapse to end
 ```
 
 ## History (Undo/Redo)
@@ -1901,12 +1648,12 @@ sel.collapse(true); // collapse to end
 Access the history subsystem via `engine.history`:
 
 ```js
-engine.history.undo(); // Undo last change
-engine.history.redo(); // Redo
-engine.history.canUndo(); // true if undo stack is not empty
-engine.history.canRedo(); // true if redo stack is not empty
-engine.history.snapshot(); // Force an immediate snapshot
-engine.history.clear(); // Clear all history
+engine.history.undo();       // Undo last change
+engine.history.redo();       // Redo
+engine.history.canUndo();    // true if undo stack is not empty
+engine.history.canRedo();    // true if redo stack is not empty
+engine.history.snapshot();   // Force an immediate snapshot
+engine.history.clear();      // Clear all history
 
 // Events
 engine.on('history:undo', () => updateUndoButton());
@@ -1918,8 +1665,8 @@ History is configured via engine options:
 ```js
 new EditorEngine(element, {
   history: {
-    maxSize: 200, // Keep up to 200 undo states (default: 100)
-    debounceMs: 500, // Wait 500ms of inactivity before snapshotting (default: 300)
+    maxSize: 200,     // Keep up to 200 undo states (default: 100)
+    debounceMs: 500,  // Wait 500ms of inactivity before snapshotting (default: 300)
   },
 });
 ```
@@ -1936,32 +1683,32 @@ engine.keyboard.register('mod+shift+h', 'highlight');
 engine.keyboard.unregister('mod+shift+h');
 
 // Look up shortcuts
-engine.keyboard.getShortcutForCommand('bold'); // 'mod+b'
-engine.keyboard.getShortcutLabel('mod+b'); // '⌘B' on Mac, 'Ctrl+B' on Windows
+engine.keyboard.getShortcutForCommand('bold');  // 'mod+b'
+engine.keyboard.getShortcutLabel('mod+b');      // '⌘B' on Mac, 'Ctrl+B' on Windows
 ```
 
 **Shortcut format:** Use `mod` for Ctrl (Windows/Linux) or Cmd (Mac). Combine with `shift`, `alt`, and a lowercase key: `'mod+shift+k'`.
 
 **Default shortcuts:**
 
-| Shortcut    | Command        |
-| ----------- | -------------- |
-| Mod+B       | bold           |
-| Mod+I       | italic         |
-| Mod+U       | underline      |
-| Mod+Shift+X | strikethrough  |
-| Mod+,       | subscript      |
-| Mod+.       | superscript    |
-| Mod+K       | insertLink     |
-| Mod+Shift+7 | orderedList    |
-| Mod+Shift+8 | unorderedList  |
-| Mod+Shift+9 | blockquote     |
-| Mod+Shift+C | codeBlock      |
-| Mod+F       | find           |
-| Mod+Shift+U | sourceMode     |
-| Mod+Shift+F | fullscreen     |
-| Mod+Z       | undo           |
-| Mod+Shift+Z | redo           |
+| Shortcut | Command |
+| --- | --- |
+| Mod+B | bold |
+| Mod+I | italic |
+| Mod+U | underline |
+| Mod+Shift+X | strikethrough |
+| Mod+, | subscript |
+| Mod+. | superscript |
+| Mod+K | insertLink |
+| Mod+Shift+7 | orderedList |
+| Mod+Shift+8 | unorderedList |
+| Mod+Shift+9 | blockquote |
+| Mod+Shift+C | codeBlock |
+| Mod+F | find |
+| Mod+Shift+U | sourceMode |
+| Mod+Shift+F | fullscreen |
+| Mod+Z | undo |
+| Mod+Shift+Z | redo |
 | Mod+Shift+P | commandPalette |
 
 ## Sanitizer
@@ -1977,36 +1724,23 @@ new EditorEngine(element, {
   sanitize: {
     allowedTags: {
       // tag name → array of allowed attributes
-      div: ['class', 'id', 'style'],
-      span: ['class', 'style'],
-      a: ['href', 'target', 'rel', 'class'],
-      img: ['src', 'alt', 'width', 'height', 'class'],
-      mark: ['class'],
+      'div': ['class', 'id', 'style'],
+      'span': ['class', 'style'],
+      'a': ['href', 'target', 'rel', 'class'],
+      'img': ['src', 'alt', 'width', 'height', 'class'],
+      'mark': ['class'],
       // ... see schema.js for full defaults
     },
     allowedStyles: [
-      'color',
-      'background-color',
-      'font-size',
-      'font-family',
-      'text-align',
-      'text-decoration',
-      'font-weight',
-      'font-style',
-      'margin',
-      'padding',
-      'border',
-      'width',
-      'height',
+      'color', 'background-color', 'font-size', 'font-family',
+      'text-align', 'text-decoration', 'font-weight', 'font-style',
+      'margin', 'padding', 'border', 'width', 'height',
       // ... see schema.js for full defaults
     ],
     // Restrict which domains can be embedded via iframe
     iframeAllowedDomains: [
-      'www.youtube.com',
-      'youtube.com',
-      'www.youtube-nocookie.com',
-      'player.vimeo.com',
-      'www.dailymotion.com',
+      'www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com',
+      'player.vimeo.com', 'www.dailymotion.com',
       // Add your own domains here
     ],
   },
@@ -2031,11 +1765,7 @@ new EditorEngine(element, {
 ### HTML Helpers
 
 ```js
-import {
-  escapeHTML,
-  escapeHTMLAttr,
-  insertPlainText,
-} from '@remyxjs/core';
+import { escapeHTML, escapeHTMLAttr, insertPlainText } from '@remyxjs/core';
 
 // Escape HTML entities for safe insertion
 escapeHTML('<script>alert("xss")</script>');
@@ -2067,11 +1797,7 @@ Supports GitHub Flavored Markdown (GFM): headings, bold, italic, links, images, 
 ### Document Conversion
 
 ```js
-import {
-  convertDocument,
-  isImportableFile,
-  getSupportedExtensions,
-} from '@remyxjs/core';
+import { convertDocument, isImportableFile, getSupportedExtensions } from '@remyxjs/core';
 
 // Check if a file can be imported
 if (isImportableFile(file)) {
@@ -2091,11 +1817,7 @@ PDF and DOCX converters use dynamic imports — the heavy libraries are only loa
 ### Export
 
 ```js
-import {
-  exportAsMarkdown,
-  exportAsPDF,
-  exportAsDocx,
-} from '@remyxjs/core';
+import { exportAsMarkdown, exportAsPDF, exportAsDocx } from '@remyxjs/core';
 
 // Export as Markdown file download
 exportAsMarkdown(engine.getHTML(), 'my-document');
@@ -2126,11 +1848,7 @@ The paste cleaner auto-detects the source application and applies format-specifi
 ### Font Management
 
 ```js
-import {
-  loadGoogleFonts,
-  addFonts,
-  removeFonts,
-} from '@remyxjs/core';
+import { loadGoogleFonts, addFonts, removeFonts } from '@remyxjs/core';
 
 // Load Google Fonts (injects <link> into <head>)
 loadGoogleFonts(['Roboto', 'Open Sans', 'Merriweather']);
@@ -2138,7 +1856,7 @@ loadGoogleFonts(['Roboto', 'Open Sans', 'Merriweather']);
 // With Subresource Integrity (SRI) hash for security
 loadGoogleFonts(['Roboto'], {
   integrity: 'sha384-abc123...', // pre-computed hash of the stylesheet
-  crossOrigin: 'anonymous', // required for SRI (default)
+  crossOrigin: 'anonymous',      // required for SRI (default)
 });
 
 // Modify a font list
@@ -2153,21 +1871,14 @@ const trimmed = removeFonts(updated, ['Times New Roman']);
 ### DOM Utilities
 
 ```js
-import {
-  closestBlock,
-  closestTag,
-  wrapInTag,
-  unwrapTag,
-  generateId,
-  isBlockEmpty,
-} from '@remyxjs/core';
+import { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from '@remyxjs/core';
 
-closestBlock(node, editorElement); // Nearest block ancestor
-closestTag(node, 'a', editorElement); // Nearest <a> ancestor
+closestBlock(node, editorElement);        // Nearest block ancestor
+closestTag(node, 'a', editorElement);     // Nearest <a> ancestor
 wrapInTag(range, 'mark', { class: 'hi' }); // Wrap range in element
-unwrapTag(markElement); // Unwrap, keep children
-generateId(); // 'rmx-a1b2c3d4'
-isBlockEmpty(paragraphElement); // true if no meaningful content
+unwrapTag(markElement);                   // Unwrap, keep children
+generateId();                             // 'rmx-a1b2c3d4'
+isBlockEmpty(paragraphElement);           // true if no meaningful content
 ```
 
 ### HTML Formatting
@@ -2187,8 +1898,8 @@ const pretty = formatHTML('<div><p>Hello</p><p>World</p></div>');
 ```js
 import { isMac, getModKey } from '@remyxjs/core';
 
-isMac(); // true on macOS
-getModKey(); // 'Cmd' on Mac, 'Ctrl' on Windows/Linux
+isMac();      // true on macOS
+getModKey();  // 'Cmd' on Mac, 'Ctrl' on Windows/Linux
 ```
 
 ## Theming
@@ -2197,23 +1908,23 @@ getModKey(); // 'Cmd' on Mac, 'Ctrl' on Windows/Linux
 
 All styles use CSS custom properties with the `--rmx-` prefix. Override them in your CSS or use `createTheme` to generate overrides programmatically.
 
-| Variable               | Default (Light) | Description           |
-| ---------------------- | --------------- | --------------------- |
-| `--rmx-bg`             | `#ffffff`       | Editor background     |
-| `--rmx-text`           | `#1a1a1a`       | Text color            |
-| `--rmx-border`         | `#e0e0e0`       | Border color          |
-| `--rmx-toolbar-bg`     | `#f8f9fa`       | Toolbar background    |
-| `--rmx-toolbar-text`   | `#374151`       | Toolbar text color    |
-| `--rmx-toolbar-hover`  | `#e9ecef`       | Toolbar button hover  |
-| `--rmx-toolbar-active` | `#dee2e6`       | Toolbar button active |
-| `--rmx-primary`        | `#3b82f6`       | Primary accent color  |
-| `--rmx-primary-hover`  | `#2563eb`       | Primary hover         |
-| `--rmx-primary-text`   | `#ffffff`       | Text on primary       |
-| `--rmx-shadow`         | `0 1px 3px ...` | Box shadow            |
-| `--rmx-radius`         | `6px`           | Border radius         |
-| `--rmx-font-family`    | system-ui       | Editor font           |
-| `--rmx-font-size`      | `16px`          | Editor font size      |
-| `--rmx-line-height`    | `1.6`           | Line height           |
+| Variable | Default (Light) | Description |
+| --- | --- | --- |
+| `--rmx-bg` | `#ffffff` | Editor background |
+| `--rmx-text` | `#1a1a1a` | Text color |
+| `--rmx-border` | `#e0e0e0` | Border color |
+| `--rmx-toolbar-bg` | `#f8f9fa` | Toolbar background |
+| `--rmx-toolbar-text` | `#374151` | Toolbar text color |
+| `--rmx-toolbar-hover` | `#e9ecef` | Toolbar button hover |
+| `--rmx-toolbar-active` | `#dee2e6` | Toolbar button active |
+| `--rmx-primary` | `#3b82f6` | Primary accent color |
+| `--rmx-primary-hover` | `#2563eb` | Primary hover |
+| `--rmx-primary-text` | `#ffffff` | Text on primary |
+| `--rmx-shadow` | `0 1px 3px ...` | Box shadow |
+| `--rmx-radius` | `6px` | Border radius |
+| `--rmx-font-family` | system-ui | Editor font |
+| `--rmx-font-size` | `16px` | Editor font size |
+| `--rmx-line-height` | `1.6` | Line height |
 
 See `packages/remyx-core/src/themes/variables.css` for the full list of 40+ variables.
 
@@ -2221,21 +1932,19 @@ See `packages/remyx-core/src/themes/variables.css` for the full list of 40+ vari
 
 Six built-in themes are available via CSS classes (applied automatically by `@remyxjs/react`'s `theme` prop, or manually via `.rmx-theme-{name}`):
 
-| Theme    | Class               | Description               |
-| -------- | ------------------- | ------------------------- |
-| `light`  | `.rmx-theme-light`  | Clean white (default)     |
-| `dark`   | `.rmx-theme-dark`   | Neutral dark              |
-| `ocean`  | `.rmx-theme-ocean`  | Deep blue palette         |
-| `forest` | `.rmx-theme-forest` | Green earth-tone palette  |
+| Theme | Class | Description |
+| --- | --- | --- |
+| `light` | `.rmx-theme-light` | Clean white (default) |
+| `dark` | `.rmx-theme-dark` | Neutral dark |
+| `ocean` | `.rmx-theme-ocean` | Deep blue palette |
+| `forest` | `.rmx-theme-forest` | Green earth-tone palette |
 | `sunset` | `.rmx-theme-sunset` | Warm orange/amber palette |
-| `rose`   | `.rmx-theme-rose`   | Soft pink palette         |
+| `rose` | `.rmx-theme-rose` | Soft pink palette |
 
 For vanilla JS usage, add the class to the editor wrapper:
 
 ```js
-document
-  .querySelector('.rmx-editor')
-  .classList.add('rmx-theme-ocean');
+document.querySelector('.rmx-editor').classList.add('rmx-theme-ocean');
 ```
 
 The `THEME_PRESETS` export is still available for programmatic overrides via `customTheme`:
@@ -2243,10 +1952,7 @@ The `THEME_PRESETS` export is still available for programmatic overrides via `cu
 ```js
 import { THEME_PRESETS, createTheme } from '@remyxjs/core';
 // Override a single variable on top of ocean
-const modified = {
-  ...THEME_PRESETS.ocean,
-  ...createTheme({ primary: '#ff6b6b' }),
-};
+const modified = { ...THEME_PRESETS.ocean, ...createTheme({ primary: '#ff6b6b' }) };
 ```
 
 ### Custom Themes
@@ -2288,47 +1994,38 @@ const theme = createTheme({
 import { TOOLBAR_PRESETS } from '@remyxjs/core';
 
 // Available presets:
-TOOLBAR_PRESETS.full; // All available items including plugin commands
-TOOLBAR_PRESETS.rich; // All features with plugin toolbar items (callout, math, toc, bookmark, merge tag)
-TOOLBAR_PRESETS.standard; // Common editing features without plugins
-TOOLBAR_PRESETS.minimal; // Basic text formatting
-TOOLBAR_PRESETS.bare; // Bold, italic, underline only
+TOOLBAR_PRESETS.full;      // All available items including plugin commands
+TOOLBAR_PRESETS.rich;      // All features with plugin toolbar items (callout, math, toc, bookmark, merge tag)
+TOOLBAR_PRESETS.standard;  // Common editing features without plugins
+TOOLBAR_PRESETS.minimal;   // Basic text formatting
+TOOLBAR_PRESETS.bare;      // Bold, italic, underline only
 ```
 
 Each preset is an array of arrays, where each inner array is a toolbar group (rendered with a separator between groups):
 
 ```js
 [
-  ['bold', 'italic', 'underline'], // Group 1
+  ['bold', 'italic', 'underline'],       // Group 1
   ['heading', 'orderedList', 'unorderedList'], // Group 2
-  ['link', 'image'], // Group 3
-];
+  ['link', 'image'],                     // Group 3
+]
 ```
 
 ### Custom Toolbars
 
 ```js
-import {
-  removeToolbarItems,
-  addToolbarItems,
-  createToolbar,
-  TOOLBAR_PRESETS,
-} from '@remyxjs/core';
+import { removeToolbarItems, addToolbarItems, createToolbar, TOOLBAR_PRESETS } from '@remyxjs/core';
 
 // Start from a preset and customize
 let toolbar = TOOLBAR_PRESETS.standard;
 
 // Remove items
-toolbar = removeToolbarItems(toolbar, [
-  'strikethrough',
-  'subscript',
-  'superscript',
-]);
+toolbar = removeToolbarItems(toolbar, ['strikethrough', 'subscript', 'superscript']);
 
 // Add items to a specific group or position
 toolbar = addToolbarItems(toolbar, ['codeBlock', 'blockquote'], {
-  position: 'after', // 'before' | 'after' | 'start' | 'end'
-  relativeTo: 'link', // existing item to position relative to
+  position: 'after',    // 'before' | 'after' | 'start' | 'end'
+  relativeTo: 'link',   // existing item to position relative to
 });
 
 // Or build from scratch
@@ -2346,10 +2043,7 @@ const myToolbar = createToolbar([
 Style individual toolbar items differently:
 
 ```js
-import {
-  createToolbarItemTheme,
-  resolveToolbarItemStyle,
-} from '@remyxjs/core';
+import { createToolbarItemTheme, resolveToolbarItemStyle } from '@remyxjs/core';
 
 const itemTheme = createToolbarItemTheme({
   bold: {
@@ -2400,17 +2094,13 @@ Load editor configuration from an external JSON or YAML URL:
 import { loadConfig } from '@remyxjs/core';
 
 // JSON config
-const config = await loadConfig(
-  'https://cdn.example.com/editor-config.json',
-);
+const config = await loadConfig('https://cdn.example.com/editor-config.json');
 
 // YAML config (detected by .yml/.yaml extension)
 const config = await loadConfig('/configs/editor.yaml');
 
 // Environment-based merging
-const config = await loadConfig('/config.json', {
-  env: 'production',
-});
+const config = await loadConfig('/config.json', { env: 'production' });
 
 // Custom headers (e.g., authenticated endpoints)
 const config = await loadConfig('/api/editor-config', {
@@ -2419,9 +2109,7 @@ const config = await loadConfig('/api/editor-config', {
 
 // Cancellation
 const controller = new AbortController();
-const config = await loadConfig('/config.json', {
-  signal: controller.signal,
-});
+const config = await loadConfig('/config.json', { signal: controller.signal });
 ```
 
 **Config file format with environment overrides:**
@@ -2460,12 +2148,12 @@ autosave:
 
 The built-in YAML parser handles simple key-value pairs, nested objects, inline arrays, booleans, numbers, null, and quoted strings. For complex YAML with anchors, multi-line blocks, or flow mappings, use the `js-yaml` library and pass the result to `defineConfig()`.
 
-| Parameter         | Type                     | Description                          |
-| ----------------- | ------------------------ | ------------------------------------ |
-| `url`             | `string`                 | URL or path to JSON/YAML config file |
-| `options.env`     | `string`                 | Environment name for config merging  |
-| `options.headers` | `Record<string, string>` | Custom fetch headers                 |
-| `options.signal`  | `AbortSignal`            | Cancellation signal                  |
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `url` | `string` | URL or path to JSON/YAML config file |
+| `options.env` | `string` | Environment name for config merging |
+| `options.headers` | `Record<string, string>` | Custom fetch headers |
+| `options.signal` | `AbortSignal` | Cancellation signal |
 
 ## Multi-Editor Support
 
@@ -2513,19 +2201,19 @@ console.log(EditorBus.getEditorIds()); // ['source', 'preview']
 EditorBus.unregister('source');
 ```
 
-| Method                         | Description                                  |
-| ------------------------------ | -------------------------------------------- |
-| `register(id, engine)`         | Register an engine by ID                     |
-| `unregister(id)`               | Remove a registered engine                   |
-| `getEditor(id)`                | Get an engine by ID                          |
-| `getEditorIds()`               | List all registered IDs                      |
-| `editorCount`                  | Number of registered editors                 |
-| `on(event, handler)`           | Subscribe to a global event                  |
-| `off(event, handler)`          | Unsubscribe                                  |
-| `once(event, handler)`         | Subscribe once                               |
-| `emit(event, data)`            | Emit to global subscribers                   |
-| `broadcast(event, data, opts)` | Emit into each editor's local `eventBus`     |
-| `reset()`                      | Clear all listeners and registry (for tests) |
+| Method | Description |
+| --- | --- |
+| `register(id, engine)` | Register an engine by ID |
+| `unregister(id)` | Remove a registered engine |
+| `getEditor(id)` | Get an engine by ID |
+| `getEditorIds()` | List all registered IDs |
+| `editorCount` | Number of registered editors |
+| `on(event, handler)` | Subscribe to a global event |
+| `off(event, handler)` | Unsubscribe |
+| `once(event, handler)` | Subscribe once |
+| `emit(event, data)` | Emit to global subscribers |
+| `broadcast(event, data, opts)` | Emit into each editor's local `eventBus` |
+| `reset()` | Clear all listeners and registry (for tests) |
 
 ### SharedResources
 
@@ -2535,8 +2223,7 @@ A lazily-initialized singleton that provides deeply-frozen copies of large, immu
 import { SharedResources } from '@remyxjs/core';
 
 // Shared, frozen sanitizer schema
-const { allowedTags, allowedStyles } =
-  SharedResources.sanitizerSchema;
+const { allowedTags, allowedStyles } = SharedResources.sanitizerSchema;
 
 // Shared toolbar presets
 const fullToolbar = SharedResources.toolbarPresets.full;
@@ -2551,12 +2238,9 @@ const keybindings = SharedResources.keybindings;
 const tooltips = SharedResources.commands.tooltips;
 
 // Register a custom icon once, available to all editors
-SharedResources.registerIcon(
-  'myAction',
-  '<svg viewBox="0 0 24 24">...</svg>',
-);
-SharedResources.getIcon('myAction'); // '<svg ...>'
-SharedResources.getIconNames(); // ['myAction']
+SharedResources.registerIcon('myAction', '<svg viewBox="0 0 24 24">...</svg>');
+SharedResources.getIcon('myAction');     // '<svg ...>'
+SharedResources.getIconNames();          // ['myAction']
 SharedResources.unregisterIcon('myAction');
 
 // Stats
@@ -2568,120 +2252,120 @@ SharedResources.stats; // { registeredIcons: 0, frozenSchemas: true }
 ```js
 import {
   // Toolbar & menu defaults
-  DEFAULT_TOOLBAR, // Full toolbar configuration
-  DEFAULT_MENU_BAR, // Menu bar structure
+  DEFAULT_TOOLBAR,      // Full toolbar configuration
+  DEFAULT_MENU_BAR,     // Menu bar structure
 
   // Font & color defaults
-  DEFAULT_FONTS, // Array of font family names
-  DEFAULT_FONT_SIZES, // Array of size strings
-  DEFAULT_COLORS, // Color palette array
+  DEFAULT_FONTS,        // Array of font family names
+  DEFAULT_FONT_SIZES,   // Array of size strings
+  DEFAULT_COLORS,       // Color palette array
 
   // Keyboard
-  DEFAULT_KEYBINDINGS, // Map: command name → shortcut string
+  DEFAULT_KEYBINDINGS,  // Map: command name → shortcut string
 
   // Heading options
-  HEADING_OPTIONS, // H1-H6 + paragraph
+  HEADING_OPTIONS,      // H1-H6 + paragraph
 
   // Security schema
-  ALLOWED_TAGS, // Tag → allowed attributes map
-  ALLOWED_STYLES, // Allowed CSS property names
+  ALLOWED_TAGS,         // Tag → allowed attributes map
+  ALLOWED_STYLES,       // Allowed CSS property names
 
   // Command metadata
-  BUTTON_COMMANDS, // Set of commands rendered as buttons
-  TOOLTIP_MAP, // Command → tooltip text
-  SHORTCUT_MAP, // Command → display shortcut
-  MODAL_COMMANDS, // Commands that open modals
-  getShortcutLabel, // (command) => platform-aware label string
+  BUTTON_COMMANDS,      // Set of commands rendered as buttons
+  TOOLTIP_MAP,          // Command → tooltip text
+  SHORTCUT_MAP,         // Command → display shortcut
+  MODAL_COMMANDS,       // Commands that open modals
+  getShortcutLabel,     // (command) => platform-aware label string
   getCommandActiveState, // (command, selectionState, engine) => boolean
 
   // Command palette
-  SLASH_COMMAND_ITEMS, // Default catalog of command palette items
-  filterSlashItems, // (items, query, options?) => filtered items (pinRecent: true by default)
-  getRecentCommands, // () => string[] — last 5 executed command IDs
-  recordRecentCommand, // (id) => void — record a command execution
-  clearRecentCommands, // () => void — clear recent history
+  SLASH_COMMAND_ITEMS,  // Default catalog of command palette items
+  filterSlashItems,     // (items, query, options?) => filtered items (pinRecent: true by default)
+  getRecentCommands,    // () => string[] — last 5 executed command IDs
+  recordRecentCommand,  // (id) => void — record a command execution
+  clearRecentCommands,  // () => void — clear recent history
   registerCommandItems, // (items) => void — add custom items to the palette
   unregisterCommandItem, // (id) => boolean — remove a custom item
   getCustomCommandItems, // () => SlashCommandItem[] — get all custom items
 
   // Comments & Annotations
-  CommentsPlugin, // Inline comment threads plugin
-  parseMentions, // (text) => string[] — extract @mentions from text
+  CommentsPlugin,       // Inline comment threads plugin
+  parseMentions,        // (text) => string[] — extract @mentions from text
 
   // Callouts & Alerts
-  CalloutPlugin, // Styled callout blocks plugin
-  registerCalloutType, // (typeDef) => void — register custom callout type
-  unregisterCalloutType, // (type) => boolean — remove a callout type
-  getCalloutTypes, // () => CalloutType[] — all registered types
-  getCalloutType, // (type) => CalloutType — get a type definition
-  parseGFMAlert, // (text) => { type, body } — parse GFM alert syntax
+  CalloutPlugin,              // Styled callout blocks plugin
+  registerCalloutType,        // (typeDef) => void — register custom callout type
+  unregisterCalloutType,      // (type) => boolean — remove a callout type
+  getCalloutTypes,            // () => CalloutType[] — all registered types
+  getCalloutType,             // (type) => CalloutType — get a type definition
+  parseGFMAlert,              // (text) => { type, body } — parse GFM alert syntax
 
   // Advanced Link Management
-  LinkPlugin, // Link previews, broken links, auto-link, bookmarks
-  detectLinks, // (text) => Array<{ type, value, index }>
-  slugify, // (text) => URL-safe slug string
+  LinkPlugin,                 // Link previews, broken links, auto-link, bookmarks
+  detectLinks,                // (text) => Array<{ type, value, index }>
+  slugify,                    // (text) => URL-safe slug string
 
   // Template System
-  TemplatePlugin, // Merge tags, conditionals, loops, preview, library
-  renderTemplate, // (template, data) => rendered string
-  extractTags, // (template) => string[] — unique tag names
-  registerTemplate, // Add custom template to library
-  unregisterTemplate, // Remove template from library
-  getTemplateLibrary, // () => all templates
-  getTemplate, // (id) => template by ID
+  TemplatePlugin,             // Merge tags, conditionals, loops, preview, library
+  renderTemplate,             // (template, data) => rendered string
+  extractTags,                // (template) => string[] — unique tag names
+  registerTemplate,           // Add custom template to library
+  unregisterTemplate,         // Remove template from library
+  getTemplateLibrary,         // () => all templates
+  getTemplate,                // (id) => template by ID
 
   // Keyboard-First Editing
-  KeyboardPlugin, // Vim/Emacs modes, auto-pair, multi-cursor
-  getHeadings, // (element) => heading list with level/text/element
-  selectNextOccurrence, // (element) => add next match to selection
+  KeyboardPlugin,             // Vim/Emacs modes, auto-pair, multi-cursor
+  getHeadings,                // (element) => heading list with level/text/element
+  selectNextOccurrence,       // (element) => add next match to selection
 
   // Drag & Drop
-  DragDropPlugin, // Drop zones, cross-editor, file drops, reorder
+  DragDropPlugin,             // Drop zones, cross-editor, file drops, reorder
 
   // Math & Equations
-  MathPlugin, // LaTeX math rendering, symbol palette, numbering
-  getSymbolPalette, // () => categorized symbol array
-  parseMathExpressions, // (text) => Array<{ type, src, index }>
-  latexToMathML, // (latex) => MathML string
+  MathPlugin,                 // LaTeX math rendering, symbol palette, numbering
+  getSymbolPalette,           // () => categorized symbol array
+  parseMathExpressions,       // (text) => Array<{ type, src, index }>
+  latexToMathML,              // (latex) => MathML string
 
   // Table of Contents
-  TocPlugin, // Auto-generated TOC, outline, heading validation
-  buildOutline, // (element) => hierarchical outline tree
-  flattenOutline, // (outline) => flat item list
-  renderTocHTML, // (outline) => HTML nav string
-  validateHeadingHierarchy, // (flatItems) => warnings array
+  TocPlugin,                  // Auto-generated TOC, outline, heading validation
+  buildOutline,               // (element) => hierarchical outline tree
+  flattenOutline,             // (outline) => flat item list
+  renderTocHTML,              // (outline) => HTML nav string
+  validateHeadingHierarchy,   // (flatItems) => warnings array
 
   // Content Analytics
-  AnalyticsPlugin, // Readability, reading time, SEO, goals
-  analyzeContent, // (text, options) => comprehensive stats
-  countSyllables, // (word) => number
-  splitSentences, // (text) => string[]
-  fleschKincaid, // (stats) => grade level
-  fleschReadingEase, // (stats) => 0-100 score
-  gunningFog, // (stats) => fog index
-  colemanLiau, // (stats) => index
-  vocabularyLevel, // (gradeLevel) => 'basic'|'intermediate'|'advanced'
-  keywordDensity, // (text, keyword) => { count, density, positions }
-  seoAnalysis, // (text, element, keyword) => { hints, ... }
+  AnalyticsPlugin,            // Readability, reading time, SEO, goals
+  analyzeContent,             // (text, options) => comprehensive stats
+  countSyllables,             // (word) => number
+  splitSentences,             // (text) => string[]
+  fleschKincaid,              // (stats) => grade level
+  fleschReadingEase,          // (stats) => 0-100 score
+  gunningFog,                 // (stats) => fog index
+  colemanLiau,                // (stats) => index
+  vocabularyLevel,            // (gradeLevel) => 'basic'|'intermediate'|'advanced'
+  keywordDensity,             // (text, keyword) => { count, density, positions }
+  seoAnalysis,                // (text, element, keyword) => { hints, ... }
 
   // Spelling & Grammar
-  SpellcheckPlugin, // Spellcheck + grammar checking with inline underlines
-  analyzeGrammar, // (text, options) => issues array
-  summarizeIssues, // (issues) => { total, grammar, style, byRule }
-  detectPassiveVoice, // (text) => issues
-  detectWordiness, // (text) => issues
-  detectCliches, // (text) => issues
-  detectPunctuationIssues, // (text) => issues
-  STYLE_PRESETS, // { formal, casual, technical, academic }
+  SpellcheckPlugin,           // Spellcheck + grammar checking with inline underlines
+  analyzeGrammar,             // (text, options) => issues array
+  summarizeIssues,            // (issues) => { total, grammar, style, byRule }
+  detectPassiveVoice,         // (text) => issues
+  detectWordiness,            // (text) => issues
+  detectCliches,              // (text) => issues
+  detectPunctuationIssues,    // (text) => issues
+  STYLE_PRESETS,              // { formal, casual, technical, academic }
 
   // Real-time Collaboration
-  CollaborationPlugin, // CRDT co-editing, live cursors, presence, transport
+  CollaborationPlugin,        // CRDT co-editing, live cursors, presence, transport
 
   // Plugin registry
-  registerPluginInRegistry, // Register a plugin for discovery
+  registerPluginInRegistry,   // Register a plugin for discovery
   unregisterPluginFromRegistry, // Remove from registry
-  listRegisteredPlugins, // () => PluginRegistryEntry[] — all registered
-  searchPluginRegistry, // (query) => PluginRegistryEntry[] — search by name/desc/tags
+  listRegisteredPlugins,      // () => PluginRegistryEntry[] — all registered
+  searchPluginRegistry,       // (query) => PluginRegistryEntry[] — search by name/desc/tags
 } from '@remyxjs/core';
 ```
 
@@ -2691,11 +2375,7 @@ import {
 
 ```js
 // Minimal — only the engine and the commands you use
-import {
-  EditorEngine,
-  registerFormattingCommands,
-  registerListCommands,
-} from '@remyxjs/core';
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 ```
 
 ```js
@@ -2746,11 +2426,7 @@ When creating a wrapper for a new framework, your package should:
 
 ```js
 // useRemyxEditor.js
-import {
-  EditorEngine,
-  registerFormattingCommands,
-  registerListCommands,
-} from '@remyxjs/core';
+import { EditorEngine, registerFormattingCommands, registerListCommands } from '@remyxjs/core';
 import { ref, onMounted, onUnmounted } from 'vue';
 
 export function useRemyxEditor(elementRef, options = {}) {

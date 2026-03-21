@@ -17,7 +17,7 @@ const HEADING_OPTIONS_WITH_STYLES = HEADING_OPTIONS.map(o => ({
   style: o.tag !== 'p' ? { fontSize: `${HEADING_BASE_FONT_SIZE - (parseInt(o.tag?.[1]) || 0) * HEADING_FONT_SIZE_STEP}px`, fontWeight: 'bold' } : {},
 }))
 
-export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme, customizableToolbar, onToolbarChange }) {
+export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme, customizableToolbar, onToolbarChange, wrap }) {
   const selectionState = useSelectionContext()
   const toolbarConfig = config || DEFAULT_TOOLBAR
   const toolbarRef = useRef(null)
@@ -91,26 +91,44 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
     return result
   }, [toolbarConfig])
 
-  // ResizeObserver-based overflow detection
+  // Width-based overflow detection (disabled when wrap mode is on)
+  const lastWidthRef = useRef(0)
   useEffect(() => {
+    if (wrap) {
+      setOverflowIndex(-1)
+      return
+    }
     const toolbar = toolbarRef.current
-    const inner = innerRef.current
-    if (!toolbar || !inner) return
+    if (!toolbar) return
 
     const checkOverflow = () => {
       const containerWidth = toolbar.clientWidth
-      const children = Array.from(inner.children)
-      let cutIndex = -1
+      // Only recalculate when container width changes
+      if (containerWidth === lastWidthRef.current) return
+      lastWidthRef.current = containerWidth
 
-      // Reserve space for overflow button (approx 36px)
+      // Estimate item widths: dropdowns ~130px, buttons ~32px, separators ~1px
       const reservedWidth = 40
       let accumulatedWidth = 0
+      let cutIndex = -1
 
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i]
-        // Skip hidden overflow items
-        if (child.classList.contains('rmx-toolbar-overflow-btn')) continue
-        accumulatedWidth += child.offsetWidth + 1 // 1px gap
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        let itemWidth
+        if (item.type === 'separator') {
+          itemWidth = 2
+        } else if (item.command === 'headings') {
+          itemWidth = 130
+        } else if (item.command === 'fontFamily') {
+          itemWidth = 140
+        } else if (item.command === 'fontSize') {
+          itemWidth = 80
+        } else if (item.command === 'foreColor' || item.command === 'backColor') {
+          itemWidth = 36
+        } else {
+          itemWidth = 32
+        }
+        accumulatedWidth += itemWidth + 1
         if (accumulatedWidth > containerWidth - reservedWidth) {
           cutIndex = i
           break
@@ -122,10 +140,12 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
 
     const observer = new ResizeObserver(checkOverflow)
     observer.observe(toolbar)
+    // Reset width ref to force initial calculation
+    lastWidthRef.current = 0
     checkOverflow()
 
     return () => observer.disconnect()
-  }, [items])
+  }, [items, wrap])
 
   // Close overflow menu on outside click
   useEffect(() => {
@@ -473,31 +493,8 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
 
   return (
     <div className={`rmx-toolbar${customizableToolbar ? ' rmx-toolbar-customizable' : ''}`} role="toolbar" aria-label="Editor toolbar" ref={toolbarRef}>
-      <div className="rmx-toolbar-inner" ref={innerRef}>
+      <div className="rmx-toolbar-inner" ref={innerRef} style={wrap ? { flexWrap: 'wrap', overflow: 'visible' } : undefined}>
         {visibleItems.map(customizableToolbar ? renderDraggableItem : renderItem)}
-        {overflowItems.length > 0 && (
-          <div className="rmx-toolbar-overflow-container" style={{ position: 'relative' }}>
-            <button
-              className="rmx-toolbar-btn rmx-toolbar-overflow-btn"
-              onClick={() => setOverflowOpen(prev => !prev)}
-              aria-label="More toolbar options"
-              aria-expanded={overflowOpen}
-              type="button"
-            >
-              &#x22EF;
-            </button>
-            {overflowOpen && (
-              <div
-                ref={overflowMenuRef}
-                className="rmx-toolbar-overflow-menu"
-                role="menu"
-                onKeyDown={handleOverflowKeyDown}
-              >
-                {overflowItems.map(renderItem)}
-              </div>
-            )}
-          </div>
-        )}
         {wordCountButton && (
           <>
             <ToolbarSeparator />
@@ -505,6 +502,29 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
           </>
         )}
       </div>
+      {overflowItems.length > 0 && (
+        <div className="rmx-toolbar-overflow-container">
+          <button
+            className="rmx-toolbar-btn rmx-toolbar-overflow-btn"
+            onClick={() => setOverflowOpen(prev => !prev)}
+            aria-label="More toolbar options"
+            aria-expanded={overflowOpen}
+            type="button"
+          >
+            &#x22EF;
+          </button>
+          {overflowOpen && (
+            <div
+              ref={overflowMenuRef}
+              className="rmx-toolbar-overflow-menu"
+              role="menu"
+              onKeyDown={handleOverflowKeyDown}
+            >
+              {overflowItems.map(renderItem)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 })

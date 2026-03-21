@@ -51,6 +51,7 @@ export function EditorModals({
           open={modals.image.open}
           onClose={() => closeModal('image')}
           engine={engine}
+          data={modals.image.data}
         />
       )}
       {modals.attachment?.open && (
@@ -58,6 +59,7 @@ export function EditorModals({
           open={modals.attachment.open}
           onClose={() => closeModal('attachment')}
           engine={engine}
+          data={modals.attachment.data}
         />
       )}
       {modals.importDocument?.open && (
@@ -65,6 +67,7 @@ export function EditorModals({
           open={modals.importDocument.open}
           onClose={() => closeModal('importDocument')}
           engine={engine}
+          data={modals.importDocument.data}
         />
       )}
       {modals.table.open && (
@@ -72,6 +75,7 @@ export function EditorModals({
           open={modals.table.open}
           onClose={() => closeModal('table')}
           engine={engine}
+          data={modals.table.data}
         />
       )}
       {modals.embed.open && (
@@ -79,6 +83,7 @@ export function EditorModals({
           open={modals.embed.open}
           onClose={() => closeModal('embed')}
           engine={engine}
+          data={modals.embed.data}
         />
       )}
       {modals.source.open && (

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { ModalOverlay } from './ModalOverlay.jsx'
 import { convertDocument, getSupportedExtensions, getSupportedFormatNames } from '@remyxjs/core'
 
-export function ImportDocumentModal({ open, onClose, engine }) {
+export function ImportDocumentModal({ open, onClose, engine, data }) {
   const [file, setFile] = useState(null)
   const [converting, setConverting] = useState(false)
   const [preview, setPreview] = useState('')
@@ -33,6 +33,7 @@ export function ImportDocumentModal({ open, onClose, engine }) {
 
   const handleInsert = () => {
     if (!preview) return
+    if (engine._savedSelection) { engine.selection.restore(engine._savedSelection); engine._savedSelection = null }
     engine.executeCommand('importDocument', {
       html: preview,
       mode: insertMode,
