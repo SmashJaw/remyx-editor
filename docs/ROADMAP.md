@@ -1,4 +1,4 @@
-![Remyx Editor](./images/Remyx-Logo.svg)
+![Remyx Editor](./screenshots/Remyx-Logo.svg)
 
 # Remyx Editor Roadmap
 

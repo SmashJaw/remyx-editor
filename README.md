@@ -1,4 +1,4 @@
-![Remyx Editor](./docs/images/Remyx-Logo.svg)
+![Remyx Editor](./docs/screenshots/Remyx-Logo.svg)
 
 # Remyx Editor
 
@@ -414,9 +414,7 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 | [CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Setup, architecture, adding commands/plugins, PR process |
 | [CHANGELOG.md](./docs/CHANGELOG.md) | Version history and release notes |
 | [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard |
-| [NX.md](./docs/NX.md) | Nx monorepo management — build, version, publish, caching, affected commands |
 | [BENCHMARK.md](./docs/BENCHMARK.md) | Build, bundle, test, and lint performance metrics |
-| [TASKS.md](./docs/TASKS.md) | All 275 bugs, security fixes, cleanup items, optimizations, performance, UX, and features (all resolved) |
 
 ## License
 

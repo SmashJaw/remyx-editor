@@ -1,4 +1,4 @@
-![Remyx Editor](../docs/images/Remyx-Logo.svg)
+![Remyx Editor](../docs/screenshots/Remyx-Logo.svg)
 
 # @remyxjs/react
 
