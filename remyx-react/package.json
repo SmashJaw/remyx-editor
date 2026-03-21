@@ -32,7 +32,6 @@
   "files": ["dist", "create"],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
   },
   "sideEffects": false,
   "peerDependencies": {
