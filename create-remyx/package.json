@@ -11,7 +11,7 @@
     "cli"
   ],
   "publishConfig": {
-    "access": "public",
+    "access": "public"
   },
   "license": "MIT"
 }

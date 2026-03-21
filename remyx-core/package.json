@@ -2,7 +2,16 @@
   "name": "@remyxjs/core",
   "version": "1.0.0-beta",
   "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
-  "keywords": ["wysiwyg", "editor", "rich-text", "contenteditable", "html-editor", "text-editor", "sanitizer", "plugins"],
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "contenteditable",
+    "html-editor",
+    "text-editor",
+    "sanitizer",
+    "plugins"
+  ],
   "author": "Remyx",
   "license": "MIT",
   "repository": {
@@ -33,11 +42,15 @@
     "./themes/sunset.css": "./dist/themes/sunset.css",
     "./themes/rose.css": "./dist/themes/rose.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "publishConfig": {
-    "access": "public",
+    "access": "public"
   },
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "*.css"
+  ],
   "dependencies": {
     "marked": "15.0.0",
     "turndown": "7.2.0",
@@ -48,8 +61,12 @@
     "pdfjs-dist": "^5.5.207"
   },
   "peerDependenciesMeta": {
-    "mammoth": { "optional": true },
-    "pdfjs-dist": { "optional": true }
+    "mammoth": {
+      "optional": true
+    },
+    "pdfjs-dist": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "rollup-plugin-visualizer": "^5.14.0",

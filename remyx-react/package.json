@@ -2,7 +2,15 @@
   "name": "@remyxjs/react",
   "version": "1.0.0-beta",
   "description": "React components and hooks for the Remyx rich-text editor",
-  "keywords": ["wysiwyg", "editor", "rich-text", "react", "contenteditable", "react-editor", "text-editor"],
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "react",
+    "contenteditable",
+    "react-editor",
+    "text-editor"
+  ],
   "author": "Remyx",
   "license": "MIT",
   "repository": {
@@ -29,9 +37,12 @@
   "bin": {
     "create-remyx-app": "./create/index.js"
   },
-  "files": ["dist", "create"],
+  "files": [
+    "dist",
+    "create"
+  ],
   "publishConfig": {
-    "access": "public",
+    "access": "public"
   },
   "sideEffects": false,
   "peerDependencies": {

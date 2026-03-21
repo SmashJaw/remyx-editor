@@ -3,11 +3,6 @@
   "private": true,
   "version": "1.0.0-beta",
   "type": "module",
-  "workspaces": [
-    "remyx-core",
-    "remyx-react",
-    "create-remyx"
-  ],
   "scripts": {
     "build:core": "cd remyx-core && npm run build",
     "build:react": "cd remyx-react && npm run build",
