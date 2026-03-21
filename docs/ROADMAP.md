@@ -105,6 +105,10 @@ Full-featured interactive wizard via `npx create-remyx`:
 
 - Lighthouse performance score target: 95+ — requires a hosted demo page; infrastructure ready, will validate when demo site is deployed
 
+## Custom Theme Builder
+
+- Contrast checker: validate text/background color combinations against WCAG AA/AAA — will be integrated into the remyxjs.com theme builder
+
 ---
 
 # Future Product Offerings
@@ -430,7 +434,7 @@ These features are not planned for the open-source @remyxjs packages and will be
 - ~~Custom theme authoring guide with step-by-step documentation~~ — available now via `createTheme()` helper and CSS custom properties (see core README)
 - ~~Theme export/import: save custom themes as JSON and share across projects~~ — supported via `customTheme` prop and `defineConfig()`
 - ~~Theme presets: community-contributed themes installable via npm or config~~ — 6 built-in presets shipped; community themes can be shared as JSON config files
-- ~~Contrast checker: validate text/background color combinations against WCAG AA/AAA~~ — will be integrated into the remyxjs.com theme builder
+- Contrast checker: validate text/background color combinations against WCAG AA/AAA — will be integrated into the remyxjs.com theme builder
 
 ## `create-remyx-app` — ✅ Shipped (v0.25.0, enhanced v0.27.0)
 
