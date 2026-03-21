@@ -416,7 +416,6 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for setup instructions, architectu
 | [ROADMAP.md](./docs/ROADMAP.md) | Planned features, framework wrappers, CMS integrations, create-remyx CLI wizard |
 | [NX.md](./docs/NX.md) | Nx monorepo management — build, version, publish, caching, affected commands |
 | [BENCHMARK.md](./docs/BENCHMARK.md) | Build, bundle, test, and lint performance metrics |
-| [PLANNED_PACKAGES.md](./docs/PLANNED_PACKAGES.md) | Multi-package restructure plan and progress |
 | [TASKS.md](./docs/TASKS.md) | All 275 bugs, security fixes, cleanup items, optimizations, performance, UX, and features (all resolved) |
 
 ## License
