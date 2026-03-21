@@ -538,7 +538,7 @@ Quick project scaffolding via `npx create-remyx-app`:
 - ~~Create `@remyxjs/react` with peer dependency on core~~ — 36 modules, full TypeScript declarations
 - ~~Standalone `remyx-editor` package~~ — removed; consumers use `@remyxjs/react` directly
 - ~~npm workspaces monorepo setup~~
-- See [PLANNED_PACKAGES.md](./PLANNED_PACKAGES.md) for the full restructure plan
+- Multi-package restructure complete — see CHANGELOG for full history
 
 ---
 
