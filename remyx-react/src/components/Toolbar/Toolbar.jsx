@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react'
+import React, { useMemo, useCallback, useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { ToolbarButton } from './ToolbarButton.jsx'
 import { ToolbarDropdown } from './ToolbarDropdown.jsx'
 import { ToolbarColorPicker } from './ToolbarColorPicker.jsx'
@@ -17,7 +17,7 @@ const HEADING_OPTIONS_WITH_STYLES = HEADING_OPTIONS.map(o => ({
   style: o.tag !== 'p' ? { fontSize: `${HEADING_BASE_FONT_SIZE - (parseInt(o.tag?.[1]) || 0) * HEADING_FONT_SIZE_STEP}px`, fontWeight: 'bold' } : {},
 }))
 
-export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme, customizableToolbar, onToolbarChange, wrap }) {
+export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal, fonts = DEFAULT_FONTS, wordCountButton, toolbarItemTheme, customizableToolbar, onToolbarChange, wrap = true }) {
   const selectionState = useSelectionContext()
   const toolbarConfig = config || DEFAULT_TOOLBAR
   const toolbarRef = useRef(null)
@@ -91,60 +91,76 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
     return result
   }, [toolbarConfig])
 
-  // Width-based overflow detection (disabled when wrap mode is on)
-  const lastWidthRef = useRef(0)
-  useEffect(() => {
-    if (wrap) {
-      setOverflowIndex(-1)
-      return
+  // Width-based overflow detection using a callback ref pattern.
+  // All items are always rendered in the inner div; overflow:hidden clips them.
+  // We measure after mount and on resize to find the cut point.
+  const overflowObserverRef = useRef(null)
+  const overflowCutRef = useRef(-1)
+
+  const toolbarCallbackRef = useCallback((node) => {
+    // Cleanup previous observer
+    if (overflowObserverRef.current) {
+      overflowObserverRef.current.disconnect()
+      overflowObserverRef.current = null
     }
-    const toolbar = toolbarRef.current
-    if (!toolbar) return
+    toolbarRef.current = node
+    if (!node) return
 
-    const checkOverflow = () => {
-      const containerWidth = toolbar.clientWidth
-      // Only recalculate when container width changes
-      if (containerWidth === lastWidthRef.current) return
-      lastWidthRef.current = containerWidth
-
-      // Estimate item widths: dropdowns ~130px, buttons ~32px, separators ~1px
-      const reservedWidth = 40
-      let accumulatedWidth = 0
+    const measure = () => {
+      const inner = node.querySelector('.rmx-toolbar-inner')
+      if (!inner) return
+      const containerWidth = node.clientWidth
+      const children = Array.from(inner.children)
+      const reservedWidth = 44
       let cutIndex = -1
-
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        let itemWidth
-        if (item.type === 'separator') {
-          itemWidth = 2
-        } else if (item.command === 'headings') {
-          itemWidth = 130
-        } else if (item.command === 'fontFamily') {
-          itemWidth = 140
-        } else if (item.command === 'fontSize') {
-          itemWidth = 80
-        } else if (item.command === 'foreColor' || item.command === 'backColor') {
-          itemWidth = 36
-        } else {
-          itemWidth = 32
-        }
-        accumulatedWidth += itemWidth + 1
-        if (accumulatedWidth > containerWidth - reservedWidth) {
+      for (let i = 0; i < children.length; i++) {
+        const right = children[i].offsetLeft + children[i].offsetWidth
+        if (right > containerWidth - reservedWidth) {
           cutIndex = i
           break
         }
       }
-
-      setOverflowIndex(cutIndex)
+      if (cutIndex !== overflowCutRef.current) {
+        overflowCutRef.current = cutIndex
+        setOverflowIndex(cutIndex)
+      }
     }
 
-    const observer = new ResizeObserver(checkOverflow)
-    observer.observe(toolbar)
-    // Reset width ref to force initial calculation
-    lastWidthRef.current = 0
-    checkOverflow()
+    // Measure after initial layout
+    requestAnimationFrame(measure)
 
-    return () => observer.disconnect()
+    const observer = new ResizeObserver(measure)
+    observer.observe(node)
+    overflowObserverRef.current = observer
+  }, [])
+
+  // Re-measure when items change (config switch)
+  useEffect(() => {
+    if (wrap) {
+      overflowCutRef.current = -1
+      setOverflowIndex(-1)
+      return
+    }
+    if (toolbarRef.current) {
+      overflowCutRef.current = -1 // reset so next measure always updates
+      requestAnimationFrame(() => {
+        const node = toolbarRef.current
+        if (!node) return
+        const inner = node.querySelector('.rmx-toolbar-inner')
+        if (!inner) return
+        const containerWidth = node.clientWidth
+        const children = Array.from(inner.children)
+        let cutIndex = -1
+        for (let i = 0; i < children.length; i++) {
+          const right = children[i].offsetLeft + children[i].offsetWidth
+          if (right > containerWidth - 44) { cutIndex = i; break }
+        }
+        if (cutIndex !== overflowCutRef.current) {
+          overflowCutRef.current = cutIndex
+          setOverflowIndex(cutIndex)
+        }
+      })
+    }
   }, [items, wrap])
 
   // Close overflow menu on outside click
@@ -468,7 +484,6 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
 
   // Split items into visible and overflow groups
   const finalItems = customizableToolbar ? orderedItems : items
-  const visibleItems = overflowIndex > 0 ? finalItems.slice(0, overflowIndex) : finalItems
   const overflowItems = overflowIndex > 0 ? finalItems.slice(overflowIndex) : []
 
   const renderDraggableItem = (item) => {
@@ -492,9 +507,9 @@ export const Toolbar = React.memo(function Toolbar({ config, engine, onOpenModal
   }
 
   return (
-    <div className={`rmx-toolbar${customizableToolbar ? ' rmx-toolbar-customizable' : ''}`} role="toolbar" aria-label="Editor toolbar" ref={toolbarRef}>
-      <div className="rmx-toolbar-inner" ref={innerRef} style={wrap ? { flexWrap: 'wrap', overflow: 'visible' } : undefined}>
-        {visibleItems.map(customizableToolbar ? renderDraggableItem : renderItem)}
+    <div className={`rmx-toolbar${customizableToolbar ? ' rmx-toolbar-customizable' : ''}`} role="toolbar" aria-label="Editor toolbar" ref={wrap ? toolbarRef : toolbarCallbackRef}>
+      <div className="rmx-toolbar-inner" ref={innerRef} style={wrap ? undefined : { flexWrap: 'nowrap', overflow: 'hidden' }}>
+        {finalItems.map(customizableToolbar ? renderDraggableItem : renderItem)}
         {wordCountButton && (
           <>
             <ToolbarSeparator />

@@ -62,7 +62,7 @@ export function useConfigFile(configName, props = {}) {
       readOnly: rawConfig.readOnly || false,
       outputFormat: rawConfig.outputFormat || 'html',
       toolbar: effectiveToolbar,
-      toolbarWrap: rawConfig.toolbarWrap || false,
+      toolbarWrap: rawConfig.toolbarOverflow ? false : (rawConfig.toolbarWrap ?? true),
       menuBarConfig,
       statusBar: rawConfig.statusBar ?? 'bottom',
       showFloatingToolbar: rawConfig.floatingToolbar ?? true,

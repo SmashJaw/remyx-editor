@@ -46,15 +46,19 @@ The `npm install` at the repo root resolves all workspace dependencies, includin
 
 ## Project Structure
 
-Remyx Editor is a monorepo managed with **npm workspaces**. All publishable packages live under `packages/`:
+Remyx Editor is a monorepo with publishable packages under `packages/` and a user-facing directory at `remyxjs/`:
 
 ```
-remyx/
+remyx-editor/
   packages/
-    remyx-core/        @remyxjs/core      0.39.0  Framework-agnostic editor engine
-    remyx-react/       @remyxjs/react     0.39.0  React components and hooks
-    create-remyx/      create-remyx     0.39.0  Reserved for future CLI tool
-    docs/              (not published)           Documentation, changelog, roadmap
+    remyx-core/        @remyxjs/core     1.0.0-beta  Framework-agnostic editor engine
+    remyx-react/       @remyxjs/react    1.0.0-beta  React components and hooks
+    create-remyx/      create-remyx      1.0.0-beta  Reserved for future CLI tool
+    docs/              (not published)               Documentation, changelog, roadmap
+  remyxjs/
+    config/            Editor configuration JSON files (one per editor instance)
+    plugins/           Optional plugins (drag-and-drop install/uninstall)
+    themes/            Theme CSS files (drag-and-drop install/uninstall)
 ```
 
 ### @remyxjs/core
@@ -66,21 +70,15 @@ packages/remyx-core/src/
   core/             EditorEngine, CommandRegistry, Selection, History, Sanitizer,
                     EventBus, KeyboardManager, Clipboard, DragDrop, AutosaveManager,
                     EditorBus.js, SharedResources.js, VirtualScroller.js
-  commands/         One file per command group (formatting, lists, tables, slashCommands, etc.)
-  plugins/          Plugin system (createPlugin, PluginManager, 17 built-in plugins incl.
-                    syntaxHighlight/, tableFeatures/, commentsFeatures/, calloutFeatures/,
-                    linkFeatures/, templateFeatures/, keyboardFeatures/, dragDropFeatures/,
-                    mathFeatures/, tocFeatures/, analyticsFeatures/, spellcheckFeatures/,
-                    collaborationFeatures/)
+  commands/         One file per command group (formatting, lists, tables, etc.)
+  plugins/          Plugin system (createPlugin, PluginManager, built-in plugins:
+                    WordCountPlugin, AutolinkPlugin, PlaceholderPlugin)
   workers/          WorkerPool for background thread offloading
   autosave/         Storage providers (LocalStorage, SessionStorage, FileSystem, Cloud, Custom)
   i18n/             Translations and locale support
-  utils/            DOM helpers, paste cleaning, theme config, toolbar config,
-                    documentConverter/ (per-format modules), export utilities,
-                    rtl.js, performance.js, escapeHTML.js, insertPlainText.js
+  utils/            DOM helpers, paste cleaning, theme/toolbar config, document converters
   constants/        Command names, keybindings, defaults, sanitization schema
-  config/           defineConfig, loadConfig
-  themes/           CSS theme files (variables, light, dark, ocean, forest, sunset, rose)
+  config/           defineConfig, loadConfig, pluginResolver
   index.js          Public API re-exports (190+ named exports)
 ```
 
@@ -90,23 +88,36 @@ React bindings that wrap `@remyxjs/core`:
 
 ```
 packages/remyx-react/src/
-  components/       RemyxEditor, RemyxEditorFromConfig, Toolbar/, MenuBar/, StatusBar/,
-                    EditArea/, Modals/, ContextMenu/, CommandPalette/, SlashCommandPalette/,
+  components/       RemyxEditor, Toolbar/, MenuBar/, StatusBar/, EditArea/,
+                    Modals/, ContextMenu/, CommandPalette/, SlashCommandPalette/,
                     RecoveryBanner/, SaveStatus/, ErrorBoundary, CommentsPanel/,
                     CollaborationBar/, EmptyState/, BreadcrumbBar/, Minimap/,
                     SplitPreview/, TypographyDropdown/
-  hooks/            useRemyxEditor, useEditorEngine, useExternalConfig, useAutosave,
+  hooks/            useRemyxEditor, useEditorEngine, useConfigFile, useAutosave,
                     useComments, useSpellcheck, useCollaboration, useDragDrop,
-                    useRemyxConfig, useSelection, useResolvedConfig, usePortalAttachment,
-                    useContextMenu, useSlashCommands, useEditorRect, useModal
-  config/           RemyxConfigProvider
+                    useSelection, usePortalAttachment, useContextMenu,
+                    useSlashCommands, useEditorRect, useModal
   icons/            SVG icon components
   index.js          Public API re-exports
 ```
 
-### create-remyx
+### remyxjs/ (User-Facing)
 
-Reserved for a future CLI tool. Project scaffolding has moved to `@remyxjs/react` — use `npx create-remyx-app`.
+This directory is where users manage plugins, themes, and editor configs:
+
+```
+remyxjs/
+  config/           JSON config files — each <RemyxEditor config="name" /> loads one
+  plugins/          Optional plugins — add/remove folders to install/uninstall
+    analytics/      Reading time, readability scores, SEO hints
+    table/          Table features (resize, sort, filter, formulas)
+    comments/       Inline comment threads with @mentions
+    callout/        Callout boxes (info, warning, error, etc.)
+    collaboration/  Real-time collaborative editing (CRDT)
+    ...             (15 plugins total — see plugins.md)
+  themes/           Theme CSS — add/remove files to install/uninstall
+    light.css, dark.css, ocean.css, forest.css, rose.css, sunset.css
+```
 
 ---
 
@@ -337,23 +348,42 @@ createPlugin({
 
 Only use `requiresFullAccess` for trusted, first-party plugins. Third-party plugins should work within the facade API.
 
+### Plugin file location
+
+All optional plugins live in `remyxjs/plugins/`. Each plugin is a directory with an `index.js` that exports a factory function.
+
 ### Real-world example: TablePlugin
 
-The built-in `TablePlugin` is a good reference for a complex, full-access plugin. It lives in `packages/remyx-core/src/plugins/builtins/tableFeatures/` and demonstrates:
+The `TablePlugin` is a good reference for a complex, full-access plugin. It lives in `remyxjs/plugins/table/` and demonstrates:
 
-- **MutationObserver** — watches for new `<table>` elements added to the editor (paste, insert)
-- **Delegated event handlers** — a single `click` listener on `engine.element` handles sort clicks on any `<th>`
+- **MutationObserver** — watches for new `<table>` elements added to the editor
+- **Delegated event handlers** — a single `click` listener on `engine.element` handles sort clicks
 - **Focus/blur handlers** — formula cells show the formula on focus and evaluate on blur
 - **Debounced content change** — re-evaluates formulas on `content:change` with a 200ms debounce
 - **Modular sub-features** — resize handles (`resize.js`) and filter UI (`filter.js`) are separate modules
 
 ```
-packages/remyx-core/src/plugins/builtins/tableFeatures/
+remyxjs/plugins/table/
   TablePlugin.js   Main plugin — MutationObserver, event handlers, lifecycle
   resize.js        Column/row resize drag handles
   filter.js        Per-column filter dropdown UI
   index.js         Public export
 ```
+
+### Installing plugins via config
+
+Once a plugin directory exists in `remyxjs/plugins/`, activate it in any config file:
+
+```json
+{
+  "plugins": {
+    "table": { "enabled": true },
+    "my-custom-plugin": { "enabled": true, "option1": "value" }
+  }
+}
+```
+
+See [plugins.md](./plugins.md) for the full plugin reference.
 
 ### Plugin definition properties
 

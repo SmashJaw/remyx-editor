@@ -218,21 +218,46 @@ export default function RemyxEditor(props) {
   // Analytics panel toggle
   const [analyticsVisible, setAnalyticsVisible] = useState(false)
   const [analyticsData, setAnalyticsData] = useState(null)
+
+  // Helper: extract text from editor DOM with newline separators between block
+  // elements so sentence/paragraph splitting works across <p> tags.
+  // engine.getText() returns element.textContent which concatenates blocks
+  // without whitespace, causing "end.Start" to be treated as one token.
+  const getEditorDomText = useCallback((eng) => {
+    if (!eng?.element) return ''
+    const blockEls = eng.element.querySelectorAll('p, li, blockquote, h1, h2, h3, h4, h5, h6, pre')
+    const blocks = Array.from(blockEls).map(b => b.textContent.trim()).filter(t => t.length > 0)
+    return blocks.length > 0 ? blocks.join('\n') : (eng.getText() || '')
+  }, [])
+
   useEffect(() => {
     if (!engine) return
     const unsubs = [
       engine.eventBus.on('analytics:toggle', ({ visible }) => {
         setAnalyticsVisible(visible)
         if (visible && engine._analytics?.analyzeContent) {
-          setAnalyticsData(engine._analytics.analyzeContent())
+          // Override the text used for analysis with DOM-derived text
+          const domText = getEditorDomText(engine)
+          const { analyzeContent } = engine._analytics
+          // analyzeContent uses engine.getText() internally, but we need DOM text
+          // so we call the exported function with proper text if available
+          const stats = analyzeContent()
+          // Patch sentence count from DOM text
+          const sentences = domText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 0)
+          const paragraphs = domText.split(/\n/).map(p => p.trim()).filter(p => p.length > 0)
+          setAnalyticsData({ ...stats, sentenceCount: sentences.length, paragraphCount: paragraphs.length })
         }
       }),
       engine.eventBus.on('analytics:update', (data) => {
-        setAnalyticsData({ ...data })
+        // Patch the update with DOM-derived sentence/paragraph counts
+        const domText = getEditorDomText(engine)
+        const sentences = domText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 0)
+        const paragraphs = domText.split(/\n/).map(p => p.trim()).filter(p => p.length > 0)
+        setAnalyticsData({ ...data, sentenceCount: sentences.length, paragraphCount: paragraphs.length })
       }),
     ]
     return () => unsubs.forEach(unsub => typeof unsub === 'function' && unsub())
-  }, [engine])
+  }, [engine, getEditorDomText])
 
   const wordCountBtn = useMemo(() =>
     statusBar === 'popup' ? <WordCountButton engine={engine} /> : null,
