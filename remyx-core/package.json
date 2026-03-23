@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/core",
-  "version": "1.0.4-beta",
+  "version": "1.0.5-beta",
   "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
   "keywords": [
     "wysiwyg",
