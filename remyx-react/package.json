@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/react",
-  "version": "1.0.5",
+  "version": "1.2.0-beta",
   "description": "React components and hooks for the Remyx rich-text editor",
   "keywords": [
     "wysiwyg",
