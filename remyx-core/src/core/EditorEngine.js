@@ -297,6 +297,7 @@ export class EditorEngine {
     // Ensure we always have at least one block element
     if (this.element.innerHTML === '' || this.element.innerHTML === '<br>') {
       this.element.innerHTML = '<p><br></p>'
+      if (!this.element.firstChild) return
       const range = document.createRange()
       range.setStart(this.element.firstChild, 0)
       range.collapse(true)

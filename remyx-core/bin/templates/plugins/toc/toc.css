@@ -1,0 +1,65 @@
+/* ====== Table of Contents ====== */
+
+.rmx-toc {
+  border: 1px solid var(--rmx-border, #e2e8f0);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  background: var(--rmx-statusbar-bg, #f8fafc);
+}
+.rmx-toc::before {
+  content: 'Table of Contents';
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--rmx-text, #1e293b);
+}
+.rmx-toc ul {
+  list-style: none;
+  padding-left: 16px;
+  margin: 0;
+}
+.rmx-toc > ul { padding-left: 0; }
+.rmx-toc li { margin: 3px 0; }
+.rmx-toc-link {
+  text-decoration: none;
+  color: var(--rmx-primary, #6366f1);
+  font-size: 13px;
+  transition: color 0.1s;
+}
+.rmx-toc-link:hover { color: var(--rmx-primary-hover, #4f46e5); text-decoration: underline; }
+.rmx-toc-number {
+  color: var(--rmx-text-secondary, #64748b);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Outline sidebar panel */
+.rmx-outline-panel {
+  border-left: 1px solid var(--rmx-border, #e2e8f0);
+  background: var(--rmx-modal-bg, #ffffff);
+  padding: 12px;
+  min-width: 220px;
+  max-width: 280px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+.rmx-outline-panel-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: var(--rmx-text, #1e293b);
+}
+.rmx-outline-item {
+  padding: 3px 0;
+  cursor: pointer;
+  color: var(--rmx-text, #1e293b);
+  transition: color 0.1s;
+}
+.rmx-outline-item:hover { color: var(--rmx-primary, #6366f1); }
+.rmx-outline-item-active { color: var(--rmx-primary, #6366f1); font-weight: 600; }
+
+@media print {
+  .rmx-toc { page-break-after: always; }
+}

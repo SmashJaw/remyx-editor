@@ -99,6 +99,7 @@ export function registerImageCommands(engine) {
   engine.commands.register('removeImage', {
     execute(eng, { element }) {
       if (!element || element.tagName !== 'IMG') return
+      if (!element.parentNode) return
       element.parentNode.removeChild(element)
     },
     meta: { tooltip: 'Remove Image' },

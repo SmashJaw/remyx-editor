@@ -378,6 +378,9 @@ export class DragDrop {
    * Cache block positions at drag start. Invalidate on scroll.
    */
   _cacheBlockRects() {
+    if (this._scrollHandler) {
+      this.engine.element.removeEventListener('scroll', this._scrollHandler)
+    }
     this._blockRects = new Map()
     const blocks = this._getTopLevelBlocks()
     for (const block of blocks) {

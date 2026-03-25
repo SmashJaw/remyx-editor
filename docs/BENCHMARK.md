@@ -1,7 +1,9 @@
 # Performance Benchmark
 
-> Measured on 2026-03-20 at commit `1328a5d` (v0.40.0).
+> Measured on 2026-03-20 at commit `1328a5d` (v1.2.0-beta).
 > Environment: Apple M3 Max, 48 GB RAM, Node v24.2.0, Vite 7.3.1, Vitest 4.1.0
+>
+> **v1.2.0-beta update**: This release includes 50 bug fixes identified during a comprehensive code audit. Benchmark numbers remain approximately the same as the prior measurement.
 
 ---
 
@@ -86,7 +88,7 @@ All times are wall-clock averages over 3 runs.
 | `@remyxjs/react` | 114.47 KB | 31.83 KB | 0.89 KB |
 | **Library total** | **390.71 KB** | **112.54 KB** | **15.35 KB** |
 
-> Note: The core bundle grew from 75 KB to 276 KB (minified) between v0.24.0 and v0.40.0 due to 17 built-in plugins, collaboration engine, spellcheck, analytics, and math rendering. Gzipped size is 80.71 KB. All plugins are tree-shakeable — consumers who import only what they need get much smaller bundles.
+> Note: The core bundle grew from 75 KB to 276 KB (minified) between v0.24.0 and v1.2.0-beta due to 17 built-in plugins, collaboration engine, spellcheck, analytics, and math rendering. Gzipped size is 80.71 KB. All plugins are tree-shakeable — consumers who import only what they need get much smaller bundles.
 
 ---
 
@@ -136,7 +138,7 @@ All times are wall-clock averages over 3 runs.
 
 4. **CSS consolidation**: Theme CSS grew from 26.54 KB to 86.72 KB (14.46 KB gzipped) after adding styles for 17 plugins, toast notifications, focus indicators, reduced-motion, and high-contrast mode support.
 
-5. **Fast test suite**: 1,783 tests run in ~3.4s with Vitest 4.1's parallel workers. Test count grew from 1,768 (v0.39.0) to 1,783 (v0.40.0) from new plugin resolver and UX tests.
+5. **Fast test suite**: 1,783 tests run in ~3.4s with Vitest 4.1's parallel workers. Test count grew from 1,768 (v0.39.0) to 1,783 (v1.2.0-beta) from new plugin resolver and UX tests.
 
 6. **Smaller node_modules**: Down from 250 MB / 383 packages to 224 MB / 274 packages.
 
@@ -148,7 +150,7 @@ All times are wall-clock averages over 3 runs.
 |---|---|---|---|---|
 | v0.24.0 | 1,314 | 21.30 KB | 5.22 KB | 13.34 KB |
 | v0.39.0 | 1,783 | 77.98 KB | 14.46 KB | 31.41 KB |
-| v0.40.0 | 1,783 | 80.71 KB | 14.46 KB | 31.83 KB |
+| v1.2.0-beta | 1,783 | 80.71 KB | 14.46 KB | 31.83 KB |
 
 ---
 

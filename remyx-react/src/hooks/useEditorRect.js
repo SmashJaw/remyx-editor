@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 /**
  * Tracks the bounding rect of the editor root element.
@@ -10,40 +10,40 @@ export function useEditorRect(editorRootRef) {
   const [editorRect, setEditorRect] = useState(null)
   const rafRef = useRef(null)
 
+  const updateRect = useCallback(() => {
+    const el = editorRootRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    if (rect) setEditorRect(rect)
+  }, [editorRootRef])
+
+  const scheduleUpdate = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(updateRect)
+  }, [updateRect])
+
   useEffect(() => {
     const el = editorRootRef.current
     if (!el) return // Early return guard if ref is not yet valid
-
-    const updateRect = () => {
-      const rect = el.getBoundingClientRect()
-      if (rect) setEditorRect(rect)
-    }
 
     // Initial measurement
     updateRect()
 
     // Use ResizeObserver instead of window resize listener
-    const resizeObserver = new ResizeObserver(() => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(updateRect)
-    })
+    const resizeObserver = new ResizeObserver(scheduleUpdate)
     resizeObserver.observe(el)
 
     // Task 258: Find the editor's scrollable parent and listen on that
     // instead of using global capture on window
     const scrollParent = findScrollableParent(el) || window
-    const handleScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      rafRef.current = requestAnimationFrame(updateRect)
-    }
-    scrollParent.addEventListener('scroll', handleScroll, { passive: true })
+    scrollParent.addEventListener('scroll', scheduleUpdate, { passive: true })
 
     return () => {
       resizeObserver.disconnect()
-      scrollParent.removeEventListener('scroll', handleScroll)
+      scrollParent.removeEventListener('scroll', scheduleUpdate)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [editorRootRef])
+  }, [editorRootRef, updateRect, scheduleUpdate])
 
   return editorRect
 }

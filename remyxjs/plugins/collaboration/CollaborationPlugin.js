@@ -330,9 +330,9 @@ export function CollaborationPlugin(options = {}) {
     },
 
     destroy() {
-      stopCollaboration()
       mutationObserver?.disconnect()
       mutationObserver = null
+      stopCollaboration()
       for (const unsub of unsubs) unsub?.()
       unsubs = []
       crdtEngine?.destroy()

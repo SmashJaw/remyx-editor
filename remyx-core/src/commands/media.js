@@ -35,6 +35,7 @@ export function registerMediaCommands(engine) {
     execute(eng, { element }) {
       if (!element) return
       const wrapper = element.closest('.rmx-embed-wrapper') || element
+      if (!wrapper.parentNode) return
       const p = document.createElement('p')
       p.innerHTML = '<br>'
       wrapper.parentNode.replaceChild(p, wrapper)

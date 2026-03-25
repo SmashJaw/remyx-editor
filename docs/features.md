@@ -294,7 +294,7 @@
 - Auto-discovery of plugin directories
 - Config-driven plugin activation and options
 - Plugin factory registration API
-- 15 optional plugins available
+- 14 optional plugins available
 
 ### Theme System
 - 6 built-in themes: light, dark, ocean, forest, rose, sunset
@@ -327,7 +327,7 @@
 - Drag-and-drop file import
 
 ### Export
-- Export to HTML, Markdown, plain text
+- Export to HTML, Markdown, plain text, PDF, DOCX
 - Download as file
 
 ### Autosave

@@ -8,6 +8,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [1.2.0-beta] — 2026-03-24
+
+### Architecture
+
+- **Config-file-only architecture** — `RemyxEditor` now accepts a `config` prop that loads from `remyxjs/config/<name>.json`; all editor configuration driven by JSON config files
+- **Removed legacy config components** — Removed `RemyxEditorFromConfig`, `RemyxConfigProvider`, `useExternalConfig`, `useRemyxConfig`, and `useResolvedConfig` in favor of the unified `config` prop
+- **Plugin externalization** — 14 optional plugins moved from `packages/remyx-core/src/plugins/builtins/` to `remyxjs/plugins/` with drag-and-drop install/uninstall (add or remove a folder to activate or deactivate a plugin)
+- **Theme externalization** — 6 CSS themes (light, dark, ocean, forest, sunset, rose) moved from `packages/remyx-core/src/themes/` to `remyxjs/themes/` with `index.js` auto-loader and per-editor config selection
+- **Config presets** — 5 JSON config presets in `remyxjs/config/`: default, minimal, blog-editor, full-toolbar, toolbar-and-menu
+
+### Fixed
+
+- **Color picker** — Fixed selection loss when picking colors from the toolbar color picker
+- **Analytics** — Fixed real-time updates and reading time accuracy in AnalyticsPlugin
+- **Auto-pairing** — Removed auto-pairing of quotes in WYSIWYG mode (was interfering with normal typing)
+
+### Code Audit (50 bug fixes)
+
+- **Core** — Added null checks throughout, FileReader error handling, autosave queue fixes, scroll listener cleanup on destroy, cache size limits, recursion guard in EventBus
+- **Commands** — Fixed shared state isolation between editor instances, findReplace memory leak on destroy, table sort performance with large tables, nested span prevention in formatting, additional null checks
+- **Utils** — Updated deprecated API calls, RTL direction detection optimization, removed redundant code paths
+- **Plugins** — Fixed collaboration cleanup order on destroy, ghost element cleanup in drag-drop, link scan guard to prevent infinite loops, equation counter reset on re-init, clipboard API update for modern browsers
+- **React** — Converted dragOffset to ref to avoid re-renders, memoized filtered languages list, combined related useEffect hooks, deduplicated requestAnimationFrame calls, added null guards for unmounted components
+
+---
+
 ## [0.39.0] — 2026-03-20
 
 ### Performance

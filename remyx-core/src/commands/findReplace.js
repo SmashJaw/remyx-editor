@@ -1,6 +1,7 @@
 export function registerFindReplaceCommands(engine) {
   let currentMatches = []
   let currentIndex = -1
+  let previousIndex = -1
 
   function clearHighlights(editorEl) {
     editorEl.querySelectorAll('mark.rmx-find-highlight').forEach((mark) => {
@@ -146,6 +147,12 @@ export function registerFindReplaceCommands(engine) {
     meta: { tooltip: 'Clear Find' },
   })
 
+  engine.eventBus.on('destroy', () => {
+    clearHighlights(engine.element)
+    currentMatches = []
+    currentIndex = -1
+  })
+
   /** Remove stale mark references that are no longer in the document */
   function pruneStaleMatches() {
     currentMatches = currentMatches.filter((m) => m.isConnected)
@@ -156,12 +163,15 @@ export function registerFindReplaceCommands(engine) {
 
   function highlightCurrent() {
     pruneStaleMatches()
-    currentMatches.forEach((m, i) => {
-      m.className = i === currentIndex ? 'rmx-find-highlight rmx-find-current' : 'rmx-find-highlight'
-    })
-    if (currentMatches[currentIndex]) {
+    // Only update the previous and current active match instead of all matches
+    if (previousIndex >= 0 && previousIndex < currentMatches.length) {
+      currentMatches[previousIndex].className = 'rmx-find-highlight'
+    }
+    if (currentIndex >= 0 && currentIndex < currentMatches.length) {
+      currentMatches[currentIndex].className = 'rmx-find-highlight rmx-find-current'
       currentMatches[currentIndex].scrollIntoView({ block: 'center', behavior: 'smooth' })
     }
+    previousIndex = currentIndex
   }
 }
 

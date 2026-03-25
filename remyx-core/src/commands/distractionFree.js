@@ -4,9 +4,9 @@
  * Toggle via command or Mod+Shift+D shortcut.
  */
 
-let hideTimer = null
-
 export function registerDistractionFreeCommands(engine) {
+  let hideTimer = null
+
   engine.commands.register('distractionFree', {
     execute(eng) {
       const root = eng.element.closest('.rmx-editor')

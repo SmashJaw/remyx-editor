@@ -147,7 +147,7 @@ export class AutosaveManager {
 
     // Prevent concurrent saves
     if (this._isSaving) {
-      this._pendingSave = true
+      this._pendingSave = (this._pendingSave || 0) + 1
       return
     }
 
@@ -169,7 +169,7 @@ export class AutosaveManager {
 
       // If a save was requested while we were saving, retry with exponential backoff
       if (this._pendingSave) {
-        this._pendingSave = false
+        this._pendingSave = Math.max(0, (this._pendingSave || 0) - 1)
         if (this._consecutiveErrors >= this._maxRetries) {
           this.engine.eventBus.emit('autosave:error', {
             error: new Error(`Autosave failed after ${this._maxRetries} consecutive attempts`),

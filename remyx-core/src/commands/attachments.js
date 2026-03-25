@@ -46,7 +46,7 @@ export function registerAttachmentCommands(engine) {
       eng.selection.insertNode(a)
 
       // Add a paragraph after the attachment if it's the last element
-      if (!a.nextSibling || a.parentElement === eng.element) {
+      if (!a.nextSibling && a.parentElement === eng.element) {
         const p = document.createElement('p')
         p.innerHTML = '<br>'
         a.parentElement.insertBefore(p, a.nextSibling)

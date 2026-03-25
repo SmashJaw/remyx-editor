@@ -1,7 +1,7 @@
 {
   "name": "remyx-packages",
   "private": true,
-  "version": "1.0.0-beta",
+  "version": "1.2.0-beta",
   "type": "module",
   "scripts": {
     "build:core": "cd remyx-core && npm run build",

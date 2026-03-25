@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { ToolbarButton } from '../Toolbar/ToolbarButton.jsx'
 import { useSelectionContext } from '../../config/SelectionContext.js'
@@ -24,6 +24,7 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
 
   // Touch-based drag repositioning state
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const dragOffsetRef = useRef({ x: 0, y: 0 })
   const dragStartRef = useRef(null)
   const isDraggingRef = useRef(false)
 
@@ -67,6 +68,11 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
       if (touchTimerRef.current) clearTimeout(touchTimerRef.current)
     }
   }, [engine])
+
+  // Keep dragOffsetRef in sync with dragOffset state
+  useEffect(() => {
+    dragOffsetRef.current = dragOffset
+  }, [dragOffset])
 
   // Cache toolbar dimensions via ResizeObserver to avoid forced reflows
   useEffect(() => {
@@ -141,11 +147,12 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
     e.preventDefault()
     e.stopPropagation()
     isDraggingRef.current = true
+    const currentOffset = dragOffsetRef.current
     dragStartRef.current = {
       x: e.clientX,
       y: e.clientY,
-      offsetX: dragOffset.x,
-      offsetY: dragOffset.y,
+      offsetX: currentOffset.x,
+      offsetY: currentOffset.y,
     }
 
     const target = e.currentTarget
@@ -170,7 +177,7 @@ function FloatingToolbarInner({ visible, selectionRect, engine, editorRect, onOp
 
     target.addEventListener('pointermove', onMove)
     target.addEventListener('pointerup', onUp)
-  }, [dragOffset])
+  }, [])
 
   const isVisible = visible || touchVisible
   if ((!isVisible && !hasFocus) || !engine) return null

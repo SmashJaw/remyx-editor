@@ -51,6 +51,10 @@ export class KeyboardManager {
       return this._normalizeCache.get(shortcut)
     }
     const normalized = shortcut.toLowerCase().split('+').sort().join('+')
+    if (this._normalizeCache.size >= 200) {
+      const firstKey = this._normalizeCache.keys().next().value
+      this._normalizeCache.delete(firstKey)
+    }
     this._normalizeCache.set(shortcut, normalized)
     return normalized
   }

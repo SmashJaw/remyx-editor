@@ -24,29 +24,22 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const ref = useRef(null)
   const swatchRefs = useRef([])
+  const savedSelectionRef = useRef(null)
 
   useEffect(() => {
     if (!open) return
     const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false)
-      }
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); setOpen(false) }
     }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
-
-  // #36: Escape key handler
-  useEffect(() => {
-    if (!open) return
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        setOpen(false)
-      }
-    }
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [open])
 
   // Reset focused index when palette opens
@@ -58,23 +51,46 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
   }, [open, currentColor])
 
   // #26: Focus swatch when focusedIndex changes (roving tabindex)
+  // Only focus on keyboard navigation, not on initial open (to preserve editor selection)
+  const hasInteracted = useRef(false)
   useEffect(() => {
-    if (open && focusedIndex >= 0 && swatchRefs.current[focusedIndex]) {
+    if (open && hasInteracted.current && focusedIndex >= 0 && swatchRefs.current[focusedIndex]) {
       swatchRefs.current[focusedIndex].focus()
     }
   }, [open, focusedIndex])
+
+  // Reset interaction flag when opening/closing
+  useEffect(() => {
+    if (!open) hasInteracted.current = false
+  }, [open])
+
+  // Wrap onColorSelect to restore selection first
+  const handleColorApply = useCallback((color) => {
+    if (savedSelectionRef.current && engine?.selection) {
+      engine.selection.restore(savedSelectionRef.current)
+      savedSelectionRef.current = null
+    }
+    onColorSelect(color)
+  }, [onColorSelect, engine])
 
   const IconComponent = ICON_MAP[command]
 
   const handleToggle = useCallback((e) => {
     e.preventDefault()
-    setOpen(prev => !prev)
-  }, [])
+    setOpen(prev => {
+      if (!prev && engine?.selection) {
+        // Save selection when opening the picker
+        savedSelectionRef.current = engine.selection.save()
+      }
+      return !prev
+    })
+  }, [engine])
 
   const handleMouseDown = useCallback((e) => e.preventDefault(), [])
 
   // #26: Keyboard navigation for color swatches
   const handleSwatchKeyDown = useCallback((e, index) => {
+    hasInteracted.current = true
     const totalColors = DEFAULT_COLORS.length
     let newIndex = index
 
@@ -98,7 +114,7 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
       case 'Enter':
       case ' ':
         e.preventDefault()
-        onColorSelect(DEFAULT_COLORS[index])
+        handleColorApply(DEFAULT_COLORS[index])
         setOpen(false)
         return
       case 'Escape':
@@ -110,14 +126,14 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
     }
 
     setFocusedIndex(newIndex)
-  }, [onColorSelect])
+  }, [handleColorApply])
 
   // #30: Default button handler
   const handleDefault = useCallback((e) => {
     e.preventDefault()
-    onColorSelect('')
+    handleColorApply('')
     setOpen(false)
-  }, [onColorSelect])
+  }, [handleColorApply])
 
   return (
     <div className="rmx-toolbar-colorpicker" ref={ref} style={itemStyle || undefined}>
@@ -153,7 +169,7 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
                 style={{ backgroundColor: color }}
                 onClick={(e) => {
                   e.preventDefault()
-                  onColorSelect(color)
+                  handleColorApply(color)
                   setOpen(false)
                 }}
                 onMouseDown={handleMouseDown}
@@ -172,7 +188,7 @@ export const ToolbarColorPicker = React.memo(function ToolbarColorPicker({ comma
                 type="color"
                 value={currentColor || '#000000'}
                 onChange={(e) => {
-                  onColorSelect(e.target.value)
+                  handleColorApply(e.target.value)
                   setOpen(false)
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
@@ -198,7 +214,7 @@ function ColorPresetSection({ engine, onColorSelect }) {
   useEffect(() => {
     if (!engine) return
     const unsub = engine.eventBus?.on('colorPresets:change', ({ presets: p }) => setPresets(p))
-    return unsub
+    return () => { if (typeof unsub === 'function') unsub() }
   }, [engine])
 
   const handleSave = () => {

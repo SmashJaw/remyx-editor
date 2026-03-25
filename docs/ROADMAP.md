@@ -2,8 +2,8 @@
 
 # Remyx Editor Roadmap
 
-**Current Version:** 1.0.0-beta
-**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), unified 6-theme system, autosave, command palette with recently-used pinning and custom command registration, code block syntax highlighting, enhanced tables, security hardening, inter-editor communication, RTL/i18n/print, block-based editing with type conversion/templates/grouping, mobile & touch optimization, comments & annotations with inline threads/mentions/panel/comment-only mode, expanded plugin architecture with dependency resolution/lifecycle hooks/scoped settings/registry, callouts/alerts/admonitions, template system with merge tags/conditionals/loops, keyboard-first editing with Vim/Emacs/auto-pair/multi-cursor, drag-and-drop content, advanced link management, math/equation editor, table of contents/document outline, content analytics/readability, real-time collaboration, UX/UI improvements (animations, empty state, distraction-free mode, breadcrumb bar, minimap, split view, sticky toolbar, toolbar customization, color presets, typography controls), spelling & grammar checking with writing-style presets, external config file support (defineConfig/loadConfig), performance optimizations (WorkerPool, VirtualScroller, compressed undo history, input batching, lazy plugin loading, shared selectionchange listener, getHTML caching, hash-based sanitizer LRU), P0 complete, 275/275 tasks resolved, 1768 tests passing
+**Current Version:** 1.2.0-beta
+**Status:** Multi-package architecture complete (`@remyxjs/core` + `@remyxjs/react`), config-file-only architecture (RemyxEditor accepts config prop), drag-and-drop plugin system (remyxjs/plugins/), theme externalization (remyxjs/themes/), 5 config presets, unified 6-theme system, autosave, command palette with recently-used pinning and custom command registration, code block syntax highlighting, enhanced tables, security hardening, inter-editor communication, RTL/i18n/print, block-based editing with type conversion/templates/grouping, mobile & touch optimization, comments & annotations with inline threads/mentions/panel/comment-only mode, expanded plugin architecture with dependency resolution/lifecycle hooks/scoped settings/registry, callouts/alerts/admonitions, template system with merge tags/conditionals/loops, keyboard-first editing with Vim/Emacs/auto-pair/multi-cursor, drag-and-drop content, advanced link management, math/equation editor, table of contents/document outline, content analytics/readability, real-time collaboration, UX/UI improvements (animations, empty state, distraction-free mode, breadcrumb bar, minimap, split view, sticky toolbar, toolbar customization, color presets, typography controls), spelling & grammar checking with writing-style presets, performance optimizations (WorkerPool, VirtualScroller, compressed undo history, input batching, lazy plugin loading, shared selectionchange listener, getHTML caching, hash-based sanitizer LRU), comprehensive code audit with 50 bug fixes, P0 complete, 275/275 tasks resolved, 1768 tests passing
 
 A living document outlining planned features, improvements, and long-term direction for the Remyx rich-text editor. Sections are ordered by priority — security and stability first, then features ranked by user impact.
 
@@ -169,13 +169,29 @@ These features are not planned for the open-source @remyxjs packages and will be
 - ~~**Parallel execution**: Nx runs independent targets in parallel with configurable concurrency, utilizing all CPU cores~~ — default Nx behavior
 - ~~**Migration path**: incremental adoption — add `nx.json` and per-package `project.json` files without changing existing `package.json` scripts or Vite configs~~ — no `project.json` files needed; Nx auto-infers from `package.json`
 
-## ~~External Configuration~~ ✅ Shipped (v0.38.0)
+## ~~Config-File Architecture, Plugin/Theme Externalization & Code Audit~~ ✅ Shipped (v1.2.0-beta)
+
+- ~~Config-file-only architecture~~ — `RemyxEditor` accepts a `config` prop; removed `RemyxEditorFromConfig`, `RemyxConfigProvider`, `useExternalConfig`, `useRemyxConfig`, `useResolvedConfig`
+- ~~Drag-and-drop plugin system~~ — 14 optional plugins moved to `remyxjs/plugins/` (analytics, block-templates, callout, collaboration, comments, drag-drop, keyboard, link, math, spellcheck, syntax-highlight, table, template, toc); only WordCountPlugin, AutolinkPlugin, PlaceholderPlugin remain as required built-ins
+- ~~Theme externalization~~ — 6 CSS themes (light, dark, ocean, forest, sunset, rose) moved to `remyxjs/themes/` with `index.js` auto-loader; per-editor config selection
+- ~~5 config presets~~ — default, minimal, blog-editor, full-toolbar, toolbar-and-menu in `remyxjs/config/`
+- ~~Comprehensive code audit~~ — 50 bugs fixed across core, commands, utils, plugins, and React components
+  - Core: null checks, FileReader error handling, autosave queue, scroll listener cleanup, cache limits, recursion guard
+  - Commands: shared state isolation, findReplace memory leak, table sort performance, nested span prevention, null checks
+  - Utils: deprecated API updates, RTL optimization, redundant code removal
+  - Plugins: collaboration cleanup order, ghost element cleanup, link scan guard, equation counter reset, clipboard API update
+  - React: dragOffset ref optimization, filtered languages memoization, combined effects, RAF dedup, null guards
+- ~~Fixed color picker selection loss~~
+- ~~Fixed analytics real-time updates and reading time accuracy~~
+- ~~Removed auto-pairing of quotes in WYSIWYG mode~~
+
+## ~~External Configuration~~ ✅ Shipped (v0.38.0, rearchitected v1.2.0-beta)
 
 - ~~Load toolbar layout, theme, fonts, and plugin list from a JSON/YAML config file~~ — `loadConfig(url, { env, headers, signal })` in `@remyxjs/core`, lightweight inline YAML parser for simple configs
-- ~~`RemyxEditor.fromConfig(url)` static method for fully declarative setup~~ — `<RemyxEditorFromConfig url="..." />` component with loading/error states, prop overrides
+- ~~Config-file-only architecture~~ — `<RemyxEditor config="name" />` loads config from `remyxjs/config/<name>.json`; `RemyxEditorFromConfig`, `RemyxConfigProvider`, `useExternalConfig`, `useRemyxConfig`, and `useResolvedConfig` removed in v1.2.0-beta
 - ~~Environment-based config merging (development vs. production defaults)~~ — `env` key in config with named overrides, deep-merged onto base config
 - ~~Admin panel concept: a standalone UI for building editor configurations visually~~ — will be available on [remyxjs.com](https://remyxjs.com) in the near future
-- ~~Runtime config reloading without unmounting the editor~~ — `useExternalConfig(url, { pollInterval })` hook with `reload()`, auto-reload on URL change, polling support
+- ~~5 config presets~~ — default, minimal, blog-editor, full-toolbar, toolbar-and-menu
 
 ## ~~Spelling & Grammar Checking~~ ✅ Shipped (v0.37.0)
 

@@ -44,6 +44,7 @@ export function registerBlockCommands(engine) {
       const existing = eng.selection.getClosestElement('blockquote')
       if (existing) {
         // Toggle off: unwrap blockquote
+        if (!existing.parentNode) return
         const parent = existing.parentNode
         while (existing.firstChild) {
           parent.insertBefore(existing.firstChild, existing)

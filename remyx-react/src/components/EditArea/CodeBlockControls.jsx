@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 
 /**
  * Default language list when the syntax-highlight plugin is not installed.
@@ -70,10 +70,10 @@ export function CodeBlockControls({ codeBlock, engine, editorRect }) {
   // Use plugin's language list if syntax-highlight is installed, else defaults
   const languages = engine?._syntaxHighlight?.SUPPORTED_LANGUAGES || DEFAULT_LANGUAGES
 
-  const filteredLangs = languages.filter(
+  const filteredLangs = useMemo(() => languages.filter(
     lang => lang.label.toLowerCase().includes(filter.toLowerCase()) ||
             lang.id.toLowerCase().includes(filter.toLowerCase())
-  )
+  ), [languages, filter])
 
   const codeBlockRect = codeBlock.getBoundingClientRect()
   const top = codeBlockRect.top - editorRect.top

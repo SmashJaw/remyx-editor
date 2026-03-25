@@ -303,6 +303,7 @@ export function MathPlugin(options = {}) {
 
     init(eng) {
       engine = eng
+      equationCounter = 0
 
       engine._math = {
         getSymbolPalette,

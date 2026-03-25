@@ -52,7 +52,7 @@ Plugins are configured in your editor's JSON config file:
 ```json
 {
   "plugins": {
-    "table": { "enabled": true },
+    "table": { "enabled": true, "sortable": true },
     "analytics": { "enabled": true, "wordsPerMinute": 250 },
     "math": { "enabled": false },
     "comments": {},
@@ -126,7 +126,12 @@ Enhanced drag-and-drop with drop zones, block reordering, and external file supp
 #### table
 Column/row resize, click-to-sort, filter UI, formula evaluation, frozen headers.
 
-No configurable options. Enable with `"table": true`.
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `sortable` | `boolean` | `true` | Enable click-to-sort on table headers |
+| `filterable` | `boolean` | `true` | Enable filter UI on header cells |
+| `resizable` | `boolean` | `true` | Enable column/row resize handles |
+| `formulas` | `boolean` | `true` | Enable formula evaluation in cells |
 
 #### syntax-highlight
 Auto-highlights code blocks with language-specific tokenizers and copy button.

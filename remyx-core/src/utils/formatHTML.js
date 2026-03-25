@@ -129,7 +129,7 @@ function buildOpenTag(el, tag) {
 
   const attrStr = attrs.map(a => {
     if (a.value === '') return a.name
-    return `${a.name}="${escapeAttr(a.value)}"`
+    return `${a.name}="${escapeHTMLAttr(a.value)}"`
   }).join(' ')
 
   return `<${tag} ${attrStr}>`
@@ -174,10 +174,3 @@ function serializeInlineContent(el) {
   return result
 }
 
-/**
- * Escape HTML attribute values.
- */
-// Task 261: Uses shared escapeHTMLAttr utility
-function escapeAttr(val) {
-  return escapeHTMLAttr(val)
-}

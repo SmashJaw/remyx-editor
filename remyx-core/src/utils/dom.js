@@ -63,7 +63,7 @@ const GENERATED_ID_LENGTH = 9
  * @returns {string} A prefixed random ID like 'rmx-abc123def'
  */
 export function generateId() {
-  return 'rmx-' + Math.random().toString(36).substr(2, GENERATED_ID_LENGTH)
+  return 'rmx-' + Math.random().toString(36).slice(2, 2 + GENERATED_ID_LENGTH)
 }
 
 export function isBlockEmpty(block) {

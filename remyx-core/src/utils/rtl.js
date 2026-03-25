@@ -7,9 +7,11 @@
 
 // Unicode ranges for RTL scripts
 const RTL_REGEX = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/
+const RTL_REGEX_GLOBAL = /[\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC]/g
 
 // Unicode ranges for LTR scripts (Latin, CJK, etc.)
 const LTR_REGEX = /[A-Za-z\u00C0-\u00FF\u0100-\u024F\u0400-\u04FF\u1100-\u11FF\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]/
+const LTR_REGEX_GLOBAL = /[A-Za-z\u00C0-\u00FF\u0100-\u024F\u0400-\u04FF\u1100-\u11FF\u3040-\u309F\u30A0-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]/g
 
 /**
  * Detect the dominant text direction of a string.
@@ -24,14 +26,10 @@ const LTR_REGEX = /[A-Za-z\u00C0-\u00FF\u0100-\u024F\u0400-\u04FF\u1100-\u11FF\u
 export function detectTextDirection(text) {
   if (!text || typeof text !== 'string') return 'auto'
 
-  let rtlCount = 0
-  let ltrCount = 0
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i]
-    if (RTL_REGEX.test(char)) rtlCount++
-    else if (LTR_REGEX.test(char)) ltrCount++
-  }
+  const rtlMatches = text.match(RTL_REGEX_GLOBAL)
+  const ltrMatches = text.match(LTR_REGEX_GLOBAL)
+  const rtlCount = rtlMatches ? rtlMatches.length : 0
+  const ltrCount = ltrMatches ? ltrMatches.length : 0
 
   if (rtlCount === 0 && ltrCount === 0) return 'auto'
   return rtlCount > ltrCount ? 'rtl' : 'ltr'

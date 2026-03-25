@@ -42,16 +42,16 @@ A feature-rich WYSIWYG editor built on a framework-agnostic core with first-clas
 - **Multi-editor support** — Full instance isolation, `EditorBus` singleton for inter-editor communication (pub/sub, broadcast, registry), `SharedResources` singleton for memory-efficient shared schemas, toolbar presets, icons, and config across 10+ concurrent editors
 - **Performance** — DOM mutation batching, `requestIdleCallback` scheduling, rAF-throttled handlers, operation coalescing in undo/redo, `WorkerPool` for background thread offloading, `VirtualScroller` for long-document rendering, compressed diff-based undo history, lazy plugin loading, input batching, shared selectionchange listener (single global handler for 10+ editors), `getHTML()` caching with dirty flag, hash-based sanitizer LRU cache, reverse-iteration DOM cleaning, cached drag-drop block positions, built-in benchmarking tools
 - **UX/UI improvements** — Smooth CSS animations (modal enter/exit, block reorder, toolbar hover), configurable empty state, distraction-free mode (`Mod+Shift+D`), breadcrumb bar showing DOM path, minimap for long documents, split view for side-by-side edit+preview, sticky toolbar, drag-and-drop toolbar customization, color palette presets (saved to localStorage), typography controls (line height, letter spacing, paragraph spacing)
-- **External configuration** — Load toolbar, theme, fonts, and plugin config from a JSON/YAML URL via `loadConfig()`; `<RemyxEditorFromConfig url="..." />` for fully declarative setup; environment-based config merging (dev vs. prod defaults); runtime config reloading via `useExternalConfig()` hook with `pollInterval` and `reload()`
+- **Config-file-driven** — Load editor settings from JSON config files in `remyxjs/config/`; 5 built-in presets (`default`, `minimal`, `blog-editor`, `full-toolbar`, `toolbar-and-menu`); use `<RemyxEditor config="default" />` for fully declarative setup
 - **Tree-shakeable** — Import only the commands and utilities you need
 
 ## Packages
 
 | Package | Version | Description |
 | --- | --- | --- |
-| [`@remyxjs/core`](./remyx-core/) | 1.0.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
-| [`@remyxjs/react`](./remyx-react/) | 1.0.0-beta | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
-| [`create-remyx`](./create-remyx/) | 1.0.0-beta | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
+| [`@remyxjs/core`](./remyx-core/) | 1.2.0-beta | Framework-agnostic engine, commands, plugins, utilities, and CSS themes |
+| [`@remyxjs/react`](./remyx-react/) | 1.2.0-beta | React components, hooks, TypeScript declarations (peer-depends on `@remyxjs/core`) |
+| [`create-remyx`](./create-remyx/) | 1.2.0-beta | Reserved for future interactive CLI wizard ([see roadmap](./docs/ROADMAP.md)) |
 
 ## Getting Started
 
@@ -89,47 +89,41 @@ function App() {
   const [content, setContent] = useState('');
   return (
     <RemyxEditor
+      config="default"
       value={content}
       onChange={setContent}
-      placeholder="Start typing..."
-      height={400}
     />
   );
 }
 ```
 
-### Customize the toolbar
+### Use a config preset
+
+5 built-in config presets are available:
 
 ```jsx
-<RemyxEditor
-  value={content}
-  onChange={setContent}
-  toolbar={[
-    ['bold', 'italic', 'underline'],
-    ['heading'],
-    ['orderedList', 'unorderedList'],
-    ['link', 'image'],
-    ['undo', 'redo'],
-  ]}
-/>
+<RemyxEditor config="default" />        {/* Full-featured editor */}
+<RemyxEditor config="minimal" />        {/* Minimal toolbar */}
+<RemyxEditor config="blog-editor" />    {/* Blog-focused layout */}
+<RemyxEditor config="full-toolbar" />   {/* All toolbar items */}
+<RemyxEditor config="toolbar-and-menu" /> {/* Toolbar + menu bar */}
 ```
+
+The `config` prop references a JSON file in your `remyxjs/config/` directory.
 
 ### Add a theme
 
 ```jsx
-<RemyxEditor
-  value={content}
-  onChange={setContent}
-  theme="ocean"
-/>
+<RemyxEditor config="default" theme="ocean" />
 ```
 
-Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
+Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`. Theme CSS files live in `remyxjs/themes/`.
 
 ### Handle file uploads
 
 ```jsx
 <RemyxEditor
+  config="default"
   value={content}
   onChange={setContent}
   uploadHandler={async (file) => {
@@ -142,81 +136,34 @@ Built-in themes: `light`, `dark`, `ocean`, `forest`, `sunset`, `rose`.
 />
 ```
 
-### Add plugins
+### Plugins (drag-and-drop)
 
-```jsx
-import { WordCountPlugin, AutolinkPlugin, PlaceholderPlugin, SyntaxHighlightPlugin, TablePlugin, CommentsPlugin, CalloutPlugin, LinkPlugin, TemplatePlugin, KeyboardPlugin, DragDropPlugin, MathPlugin, TocPlugin, AnalyticsPlugin, SpellcheckPlugin, CollaborationPlugin } from '@remyxjs/core';
+14 optional plugins are available as self-contained folders. To install a plugin, drop its folder into `remyxjs/plugins/` and enable it in your config JSON:
 
-<RemyxEditor
-  value={content}
-  onChange={setContent}
-  plugins={[
-    WordCountPlugin,
-    AutolinkPlugin,
-    PlaceholderPlugin('Write something...'),
-    SyntaxHighlightPlugin(),
-    TablePlugin(),       // Sortable columns, filters, formulas, resize handles
-    CommentsPlugin(),    // Inline comment threads, @mentions, resolve/reopen
-    CalloutPlugin(),     // Info/warning/error/success/tip/note/question blocks
-    LinkPlugin(),        // Link previews, broken link detection, auto-link, bookmarks
-    TemplatePlugin(),    // Merge tags, conditionals, loops, template library
-    KeyboardPlugin(),    // Auto-pairing, multi-cursor, jump-to-heading
-    DragDropPlugin(),    // Drop zones, cross-editor drag, block reorder
-    MathPlugin(),        // LaTeX math rendering, symbol palette, equation numbering
-    TocPlugin(),         // Auto-generated table of contents, outline, headings
-    AnalyticsPlugin(),   // Readability scores, reading time, SEO hints
-    SpellcheckPlugin(),  // Grammar checking, writing-style presets, dictionary
-    CollaborationPlugin(), // Real-time co-editing, live cursors, presence
-  ]}
-/>
+```json
+{
+  "plugins": {
+    "syntax-highlight": true,
+    "table": true,
+    "comments": { "enabled": true, "mentionUsers": ["alice", "bob"] },
+    "analytics": { "enabled": true, "wordsPerMinute": 250 }
+  }
+}
 ```
 
-### Enhanced tables
+To uninstall a plugin, remove it from the config and delete the folder from `remyxjs/plugins/`.
 
-With the `TablePlugin` enabled, tables gain spreadsheet-like capabilities:
-
-```jsx
-import { TablePlugin } from '@remyxjs/core';
-
-<RemyxEditor
-  value={content}
-  onChange={setContent}
-  plugins={[TablePlugin()]}
-/>
-```
-
-**What you get out of the box:**
-- **Click a column header** to sort ascending/descending (Shift+click for multi-column sort)
-- **Filter icon** on each header cell opens a dropdown for substring filtering
-- **Drag column/row borders** to resize
-- **Type `=SUM(A1:A5)`** in any cell — formulas evaluate on blur
-- **Right-click a cell** to format as number, currency, percentage, or date
-- **Copy/paste from Excel or Google Sheets** — the editor auto-detects TSV and expands the table grid
-
-Programmatic access to all features:
-
-```js
-// Sort the first column descending with numeric comparison
-engine.executeCommand('sortTable', { columnIndex: 0, direction: 'desc', dataType: 'numeric' });
-
-// Filter column 2 to only show rows containing "active"
-engine.executeCommand('filterTable', { columnIndex: 2, filterValue: 'active' });
-
-// Format the focused cell as currency
-engine.executeCommand('formatCell', { format: 'currency', options: { currency: 'EUR' } });
-
-// Toggle the first row between <thead>/<tbody>
-engine.executeCommand('toggleHeaderRow');
-```
+Available plugins: `analytics`, `callout`, `collaboration`, `comments`, `drag-drop`, `keyboard`, `link`, `math`, `spellcheck`, `syntax-highlight`, `table`, `template`, `toc`, `block-template`.
 
 ### Enable autosave
 
 ```jsx
 // localStorage (default) — just pass true
-<RemyxEditor value={content} onChange={setContent} autosave />
+<RemyxEditor config="default" value={content} onChange={setContent} autosave />
 
 // Cloud storage (AWS S3, GCP, or any HTTP endpoint)
 <RemyxEditor
+  config="default"
   value={content}
   onChange={setContent}
   autosave={{
@@ -228,56 +175,6 @@ engine.executeCommand('toggleHeaderRow');
     interval: 60000,
   }}
 />
-```
-
-### External configuration
-
-Load editor settings from a JSON or YAML file — no code changes needed when config updates:
-
-```jsx
-import { RemyxEditorFromConfig } from '@remyxjs/react';
-
-// Fully declarative: load everything from a config URL
-<RemyxEditorFromConfig
-  url="/editor-config.json"
-  env="production"
-  value={content}
-  onChange={setContent}
-  loadingFallback={<div>Loading editor...</div>}
-/>
-```
-
-Example `editor-config.json`:
-
-```json
-{
-  "theme": "ocean",
-  "toolbar": [["bold", "italic"], ["heading"], ["link", "image"]],
-  "height": 500,
-  "menuBar": true,
-  "env": {
-    "production": { "readOnly": false, "height": 600 },
-    "development": { "readOnly": false, "height": 400 }
-  }
-}
-```
-
-Or use the hook directly for more control:
-
-```jsx
-import { useExternalConfig } from '@remyxjs/react';
-
-function MyEditor() {
-  const { config, loading, error, reload } = useExternalConfig('/editor-config.json', {
-    env: process.env.NODE_ENV,
-    pollInterval: 60000, // Auto-reload every minute
-  });
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <button onClick={reload}>Retry</button>;
-
-  return <RemyxEditor {...config} value={content} onChange={setContent} />;
-}
 ```
 
 See the full [@remyxjs/react README](./remyx-react/README.md) for all props, hooks, error handling, engine access, modals, forms, and more.
@@ -342,9 +239,9 @@ See the full [@remyxjs/core README](./remyx-core/README.md) for the complete eng
 | CSS themes | Yes | Additional component styles |
 | Multi-editor | EditorBus + SharedResources singletons | Re-exports from core |
 | Autosave engine | AutosaveManager + 5 storage providers | useAutosave hook, SaveStatus, RecoveryBanner |
-| React components | — | RemyxEditor, RemyxEditorFromConfig, SaveStatus, RecoveryBanner, CommentsPanel, CollaborationBar, EditorErrorBoundary, EmptyState, BreadcrumbBar, Minimap, SplitPreview, TypographyDropdown |
+| React components | — | RemyxEditor, SaveStatus, RecoveryBanner, CommentsPanel, CollaborationBar, EditorErrorBoundary, Toast, EmptyState, BreadcrumbBar, Minimap, SplitPreview, TypographyDropdown |
 | Collaboration | CollaborationPlugin, transport API | useCollaboration hook, CollaborationBar |
-| React hooks | — | useRemyxEditor, useEditorEngine, useExternalConfig, useDragDrop, useAutosave, useComments, useSpellcheck, useCollaboration, useRemyxConfig |
+| React hooks | — | useRemyxEditor, useEditorEngine, useDragDrop, useAutosave, useComments, useSpellcheck, useCollaboration, useToast |
 | TypeScript types | — | Full `.d.ts` declarations |
 | Scaffolding CLI | — | `npx create-remyx-app` |
 
@@ -352,10 +249,14 @@ See the full [@remyxjs/core README](./remyx-core/README.md) for the complete eng
 
 ```
 packages/
-  create-remyx/   → create-remyx        Reserved for future CLI wizard
+  create-remyx/   → create-remyx          Reserved for future CLI wizard
   remyx-core/     → @remyxjs/core         190+ exports, 0 framework deps
   remyx-react/    → @remyxjs/react        React components + hooks + TS types + scaffolding CLI
   docs/           Documentation, changelogs, roadmap, benchmarks
+remyxjs/
+  config/         Editor config presets (default.json, minimal.json, blog-editor.json, etc.)
+  plugins/        Optional plugins (drag-and-drop install, 14 available)
+  themes/         Theme CSS files (light.css, dark.css, ocean.css, forest.css, sunset.css, rose.css)
 ```
 
 ## Bundle Size

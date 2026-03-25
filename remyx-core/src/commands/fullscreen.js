@@ -1,8 +1,6 @@
-// Track how many editors are currently fullscreen so we only restore
-// document.body.style.overflow when the last one exits.
-let fullscreenCount = 0
-
 export function registerFullscreenCommands(engine) {
+  let fullscreenCount = 0
+
   engine.commands.register('fullscreen', {
     execute(eng) {
       const root = eng.element.closest('.rmx-editor')

@@ -51,9 +51,9 @@ Remyx Editor is a monorepo with publishable packages under `packages/` and a use
 ```
 remyx-editor/
   packages/
-    remyx-core/        @remyxjs/core     1.0.0-beta  Framework-agnostic editor engine
-    remyx-react/       @remyxjs/react    1.0.0-beta  React components and hooks
-    create-remyx/      create-remyx      1.0.0-beta  Reserved for future CLI tool
+    remyx-core/        @remyxjs/core     1.2.0-beta  Framework-agnostic editor engine
+    remyx-react/       @remyxjs/react    1.2.0-beta  React components and hooks
+    create-remyx/      create-remyx      1.2.0-beta  Reserved for future CLI tool
     docs/              (not published)               Documentation, changelog, roadmap
   remyxjs/
     config/            Editor configuration JSON files (one per editor instance)
@@ -107,16 +107,17 @@ This directory is where users manage plugins, themes, and editor configs:
 
 ```
 remyxjs/
-  config/           JSON config files — each <RemyxEditor config="name" /> loads one
+  config/           5 JSON config presets (default, minimal, blog-editor, full-toolbar, toolbar-and-menu)
   plugins/          Optional plugins — add/remove folders to install/uninstall
     analytics/      Reading time, readability scores, SEO hints
     table/          Table features (resize, sort, filter, formulas)
     comments/       Inline comment threads with @mentions
     callout/        Callout boxes (info, warning, error, etc.)
     collaboration/  Real-time collaborative editing (CRDT)
-    ...             (15 plugins total — see plugins.md)
+    ...             (14 plugins total — see plugins.md)
   themes/           Theme CSS — add/remove files to install/uninstall
     light.css, dark.css, ocean.css, forest.css, rose.css, sunset.css
+    index.js          Auto-loader for theme registration
 ```
 
 ---
@@ -475,7 +476,7 @@ export function registerAlignmentCommands(engine) {
 ### File organization
 
 - One command group per file in `commands/`.
-- One plugin per file in `plugins/builtins/`.
+- Required built-in plugins (WordCountPlugin, AutolinkPlugin, PlaceholderPlugin) live in `plugins/builtins/`. Optional plugins live in `remyxjs/plugins/<name>/` with an `index.js` and `<Name>Plugin.js`.
 - Co-locate React hooks with the components that use them when they are single-use. Extract to `hooks/` when shared.
 
 ### Constants

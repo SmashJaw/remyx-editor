@@ -309,6 +309,9 @@ export class Clipboard {
         this.engine.commands.execute('insertImage', { src, alt: file.name })
       }
       reader.readAsDataURL(file)
+      reader.onerror = () => {
+        this.engine.eventBus.emit('upload:error', { file, error: new Error('Failed to read file') })
+      }
     }
   }
 }

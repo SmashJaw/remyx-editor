@@ -91,6 +91,8 @@ export function usePinchZoom(editorRef) {
     const { element } = pinchRef.current
     const finalScale = scaleRef.current
 
+    if (!element || !element.isConnected) return
+
     if (Math.abs(finalScale - 1) > 0.05) {
       // Apply the scale by adjusting dimensions
       if (element.tagName === 'IMG') {

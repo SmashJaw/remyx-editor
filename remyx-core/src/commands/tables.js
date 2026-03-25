@@ -233,7 +233,13 @@ export function registerTableCommands(engine) {
       if (rows.length === 0) return
 
       // Support multi-column sort via keys array, or single-column via columnIndex/direction
-      const sortKeys = keys || [{ columnIndex, direction: direction || 'asc', dataType }]
+      const rawKeys = keys || [{ columnIndex, direction: direction || 'asc', dataType }]
+
+      // Pre-compute data types to avoid repeated detection inside comparator
+      const sortKeys = rawKeys.map(k => ({
+        ...k,
+        dataType: k.dataType || detectSortDataType(rows, k.columnIndex)
+      }))
 
       // Build sort comparator
       const getCell = (row, idx) => {
@@ -247,7 +253,7 @@ export function registerTableCommands(engine) {
         for (const key of sortKeys) {
           const valA = getCell(a, key.columnIndex)
           const valB = getCell(b, key.columnIndex)
-          const type = key.dataType || detectSortDataType(rows, key.columnIndex)
+          const type = key.dataType
           let result = 0
 
           if (customComparator) {
@@ -560,8 +566,8 @@ function expandRange(rangeStr) {
  * Get cell value from table by col/row indices.
  * Row 0 = first row of thead (if exists) or first row of tbody.
  */
-function getTableCellValue(table, col, row) {
-  const allRows = table.querySelectorAll('thead tr, tbody tr')
+function getTableCellValue(table, col, row, cachedRows) {
+  const allRows = cachedRows || table.querySelectorAll('thead tr, tbody tr')
   const tr = allRows[row]
   if (!tr) return ''
   const cells = tr.querySelectorAll('td, th')
@@ -638,7 +644,8 @@ function tokenizeFormula(formula) {
 /**
  * Recursive-descent parser and evaluator for formulas.
  */
-function evaluateFormula(formulaStr, table, evalStack = new Set()) {
+function evaluateFormula(formulaStr, table, evalStack = new Set(), cachedRows = null) {
+  const allRows = cachedRows || table.querySelectorAll('thead tr, tbody tr')
   // Strip leading '=' that marks a cell as a formula
   const cleanFormula = formulaStr.startsWith('=') ? formulaStr.slice(1) : formulaStr
   const tokens = tokenizeFormula(cleanFormula)
@@ -700,14 +707,13 @@ function evaluateFormula(formulaStr, table, evalStack = new Set()) {
       const cellKey = token.value
       if (evalStack.has(cellKey)) return '#CIRC!'
       evalStack.add(cellKey)
-      const raw = getTableCellValue(table, ref.col, ref.row)
+      const raw = getTableCellValue(table, ref.col, ref.row, allRows)
       // If the cell itself has a formula, evaluate it
-      const allRows = table.querySelectorAll('thead tr, tbody tr')
       const cell = allRows[ref.row]?.querySelectorAll('td, th')[ref.col]
       const cellFormula = cell?.getAttribute('data-formula')
       let val
       if (cellFormula) {
-        val = evaluateFormula(cellFormula, table, evalStack)
+        val = evaluateFormula(cellFormula, table, evalStack, allRows)
       } else {
         val = parseFloat(raw)
         if (isNaN(val)) val = raw
@@ -720,7 +726,7 @@ function evaluateFormula(formulaStr, table, evalStack = new Set()) {
       const refs = expandRange(token.value)
       if (!refs) return []
       return refs.map(r => {
-        const raw = getTableCellValue(table, r.col, r.row)
+        const raw = getTableCellValue(table, r.col, r.row, allRows)
         const num = parseFloat(raw)
         return isNaN(num) ? raw : num
       })
@@ -762,11 +768,12 @@ function evaluateFormula(formulaStr, table, evalStack = new Set()) {
  * Evaluate all formula cells in a table.
  */
 export function evaluateTableFormulas(table) {
+  const allRows = table.querySelectorAll('thead tr, tbody tr')
   const cells = table.querySelectorAll('td[data-formula], th[data-formula]')
   for (const cell of cells) {
     const formula = cell.getAttribute('data-formula')
     if (!formula) continue
-    const result = evaluateFormula(formula, table)
+    const result = evaluateFormula(formula, table, new Set(), allRows)
     if (typeof result === 'string' && result.startsWith('#')) {
       cell.textContent = result
     } else if (typeof result === 'number') {

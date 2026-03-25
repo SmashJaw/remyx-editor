@@ -91,6 +91,18 @@ Create a JSON file in `remyxjs/config/`:
 
 This loads `remyxjs/config/my-config.json`.
 
+### Built-in Config Presets
+
+5 presets ship out of the box:
+
+| Preset | Description |
+|--------|-------------|
+| `default` | Full-featured editor with standard toolbar |
+| `minimal` | Stripped-down toolbar for simple editing |
+| `blog-editor` | Blog-focused layout with heading and media tools |
+| `full-toolbar` | All toolbar items enabled |
+| `toolbar-and-menu` | Full toolbar plus menu bar |
+
 ### Multiple Editors with Different Configs
 
 ```jsx
@@ -205,9 +217,26 @@ Drop a plugin folder into `remyxjs/plugins/` and add it to your config:
 1. Remove from config
 2. Delete the plugin folder from `remyxjs/plugins/`
 
-### Available Plugins
+### Available Plugins (14)
 
-See [plugins.md](./plugins.md) for the full list of available plugins and their options.
+| Plugin Folder | Description |
+|---------------|-------------|
+| `analytics/` | Readability scores, reading time, SEO hints |
+| `block-template/` | Block-level templates with pre-built layouts |
+| `callout/` | Info/warning/error/success/tip/note/question blocks |
+| `collaboration/` | Real-time co-editing, live cursors, presence |
+| `comments/` | Inline comment threads, @mentions, resolve/reopen |
+| `drag-drop/` | Drop zones, cross-editor drag, block reorder |
+| `keyboard/` | Vim/Emacs modes, multi-cursor, auto-pairing |
+| `link/` | Link previews, broken link detection, auto-linking |
+| `math/` | LaTeX math rendering, symbol palette, equation numbering |
+| `spellcheck/` | Grammar checking, writing-style presets, dictionary |
+| `syntax-highlight/` | Code block syntax highlighting with language detection |
+| `table/` | Sortable columns, filters, formulas, resize handles |
+| `template/` | Merge tags, conditionals, loops, template library |
+| `toc/` | Auto-generated table of contents, outline, headings |
+
+See [plugins.md](./plugins.md) for detailed options per plugin.
 
 ---
 

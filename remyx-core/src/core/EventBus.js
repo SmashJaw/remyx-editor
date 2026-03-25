@@ -88,7 +88,7 @@ export class EventBus {
           } catch (err) {
             console.error(`EventBus error in "${event}" handler:`, err)
             // Forward handler errors to 'error' event (with recursion guard)
-            if (event !== 'error' && this._emitDepth < 3) {
+            if (event !== 'error' && this._emitDepth < 2) {
               this.emit('error', { event, error: err, data })
             }
           }

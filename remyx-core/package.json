@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/core",
-  "version": "1.0.5-beta",
+  "version": "1.2.0-beta",
   "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
   "keywords": [
     "wysiwyg",
@@ -16,14 +16,17 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SmashJaw/remyxjs.git",
+    "url": "https://github.com/SmashJaw/remyx-editor.git",
     "directory": "packages/remyx-core"
   },
   "bugs": {
-    "url": "https://github.com/SmashJaw/remyxjs/issues"
+    "url": "https://github.com/SmashJaw/remyx-editor/issues"
   },
-  "homepage": "https://github.com/SmashJaw/remyxjs",
+  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/main/packages/remyx-core#readme",
   "type": "module",
+  "bin": {
+    "remyxjs": "./bin/init.js"
+  },
   "main": "./dist/remyx-core.cjs",
   "module": "./dist/remyx-core.js",
   "types": "./dist/index.d.ts",
@@ -43,7 +46,8 @@
     "./themes/rose.css": "./dist/themes/rose.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "publishConfig": {
     "access": "public"

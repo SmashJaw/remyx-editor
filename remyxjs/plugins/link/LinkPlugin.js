@@ -163,6 +163,7 @@ export function LinkPlugin(options = {}) {
 
   /** Cache for unfurl results */
   const _unfurlCache = new Map()
+  let _isScanning = false
 
   /** Set of URLs marked as broken */
   const _brokenLinks = new Set()
@@ -274,7 +275,12 @@ export function LinkPlugin(options = {}) {
         let data = _unfurlCache.get(url)
         if (!data) {
           data = await onUnfurl(url)
-          if (data) _unfurlCache.set(url, data)
+          if (data) {
+            if (_unfurlCache.size > 100) {
+              _unfurlCache.delete(_unfurlCache.keys().next().value)
+            }
+            _unfurlCache.set(url, data)
+          }
         }
         if (data) {
           showPreview(anchor, data, engine.element)
@@ -302,6 +308,9 @@ export function LinkPlugin(options = {}) {
 
   async function scanForBrokenLinks() {
     if (!engine || !validateLink) return
+    if (_isScanning) return
+    _isScanning = true
+    try {
     const anchors = engine.element.querySelectorAll('a[href]')
     const checked = new Set()
 
@@ -343,6 +352,9 @@ export function LinkPlugin(options = {}) {
       total: checked.size,
       broken: _brokenLinks.size,
     })
+    } finally {
+      _isScanning = false
+    }
   }
 
   // -----------------------------------------------------------------------

@@ -79,9 +79,6 @@ export function loadGoogleFonts(fontFamilies, options = {}) {
 
   // Build the Google Fonts URL
   const families = fontFamilies.map(f => {
-    // If the user already provided a spec with weights, use as-is
-    if (f.includes(':')) return `family=${f.replace(/ /g, '+')}`
-    // Otherwise default to requesting the font family
     return `family=${f.replace(/ /g, '+')}`
   })
 

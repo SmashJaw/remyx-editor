@@ -24,6 +24,16 @@ function wrapWithStyle(engine, property, value) {
     return
   }
 
+  // Check ancestors too
+  let ancestor = parent
+  while (ancestor && ancestor !== engine.element) {
+    if (ancestor.tagName === 'SPAN' && ancestor.style[property]) {
+      ancestor.style[property] = value
+      return
+    }
+    ancestor = ancestor.parentNode
+  }
+
   const span = document.createElement('span')
   span.style[property] = value
 

@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/react",
-  "version": "1.0.5-beta",
+  "version": "1.2.0-beta",
   "description": "React components and hooks for the Remyx rich-text editor",
   "keywords": [
     "wysiwyg",
@@ -46,7 +46,7 @@
   },
   "sideEffects": false,
   "peerDependencies": {
-    "@remyxjs/core": "1.0.5-beta",
+    "@remyxjs/core": "*",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
@@ -54,7 +54,7 @@
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
-    "@remyxjs/core": "1.0.5-beta",
+    "@remyxjs/core": "1.2.0-beta",
     "@vitejs/plugin-react": "5.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

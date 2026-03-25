@@ -2,7 +2,10 @@ let _isMac = null
 
 export function isMac() {
   if (_isMac === null) {
-    _isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+    _isMac = typeof navigator !== 'undefined' && (
+      navigator.userAgentData?.platform === 'macOS' ||
+      /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+    )
   }
   return _isMac
 }
