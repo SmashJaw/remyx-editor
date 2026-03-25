@@ -5,7 +5,7 @@
 A feature-rich WYSIWYG editor for React, built on the framework-agnostic [`@remyxjs/core`](https://www.npmjs.com/package/@remyxjs/core) engine. Configurable toolbar, menu bar, markdown support, theming, file uploads, and a plugin system.
 
 Visit us at [`SmashJaw.com`](https://smashjaw.com)
-or the RemyxJS official site: [`@remyxjs/core`](https://remyxjs.com)
+or the RemyxJS official site: [`Remyxjs.com`](https://remyxjs.com)
 
 ## Packages
 

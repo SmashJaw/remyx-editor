@@ -7,7 +7,7 @@ Framework-agnostic core engine for the Remyx Editor. Provides the editor engine,
 Use this package to build Remyx Editor integrations for any framework (Vue, Svelte, Angular, vanilla JS) or for server-side processing. For React projects, use [`@remyxjs/react`](https://www.npmjs.com/package/@remyxjs/react), which includes this package plus React components and hooks.
 
 Visit us at [`SmashJaw.com`](https://smashjaw.com)
-or the RemyxJS official site: [`@remyxjs/core`](https://remyxjs.com)
+or the RemyxJS official site: [`RemyxJs.com`](https://remyxjs.com)
 
 ## Table of Contents
 
