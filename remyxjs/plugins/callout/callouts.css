@@ -1,0 +1,79 @@
+/* ====== Callouts, Alerts & Admonitions ====== */
+
+.rmx-callout {
+  border-radius: 6px;
+  border-left: 4px solid var(--rmx-callout-color, #6366f1);
+  background: var(--rmx-callout-bg, rgba(99, 102, 241, 0.06));
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.rmx-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--rmx-callout-color, #6366f1);
+  user-select: none;
+}
+
+.rmx-callout-icon {
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.rmx-callout-title {
+  flex: 1;
+}
+
+.rmx-callout-toggle {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--rmx-callout-color, #6366f1);
+  padding: 2px 4px;
+  border-radius: 3px;
+  opacity: 0.7;
+  transition: opacity 0.1s;
+}
+.rmx-callout-toggle:hover { opacity: 1; }
+
+.rmx-callout-body {
+  padding: 2px 12px 10px;
+  font-size: inherit;
+  line-height: inherit;
+}
+.rmx-callout-body > :first-child { margin-top: 0; }
+.rmx-callout-body > :last-child { margin-bottom: 0; }
+
+/* --- Per-type colors --- */
+.rmx-callout-info    { --rmx-callout-color: #3b82f6; --rmx-callout-bg: rgba(59, 130, 246, 0.06); }
+.rmx-callout-warning { --rmx-callout-color: #f59e0b; --rmx-callout-bg: rgba(245, 158, 11, 0.06); }
+.rmx-callout-error   { --rmx-callout-color: #ef4444; --rmx-callout-bg: rgba(239, 68, 68, 0.06); }
+.rmx-callout-success { --rmx-callout-color: #22c55e; --rmx-callout-bg: rgba(34, 197, 94, 0.06); }
+.rmx-callout-tip     { --rmx-callout-color: #8b5cf6; --rmx-callout-bg: rgba(139, 92, 246, 0.06); }
+.rmx-callout-note    { --rmx-callout-color: #6366f1; --rmx-callout-bg: rgba(99, 102, 241, 0.06); }
+.rmx-callout-question{ --rmx-callout-color: #ec4899; --rmx-callout-bg: rgba(236, 72, 153, 0.06); }
+
+/* --- Dark theme --- */
+.rmx-theme-dark .rmx-callout-info    { --rmx-callout-bg: rgba(59, 130, 246, 0.12); }
+.rmx-theme-dark .rmx-callout-warning { --rmx-callout-bg: rgba(245, 158, 11, 0.12); }
+.rmx-theme-dark .rmx-callout-error   { --rmx-callout-bg: rgba(239, 68, 68, 0.12); }
+.rmx-theme-dark .rmx-callout-success { --rmx-callout-bg: rgba(34, 197, 94, 0.12); }
+.rmx-theme-dark .rmx-callout-tip     { --rmx-callout-bg: rgba(139, 92, 246, 0.12); }
+.rmx-theme-dark .rmx-callout-note    { --rmx-callout-bg: rgba(99, 102, 241, 0.12); }
+.rmx-theme-dark .rmx-callout-question{ --rmx-callout-bg: rgba(236, 72, 153, 0.12); }
+
+/* --- Print --- */
+@media print {
+  .rmx-callout {
+    border-left-width: 3px;
+    page-break-inside: avoid;
+  }
+  .rmx-callout-toggle { display: none; }
+  .rmx-callout-body { display: block !important; }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "remyx-packages",
+  "private": true,
+  "version": "1.0.0-beta",
+  "type": "module",
+  "scripts": {
+    "build:core": "cd remyx-core && npm run build",
+    "build:react": "cd remyx-react && npm run build",
+    "build:all": "npx nx run-many --target=build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "npx nx run-many --target=lint",
+    "graph": "npx nx graph",
+    "affected:build": "npx nx affected --target=build",
+    "affected:test": "npx nx affected --target=test",
+    "affected:lint": "npx nx affected --target=lint",
+    "release": "npx nx release",
+    "release:dry-run": "npx nx release --dry-run",
+    "release:version": "npx nx release version",
+    "release:publish": "npx nx release publish",
+    "release:changelog": "npx nx release changelog"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@nx/js": "^22.5.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^26.1.0",
+    "nx": "22.5.4",
+    "vitest": "^4.1.0"
+  }
+}

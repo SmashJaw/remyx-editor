@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for nx affected detection
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint (affected only)
+        run: npx nx affected --target=lint --base=origin/master
+
+      - name: Type check
+        run: npm run typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build affected packages
+        run: npx nx affected --target=build --base=origin/master
+
+      - name: Build all packages (for artifact verification)
+        run: npm run build:all
+
+      - name: Verify @remyxjs/core dist
+        run: |
+          test -f remyx-core/dist/remyx-core.js
+          test -f remyx-core/dist/remyx-core.cjs
+          test -f remyx-core/dist/style.css
+
+      - name: Verify @remyxjs/react dist
+        run: |
+          test -f remyx-react/dist/remyx-react.js
+          test -f remyx-react/dist/remyx-react.cjs
+          test -f remyx-react/dist/style.css
+
+      - name: Bundle size check
+        run: |
+          MAX_CORE_GZIP=51200   # 50KB
+          MAX_REACT_GZIP=30720  # 30KB
+
+          CORE_SIZE=$(gzip -c remyx-core/dist/remyx-core.js | wc -c | tr -d ' ')
+          REACT_SIZE=$(gzip -c remyx-react/dist/remyx-react.js | wc -c | tr -d ' ')
+
+          CORE_KB=$(echo "scale=1; $CORE_SIZE / 1024" | bc)
+          REACT_KB=$(echo "scale=1; $REACT_SIZE / 1024" | bc)
+
+          echo "remyx-core.js gzipped: ${CORE_KB}KB ($CORE_SIZE bytes)"
+          echo "remyx-react.js gzipped: ${REACT_KB}KB ($REACT_SIZE bytes)"
+
+          FAILED=0
+          if [ "$CORE_SIZE" -gt "$MAX_CORE_GZIP" ]; then
+            echo "::error::remyx-core.js exceeds 50KB gzipped (${CORE_KB}KB)"
+            FAILED=1
+          fi
+          if [ "$REACT_SIZE" -gt "$MAX_REACT_GZIP" ]; then
+            echo "::error::remyx-react.js exceeds 30KB gzipped (${REACT_KB}KB)"
+            FAILED=1
+          fi
+          if [ "$FAILED" -eq 1 ]; then
+            exit 1
+          fi
+          echo "Bundle sizes within limits."
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            remyx-core/dist/
+            remyx-react/dist/
+          retention-days: 7
+
+  test:
+    name: Test (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run tests with coverage
+        if: matrix.node-version == 22
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: matrix.node-version == 22
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14
+
+  package-check:
+    name: Package Integrity
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build all packages
+        run: npm run build:all
+
+      - name: Dry-run pack @remyxjs/core
+        working-directory: remyx-core
+        run: npm pack --dry-run 2>&1 | tee /tmp/core-pack.txt
+
+      - name: Dry-run pack @remyxjs/react
+        working-directory: remyx-react
+        run: npm pack --dry-run 2>&1 | tee /tmp/react-pack.txt
+
+      - name: Dry-run pack create-remyx
+        working-directory: create-remyx
+        run: npm pack --dry-run 2>&1 | tee /tmp/create-pack.txt
+
+      - name: Verify no secrets in packages
+        run: |
+          for dir in remyx-core remyx-react create-remyx; do
+            echo "Checking $dir..."
+            if grep -rn "PRIVATE\|SECRET\|PASSWORD\|_KEY=" "$dir/dist/" 2>/dev/null || \
+               grep -rn "PRIVATE\|SECRET\|PASSWORD\|_KEY=" "$dir/create/" 2>/dev/null; then
+              echo "::error::Potential secret found in $dir"
+              exit 1
+            fi
+          done
+          echo "No secrets detected."

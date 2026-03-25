@@ -1,0 +1,28 @@
+/* ====== Math & Equations ====== */
+
+.rmx-math { display: inline-block; vertical-align: middle; }
+.rmx-math-block {
+  display: block;
+  text-align: center;
+  margin: 16px 0;
+  padding: 12px;
+  position: relative;
+}
+.rmx-math-inline { padding: 0 2px; }
+.rmx-math-latex {
+  font-family: 'Computer Modern', 'Latin Modern Math', 'STIX Two Math', serif;
+  font-size: 1.1em;
+  color: var(--rmx-text, #1e293b);
+  background: rgba(99, 102, 241, 0.04);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.rmx-math-block .rmx-math-latex { font-size: 1.3em; }
+.rmx-equation-number {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--rmx-text-secondary, #64748b);
+}

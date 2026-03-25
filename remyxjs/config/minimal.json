@@ -1,0 +1,17 @@
+{
+  "theme": "light",
+  "placeholder": "Write something...",
+  "height": 200,
+  "outputFormat": "html",
+  "readOnly": false,
+  "toolbar": [
+    ["bold", "italic", "underline"],
+    ["link"]
+  ],
+  "menuBar": false,
+  "statusBar": false,
+  "floatingToolbar": true,
+  "contextMenu": true,
+  "commandPalette": false,
+  "plugins": {}
+}

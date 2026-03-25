@@ -1,0 +1,109 @@
+/* ====== Remyx Editor - Rose Theme ====== */
+
+.rmx-editor.rmx-theme-rose {
+  --rmx-bg: #1c1018;
+  --rmx-text: #fde2ee;
+  --rmx-text-secondary: #d4809f;
+  --rmx-border: #5c2848;
+  --rmx-border-subtle: #5c2848;
+
+  /* Toolbar */
+  --rmx-toolbar-bg: #18101a;
+  --rmx-toolbar-border: #5c2848;
+  --rmx-toolbar-button-hover: #5c2848;
+  --rmx-toolbar-button-active: #7c2858;
+  --rmx-toolbar-icon: #d4809f;
+  --rmx-toolbar-icon-active: #fb7185;
+
+  /* Accent / Primary */
+  --rmx-primary: #f43f5e;
+  --rmx-primary-hover: #e11d48;
+  --rmx-primary-light: rgba(244, 63, 94, 0.15);
+  --rmx-focus-ring: #f43f5e;
+  --rmx-selection: #881337;
+
+  /* Feedback */
+  --rmx-danger: #f87171;
+  --rmx-danger-light: rgba(248, 113, 113, 0.1);
+
+  /* UI */
+  --rmx-placeholder: #8b4766;
+  --rmx-modal-bg: #18101a;
+  --rmx-modal-overlay: rgba(0, 0, 0, 0.6);
+  --rmx-statusbar-bg: #18101a;
+  --rmx-statusbar-text: #8b4766;
+
+  /* Shadows */
+  --rmx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --rmx-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --rmx-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
+  --rmx-shadow-float: 0 8px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+
+  /* Content overrides (Item 12) */
+  --rmx-pre-bg: #18101a;
+  --rmx-code-bg: rgba(244, 63, 94, 0.1);
+  --rmx-blockquote-bg: linear-gradient(135deg, rgba(244, 63, 94, 0.06), rgba(244, 63, 94, 0.03));
+  --rmx-table-th-bg: #18101a;
+  --rmx-find-highlight-bg: #854d0e;
+  --rmx-find-highlight-text: #fef3c7;
+  --rmx-find-current-bg: #f97316;
+  --rmx-find-current-text: #1c1018;
+  --rmx-link-decoration: rgba(244, 63, 94, 0.35);
+  --rmx-code-editor-bg: #1c1018;
+  --rmx-code-gutter-bg: #18101a;
+  --rmx-code-gutter-border: #5c2848;
+  --rmx-code-caret: #fde2ee;
+}
+
+/* Item 12: Content overrides consolidated via CSS variables */
+
+/* ---- Rose Code Editor ---- */
+.rmx-editor.rmx-theme-rose .rmx-code-editor {
+  background: #1c1018;
+}
+
+.rmx-editor.rmx-theme-rose .rmx-code-gutter {
+  background: #18101a;
+  border-right-color: #5c2848;
+}
+
+.rmx-editor.rmx-theme-rose .rmx-code-input {
+  caret-color: #fde2ee;
+}
+
+/* Rose syntax tokens — HTML */
+.rmx-editor.rmx-theme-rose .rmx-syn-tag { color: #fb7185; }
+.rmx-editor.rmx-theme-rose .rmx-syn-attr-name { color: #fda4af; }
+.rmx-editor.rmx-theme-rose .rmx-syn-attr-value { color: #fecdd3; }
+.rmx-editor.rmx-theme-rose .rmx-syn-comment { color: #8b4766; font-style: italic; }
+.rmx-editor.rmx-theme-rose .rmx-syn-entity { color: #fecdd3; }
+.rmx-editor.rmx-theme-rose .rmx-syn-doctype { color: #8b4766; }
+
+/* Rose syntax tokens — Markdown */
+.rmx-editor.rmx-theme-rose .rmx-syn-heading { color: #fb7185; font-weight: 600; }
+.rmx-editor.rmx-theme-rose .rmx-syn-bold { color: #fde2ee; }
+.rmx-editor.rmx-theme-rose .rmx-syn-italic { color: #fde2ee; }
+.rmx-editor.rmx-theme-rose .rmx-syn-code { color: #fda4af; background: rgba(255, 255, 255, 0.06); }
+.rmx-editor.rmx-theme-rose .rmx-syn-code-fence { color: #8b4766; }
+.rmx-editor.rmx-theme-rose .rmx-syn-link { color: #fb7185; }
+.rmx-editor.rmx-theme-rose .rmx-syn-url { color: #fecdd3; }
+.rmx-editor.rmx-theme-rose .rmx-syn-image { color: #fda4af; }
+.rmx-editor.rmx-theme-rose .rmx-syn-list-marker { color: #fda4af; font-weight: 600; }
+.rmx-editor.rmx-theme-rose .rmx-syn-blockquote { color: #8b4766; }
+.rmx-editor.rmx-theme-rose .rmx-syn-hr { color: #5c2848; }
+
+/* Programming language tokens */
+.rmx-editor.rmx-theme-rose .rmx-syn-keyword { color: #fb7185; }
+.rmx-editor.rmx-theme-rose .rmx-syn-string { color: #fda4af; }
+.rmx-editor.rmx-theme-rose .rmx-syn-number { color: #f472b6; }
+.rmx-editor.rmx-theme-rose .rmx-syn-function { color: #e879f9; }
+.rmx-editor.rmx-theme-rose .rmx-syn-operator { color: #fb7185; }
+.rmx-editor.rmx-theme-rose .rmx-syn-punctuation { color: #fce7f3; }
+.rmx-editor.rmx-theme-rose .rmx-syn-builtin { color: #f472b6; }
+.rmx-editor.rmx-theme-rose .rmx-syn-property { color: #f472b6; }
+.rmx-editor.rmx-theme-rose .rmx-syn-regex { color: #fda4af; }
+.rmx-editor.rmx-theme-rose .rmx-syn-decorator { color: #fb923c; }
+.rmx-editor.rmx-theme-rose .rmx-syn-type { color: #e879f9; }
+.rmx-editor.rmx-theme-rose .rmx-syn-selector { color: #e879f9; }
+.rmx-editor.rmx-theme-rose .rmx-syn-atrule { color: #fb7185; }
+.rmx-editor.rmx-theme-rose .rmx-syn-variable { color: #fb923c; }

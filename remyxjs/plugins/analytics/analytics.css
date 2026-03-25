@@ -1,0 +1,37 @@
+/* ====== Analytics ====== */
+
+.rmx-analytics-panel {
+  border: 1px solid var(--rmx-border, #e2e8f0);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 12px;
+  background: var(--rmx-statusbar-bg, #f8fafc);
+}
+.rmx-analytics-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--rmx-border-subtle, #f1f5f9);
+}
+.rmx-analytics-stat:last-child { border-bottom: none; }
+.rmx-analytics-label { color: var(--rmx-text-secondary, #64748b); }
+.rmx-analytics-value { font-weight: 600; color: var(--rmx-text, #1e293b); }
+.rmx-analytics-warning { color: var(--rmx-danger, #ef4444); font-size: 11px; margin-top: 4px; }
+.rmx-goal-progress {
+  height: 6px;
+  background: var(--rmx-border, #e2e8f0);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.rmx-goal-progress-bar {
+  height: 100%;
+  background: var(--rmx-primary, #6366f1);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.rmx-goal-progress-bar.rmx-goal-complete { background: #22c55e; }
+
+@media print {
+  .rmx-analytics-panel { display: none; }
+}

@@ -1,0 +1,80 @@
+{
+  "name": "@remyxjs/core",
+  "version": "1.0.5-beta",
+  "description": "Framework-agnostic rich-text editor engine with commands, plugins, sanitization, and CSS themes",
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "contenteditable",
+    "html-editor",
+    "text-editor",
+    "sanitizer",
+    "plugins"
+  ],
+  "author": "Remyx",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SmashJaw/remyxjs.git",
+    "directory": "packages/remyx-core"
+  },
+  "bugs": {
+    "url": "https://github.com/SmashJaw/remyxjs/issues"
+  },
+  "homepage": "https://github.com/SmashJaw/remyxjs",
+  "type": "module",
+  "main": "./dist/remyx-core.cjs",
+  "module": "./dist/remyx-core.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/remyx-core.js",
+      "require": "./dist/remyx-core.cjs"
+    },
+    "./style.css": "./dist/style.css",
+    "./themes/variables.css": "./dist/themes/variables.css",
+    "./themes/light.css": "./dist/themes/light.css",
+    "./themes/dark.css": "./dist/themes/dark.css",
+    "./themes/ocean.css": "./dist/themes/ocean.css",
+    "./themes/forest.css": "./dist/themes/forest.css",
+    "./themes/sunset.css": "./dist/themes/sunset.css",
+    "./themes/rose.css": "./dist/themes/rose.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "dependencies": {
+    "marked": "15.0.0",
+    "turndown": "7.2.0",
+    "turndown-plugin-gfm": "1.0.2"
+  },
+  "peerDependencies": {
+    "mammoth": "^1.11.0",
+    "pdfjs-dist": "^5.5.207"
+  },
+  "peerDependenciesMeta": {
+    "mammoth": {
+      "optional": true
+    },
+    "pdfjs-dist": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "rollup-plugin-visualizer": "^5.14.0",
+    "terser": "5.37.0",
+    "vite": "7.3.1"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  }
+}

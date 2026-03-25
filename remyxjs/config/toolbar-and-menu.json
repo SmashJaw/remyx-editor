@@ -1,0 +1,56 @@
+{
+  "theme": "dark",
+  "placeholder": "Toolbar + Menu Bar with all plugins...",
+  "height": 450,
+  "outputFormat": "html",
+  "readOnly": false,
+  "toolbar": [
+    ["undo", "redo"],
+    ["headings", "fontFamily", "fontSize"],
+    ["bold", "italic", "underline", "strikethrough"],
+    ["foreColor", "backColor"],
+    ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
+    ["orderedList", "unorderedList", "taskList"],
+    ["outdent", "indent"],
+    ["link", "image", "table", "blockquote", "codeBlock", "horizontalRule"],
+    ["subscript", "superscript", "removeFormat"],
+    ["fullscreen"]
+  ],
+  "menuBar": [
+    { "label": "File", "items": ["importDocument", "attachment", "export"] },
+    { "label": "Edit", "items": ["undo", "redo", "---", "findReplace"] },
+    { "label": "View", "items": ["fullscreen", "distractionFree", "toggleSplitView", "---", "toggleMarkdown", "sourceMode", "---", "toggleAnalytics", "toggleSpellcheck"] },
+    { "label": "Insert", "items": [
+      "link", "image", "table", "embedMedia",
+      "---", "blockquote", "codeBlock", "horizontalRule",
+      "---", "insertCallout", "insertMath", "insertToc", "insertBookmark", "insertMergeTag",
+      "---", "addComment"
+    ]},
+    { "label": "Format", "items": [
+      "bold", "italic", "underline", "strikethrough", "---",
+      "subscript", "superscript", "---",
+      "orderedList", "unorderedList", "taskList",
+      "---", "foreColor", "backColor",
+      "---", "removeFormat"
+    ]}
+  ],
+  "statusBar": "bottom",
+  "floatingToolbar": true,
+  "contextMenu": true,
+  "commandPalette": true,
+  "plugins": {
+    "syntax-highlight": { "enabled": true },
+    "table": { "enabled": true },
+    "comments": { "enabled": true },
+    "callout": { "enabled": true },
+    "block-templates": { "enabled": true },
+    "template": { "enabled": true },
+    "keyboard": { "enabled": true },
+    "drag-drop": { "enabled": true },
+    "link": { "enabled": true },
+    "math": { "enabled": true },
+    "toc": { "enabled": true },
+    "analytics": { "enabled": true },
+    "spellcheck": { "enabled": true }
+  }
+}

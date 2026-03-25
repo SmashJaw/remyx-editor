@@ -1,0 +1,29 @@
+{
+  "theme": "ocean",
+  "placeholder": "Write your blog post...",
+  "height": 500,
+  "outputFormat": "markdown",
+  "readOnly": false,
+  "toolbar": [
+    ["undo", "redo"],
+    ["headings"],
+    ["bold", "italic", "underline", "strikethrough"],
+    ["link", "image", "blockquote", "codeBlock", "horizontalRule"],
+    ["orderedList", "unorderedList", "taskList"],
+    ["table"]
+  ],
+  "menuBar": false,
+  "statusBar": "bottom",
+  "floatingToolbar": true,
+  "contextMenu": true,
+  "commandPalette": true,
+  "plugins": {
+    "syntax-highlight": { "enabled": true },
+    "table": { "enabled": true },
+    "callout": { "enabled": true },
+    "link": { "enabled": true },
+    "toc": { "enabled": true },
+    "analytics": { "enabled": true },
+    "spellcheck": { "enabled": true }
+  }
+}

@@ -1,0 +1,76 @@
+name: Release (nx release)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+  packages: write
+
+concurrency:
+  group: release-nx
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm via nx release
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npx nx run-many --target=build
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+          IS_PRERELEASE=false
+          if echo "$TAG" | grep -qE '(alpha|beta|rc|next|canary)'; then
+            IS_PRERELEASE=true
+          fi
+          echo "prerelease=$IS_PRERELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Publish via nx release
+        run: npx nx release publish --yes
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write publish summary
+        run: |
+          CORE_VERSION=$(node -p "require('./remyx-core/package.json').version")
+          REACT_VERSION=$(node -p "require('./remyx-react/package.json').version")
+          CLI_VERSION=$(node -p "require('./create-remyx/package.json').version")
+
+          echo "### Published to npm via nx release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Package | Version |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`@remyxjs/core\` | $CORE_VERSION |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`@remyxjs/react\` | $REACT_VERSION |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| \`create-remyx\` | $CLI_VERSION |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,69 @@
+{
+  "name": "@remyxjs/react",
+  "version": "1.0.5-beta",
+  "description": "React components and hooks for the Remyx rich-text editor",
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "react",
+    "contenteditable",
+    "react-editor",
+    "text-editor"
+  ],
+  "author": "Remyx",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SmashJaw/remyx-editor.git",
+    "directory": "packages/remyx-react"
+  },
+  "bugs": {
+    "url": "https://github.com/SmashJaw/remyx-editor/issues"
+  },
+  "homepage": "https://github.com/SmashJaw/remyx-editor/tree/main/packages/remyx-react#readme",
+  "type": "module",
+  "main": "./dist/remyx-react.cjs",
+  "module": "./dist/remyx-react.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/remyx-react.js",
+      "require": "./dist/remyx-react.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "bin": {
+    "create-remyx-app": "./create/index.js"
+  },
+  "files": [
+    "dist",
+    "create"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "@remyxjs/core": "1.0.5-beta",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "prop-types": "^15.8.1"
+  },
+  "devDependencies": {
+    "@remyxjs/core": "1.0.5-beta",
+    "@vitejs/plugin-react": "5.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "terser": "5.37.0",
+    "vite": "7.3.1"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  }
+}

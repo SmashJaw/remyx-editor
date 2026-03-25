@@ -1,0 +1,126 @@
+version: 2
+
+updates:
+  # Root workspace dependencies
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 15
+    reviewers:
+      - SmashJaw
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: "chore(deps):"
+    groups:
+      # Group all Nx-related updates together
+      nx:
+        patterns:
+          - "nx"
+          - "@nx/*"
+      # Group all testing-related updates together
+      testing:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "@testing-library/*"
+          - "babel-jest"
+          - "@playwright/test"
+      # Group all React-related updates together
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+          - "@vitejs/plugin-react"
+      # Group all linting/formatting updates together
+      linting:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@eslint/*"
+          - "lint-staged"
+          - "husky"
+      # Group build tools together
+      build:
+        patterns:
+          - "vite"
+          - "terser"
+          - "@babel/*"
+          - "globals"
+
+  # @remyxjs/core package dependencies
+  - package-ecosystem: npm
+    directory: /packages/remyx-core
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 10
+    reviewers:
+      - SmashJaw
+    labels:
+      - dependencies
+      - automated
+      - "pkg:core"
+    commit-message:
+      prefix: "chore(deps-core):"
+    groups:
+      markdown:
+        patterns:
+          - "marked"
+          - "turndown"
+          - "turndown-*"
+      build:
+        patterns:
+          - "vite"
+          - "terser"
+
+  # @remyxjs/react package dependencies
+  - package-ecosystem: npm
+    directory: /packages/remyx-react
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 10
+    reviewers:
+      - SmashJaw
+    labels:
+      - dependencies
+      - automated
+      - "pkg:react"
+    commit-message:
+      prefix: "chore(deps-react):"
+    groups:
+      build:
+        patterns:
+          - "vite"
+          - "terser"
+          - "@vitejs/plugin-react"
+
+  # GitHub Actions version updates
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/New_York
+    open-pull-requests-limit: 5
+    reviewers:
+      - SmashJaw
+    labels:
+      - dependencies
+      - automated
+      - ci
+    commit-message:
+      prefix: "chore(ci):"

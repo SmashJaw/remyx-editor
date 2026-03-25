@@ -1,0 +1,17 @@
+/* ====== Drag & Drop ====== */
+
+.rmx-drop-zone { transition: box-shadow 0.15s ease; }
+.rmx-drop-zone-active {
+  box-shadow: inset 0 0 0 2px var(--rmx-primary, #6366f1);
+}
+.rmx-dragging { opacity: 0.4; }
+.rmx-drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--rmx-primary, #6366f1);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 100;
+}

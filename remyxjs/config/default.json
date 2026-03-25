@@ -1,0 +1,38 @@
+{
+  "theme": "light",
+  "placeholder": "Start typing to explore all the features...",
+  "height": 400,
+  "outputFormat": "html",
+  "readOnly": false,
+  "toolbar": [
+    ["undo", "redo"],
+    ["headings", "fontFamily", "fontSize"],
+    ["bold", "italic", "underline", "strikethrough"],
+    ["foreColor", "backColor"],
+    ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
+    ["orderedList", "unorderedList", "taskList"],
+    ["indent", "outdent"],
+    ["link", "image", "table", "codeBlock", "blockquote", "horizontalRule"]
+  ],
+  "menuBar": true,
+  "statusBar": "bottom",
+  "floatingToolbar": true,
+  "contextMenu": true,
+  "commandPalette": true,
+  "plugins": {
+    "syntax-highlight": { "enabled": true },
+    "table": { "enabled": true },
+    "comments": { "enabled": true },
+    "callout": { "enabled": true },
+    "block-templates": { "enabled": true },
+    "template": { "enabled": true },
+    "keyboard": { "enabled": true },
+    "drag-drop": { "enabled": true },
+    "link": { "enabled": true },
+    "math": { "enabled": true },
+    "toc": { "enabled": true },
+    "analytics": { "enabled": true },
+    "spellcheck": { "enabled": true },
+    "collaboration": { "enabled": false }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "theme": "light",
+  "toolbarWrap": true,
+  "placeholder": "Full toolbar — all icons visible (wrapped)...",
+  "height": 450,
+  "outputFormat": "html",
+  "readOnly": false,
+  "toolbar": [
+    ["undo", "redo"],
+    ["headings", "fontFamily", "fontSize"],
+    ["bold", "italic", "underline", "strikethrough"],
+    ["foreColor", "backColor"],
+    ["alignLeft", "alignCenter", "alignRight", "alignJustify"],
+    ["orderedList", "unorderedList", "taskList"],
+    ["outdent", "indent"],
+    ["link", "image", "attachment", "importDocument", "table", "embedMedia", "blockquote", "codeBlock", "horizontalRule"],
+    ["subscript", "superscript", "removeFormat"],
+    ["insertCallout", "insertMath", "insertToc", "insertBookmark", "insertMergeTag"],
+    ["addComment", "toggleSpellcheck", "toggleAnalytics"],
+    ["findReplace", "toggleMarkdown", "sourceMode", "distractionFree", "toggleSplitView", "export", "commandPalette", "fullscreen"]
+  ],
+  "menuBar": false,
+  "statusBar": "bottom",
+  "floatingToolbar": true,
+  "contextMenu": true,
+  "commandPalette": true,
+  "plugins": {
+    "syntax-highlight": { "enabled": true },
+    "table": { "enabled": true },
+    "comments": { "enabled": true },
+    "callout": { "enabled": true },
+    "block-templates": { "enabled": true },
+    "template": { "enabled": true },
+    "keyboard": { "enabled": true },
+    "drag-drop": { "enabled": true },
+    "link": { "enabled": true },
+    "math": { "enabled": true },
+    "toc": { "enabled": true },
+    "analytics": { "enabled": true },
+    "spellcheck": { "enabled": true }
+  }
+}
