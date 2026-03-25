@@ -1,6 +1,6 @@
 {
   "name": "@remyxjs/react",
-  "version": "1.2.0-beta",
+  "version": "1.0.5",
   "description": "React components and hooks for the Remyx rich-text editor",
   "keywords": [
     "wysiwyg",
@@ -46,7 +46,7 @@
   },
   "sideEffects": false,
   "peerDependencies": {
-    "@remyxjs/core": "*",
+    "@remyxjs/core": "1.2.0-beta",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
