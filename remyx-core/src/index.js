@@ -67,7 +67,7 @@ export { escapeHTML, escapeHTMLAttr } from './utils/escapeHTML.js'
 export { insertPlainText } from './utils/insertPlainText.js'
 export { closestBlock, closestTag, wrapInTag, unwrapTag, generateId, isBlockEmpty } from './utils/dom.js'
 export { isMac, getModKey } from './utils/platform.js'
-export { detectTextDirection, applyAutoDirection, applyAutoDirectionAll, getCharDirection, isBiDiBoundary, LOGICAL_PROPERTIES } from './utils/rtl.js'
+export { detectTextDirection, applyAutoDirection, applyAutoDirectionAll, applyAutoDirectionAtCaret, getCharDirection, isBiDiBoundary, LOGICAL_PROPERTIES } from './utils/rtl.js'
 export { t, setLocale, getLocale, registerLocale, unregisterLocale, getRegisteredLocales } from './i18n/index.js'
 export { batchDOMMutations, scheduleIdleTask, cancelIdleTask, rafThrottle, measurePerformance, benchmark, createInputBatcher } from './utils/performance.js'
 

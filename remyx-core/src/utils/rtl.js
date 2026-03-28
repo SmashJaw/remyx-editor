@@ -20,16 +20,27 @@ const LTR_REGEX_GLOBAL = /[A-Za-z\u00C0-\u00FF\u0100-\u024F\u0400-\u04FF\u1100-\
  * of whichever has more characters. Returns 'auto' if the string
  * contains no directional characters (e.g., numbers only).
  *
+ * Uses a counting loop instead of match() to avoid allocating
+ * temporary arrays for every call — important since this runs on
+ * every input event for each block element.
+ *
  * @param {string} text - The text to analyze
  * @returns {'ltr' | 'rtl' | 'auto'} The detected text direction
  */
 export function detectTextDirection(text) {
   if (!text || typeof text !== 'string') return 'auto'
 
-  const rtlMatches = text.match(RTL_REGEX_GLOBAL)
-  const ltrMatches = text.match(LTR_REGEX_GLOBAL)
-  const rtlCount = rtlMatches ? rtlMatches.length : 0
-  const ltrCount = ltrMatches ? ltrMatches.length : 0
+  let rtlCount = 0
+  let ltrCount = 0
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (RTL_REGEX.test(ch)) rtlCount++
+    else if (LTR_REGEX.test(ch)) ltrCount++
+    // Early exit: once we find a strong direction character, for short texts
+    // we can decide quickly. For first-strong-char detection (common use case),
+    // this avoids scanning the rest of the string.
+    // However, we need the full count for mixed-direction blocks, so no early exit.
+  }
 
   if (rtlCount === 0 && ltrCount === 0) return 'auto'
   return rtlCount > ltrCount ? 'rtl' : 'ltr'
@@ -68,6 +79,28 @@ export function applyAutoDirectionAll(container) {
 }
 
 /**
+ * Apply auto-direction to just the block containing the current selection.
+ * Much cheaper than applyAutoDirectionAll — use this on frequent events like
+ * input/keydown where only the active block's direction may have changed.
+ *
+ * @param {HTMLElement} container - The editor root element
+ */
+export function applyAutoDirectionAtCaret(container) {
+  if (!container) return
+  const sel = window.getSelection?.()
+  if (!sel || sel.rangeCount === 0) return
+  let node = sel.anchorNode
+  if (!node || !container.contains(node)) return
+  // Walk up to find the nearest block-level element
+  if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+  const BLOCK_SELECTOR = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, td, th'
+  const block = node?.closest?.(BLOCK_SELECTOR)
+  if (block && container.contains(block)) {
+    applyAutoDirection(block)
+  }
+}
+
+/**
  * Detect the direction of a single character.
  *
  * @param {string} char - A single character to test
@@ -75,8 +108,11 @@ export function applyAutoDirectionAll(container) {
  */
 export function getCharDirection(char) {
   if (!char || typeof char !== 'string') return 'neutral'
-  // Take only the first character (supports surrogate pairs via slice)
-  const c = char.length > 1 ? char.slice(0, 1) : char
+  // Use codePointAt to correctly handle surrogate pairs (emoji, etc.)
+  // then test the single code-point string against regex
+  const cp = char.codePointAt(0)
+  if (cp === undefined) return 'neutral'
+  const c = String.fromCodePoint(cp)
   if (RTL_REGEX.test(c)) return 'rtl'
   if (LTR_REGEX.test(c)) return 'ltr'
   return 'neutral'

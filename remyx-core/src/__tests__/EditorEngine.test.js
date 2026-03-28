@@ -359,11 +359,14 @@ describe('EditorEngine', () => {
       checkbox.checked = false
       element.appendChild(checkbox)
 
-      // Simulate click event with the checkbox as target
+      // In a real browser, clicking a checkbox toggles `checked` before
+      // the click handler fires. Simulate that browser behavior here.
+      checkbox.checked = true
       const clickEvent = new MouseEvent('click', { bubbles: true })
       Object.defineProperty(clickEvent, 'target', { value: checkbox })
       element.dispatchEvent(clickEvent)
 
+      // The handler should NOT re-toggle — it just emits content:change
       expect(checkbox.checked).toBe(true)
       expect(handler).toHaveBeenCalled()
     })

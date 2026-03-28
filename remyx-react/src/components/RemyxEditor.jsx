@@ -53,10 +53,8 @@ import { EditorModals, FindReplacePanel } from './EditorModals.jsx'
 export default function RemyxEditor(props) {
   const resolved = useConfigFile(props.config, props)
 
-  if (!resolved) {
-    return <div className="rmx-editor rmx-error">Config &quot;{props.config}&quot; not found</div>
-  }
-
+  // Destructure resolved config (with defaults for when resolved is null,
+  // so all hooks below execute unconditionally — React Rules of Hooks).
   const {
     value, defaultValue, onChange, toolbar, toolbarWrap,
     theme, placeholder, height, minHeight, maxHeight,
@@ -70,7 +68,7 @@ export default function RemyxEditor(props) {
     showBreadcrumb,
     showMinimap,
     splitViewFormat,
-  } = resolved
+  } = resolved || {}
 
   const editAreaRef = useRef(null)
   const editorRootRef = useRef(null)
@@ -280,6 +278,11 @@ export default function RemyxEditor(props) {
     customTheme ? { ...customTheme, ...style } : style,
     [customTheme, style]
   )
+
+  // Guard: if config was not found, show error after all hooks have executed
+  if (!resolved) {
+    return <div className="rmx-editor rmx-error">Config &quot;{props.config}&quot; not found</div>
+  }
 
   return (
     <EditorErrorBoundary onError={onError} fallback={errorFallback}>

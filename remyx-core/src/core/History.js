@@ -311,7 +311,9 @@ export class History {
 
     this._undoStack.push(entry)
     if (this._undoStack.length > this.maxSize) {
-      this._undoStack.shift()
+      // Batch trim: remove 10% of oldest entries at once to amortize the O(n) shift cost
+      const trimCount = Math.max(1, Math.floor(this.maxSize * 0.1))
+      this._undoStack.splice(0, trimCount)
     }
     this._redoStack = []
     this._lastSnapshot = html

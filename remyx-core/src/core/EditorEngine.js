@@ -8,7 +8,7 @@ import { Sanitizer } from './Sanitizer.js'
 import { Clipboard } from './Clipboard.js'
 import { DragDrop } from './DragDrop.js'
 import { PluginManager } from '../plugins/PluginManager.js'
-import { applyAutoDirectionAll } from '../utils/rtl.js'
+import { applyAutoDirectionAll, applyAutoDirectionAtCaret } from '../utils/rtl.js'
 
 /**
  * @typedef {Object} EditorOptions
@@ -275,7 +275,21 @@ export class EditorEngine {
   getWordCount() {
     const text = this.getText().trim()
     if (!text) return 0
-    return text.split(/\s+/).length
+    // Count words without allocating a split array
+    let count = 0
+    let inWord = false
+    for (let i = 0; i < text.length; i++) {
+      const ch = text.charCodeAt(i)
+      // space, tab, newline, carriage return, form feed, non-breaking space
+      const isSpace = ch === 32 || ch === 9 || ch === 10 || ch === 13 || ch === 12 || ch === 160
+      if (isSpace) {
+        inWord = false
+      } else if (!inWord) {
+        inWord = true
+        count++
+      }
+    }
+    return count
   }
 
   /**
@@ -299,8 +313,9 @@ export class EditorEngine {
     // Task 273: Invalidate text cache on input
     this._textCacheDirty = true
 
-    // Keep per-block dir attributes current for BiDi caret movement
-    applyAutoDirectionAll(this.element)
+    // Keep per-block dir attributes current for BiDi caret movement.
+    // Only update the block at the caret — much cheaper than scanning all blocks.
+    applyAutoDirectionAtCaret(this.element)
 
     // Ensure we always have at least one block element
     if (this.element.innerHTML === '' || this.element.innerHTML === '<br>') {
@@ -354,9 +369,10 @@ export class EditorEngine {
    * @returns {void}
    */
   _handleClick(e) {
-    // Handle task list checkbox clicks
+    // Handle task list checkbox clicks.
+    // The browser click event already toggles the checked state, so we
+    // just need to mark content dirty and emit the change event.
     if (e.target.type === 'checkbox' && e.target.classList.contains('rmx-task-checkbox')) {
-      e.target.checked = !e.target.checked
       this._htmlDirty = true
       this._textCacheDirty = true
       this.eventBus.emit('content:change')

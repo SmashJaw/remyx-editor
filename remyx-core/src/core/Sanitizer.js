@@ -155,9 +155,10 @@ export class Sanitizer {
         continue
       }
 
-      // Remove disallowed attributes + explicitly block on* event handlers
-      const attrs = Array.from(child.attributes)
-      for (const attr of attrs) {
+      // Remove disallowed attributes + explicitly block on* event handlers.
+      // Iterate in reverse to safely remove attributes without Array.from() allocation.
+      for (let j = child.attributes.length - 1; j >= 0; j--) {
+        const attr = child.attributes[j]
         // Defense-in-depth: block all event handler attributes regardless of allowlist
         if (attr.name.startsWith('on')) {
           child.removeAttribute(attr.name)

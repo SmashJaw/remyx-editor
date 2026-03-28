@@ -82,7 +82,10 @@ export class Selection {
    * @returns {Range|null} The current selection range within the editor, or null
    */
   getRange() {
-    // Return cached range if still valid within same synchronous cycle
+    // Return cached range if still valid within same synchronous cycle.
+    // The microtask-based invalidation is kept as a safety net, but callers
+    // that mutate the DOM should call invalidateCache() explicitly for
+    // immediate correctness.
     if (this._cachedRange !== null) {
       return this._cachedRange
     }
@@ -97,13 +100,14 @@ export class Selection {
       return null
     }
     this._cachedRange = range
-    // Schedule cache invalidation at end of current synchronous cycle
-    const gen = ++this._cacheGeneration
-    Promise.resolve().then(() => {
-      if (this._cacheGeneration === gen) {
+    // Schedule cache invalidation at end of current microtask as safety net
+    if (!this._pendingInvalidation) {
+      this._pendingInvalidation = true
+      Promise.resolve().then(() => {
+        this._pendingInvalidation = false
         this._cachedRange = null
-      }
-    })
+      })
+    }
     return range
   }
 
@@ -317,6 +321,7 @@ export class Selection {
     const safeHtml = this._sanitizer ? this._sanitizer.sanitize(html) : html
     const sel = this.getSelection()
     if (!sel || sel.rangeCount === 0) return
+    this.invalidateCache()
     const range = sel.getRangeAt(0)
     range.deleteContents()
     const template = document.createElement('template')
@@ -353,6 +358,7 @@ export class Selection {
   insertNode(node) {
     const range = this.getRange()
     if (!range) return
+    this.invalidateCache()
     range.deleteContents()
     range.insertNode(node)
     range.setStartAfter(node)

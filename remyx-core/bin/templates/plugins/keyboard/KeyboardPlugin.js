@@ -386,7 +386,9 @@ export function KeyboardPlugin(options = {}) {
       case 'killToLineEnd':
         if (range) {
           engine.history.snapshot()
-          sel.modify('extend', 'forward', 'lineboundary')
+          // Use BiDi-aware moveVisual to extend to line end in the
+          // correct visual direction for both LTR and RTL blocks
+          engine.selection.moveVisual('right', true, 'lineboundary')
           killRing = sel.toString()
           range.deleteContents()
           engine.eventBus.emit('content:change')
@@ -403,7 +405,8 @@ export function KeyboardPlugin(options = {}) {
       case 'killWord':
         if (range) {
           engine.history.snapshot()
-          sel.modify('extend', 'backward', 'word')
+          // Use BiDi-aware moveVisual for backward word selection
+          engine.selection.moveVisual('left', true, 'word')
           killRing = sel.toString()
           range.deleteContents()
           engine.eventBus.emit('content:change')

@@ -180,9 +180,12 @@ export class VirtualScroller {
    * @returns {void}
    */
   restoreAll() {
-    this._collapsed.forEach((data, el) => {
+    // Collect keys first to avoid mutating the Map during iteration
+    // (_restore deletes from _collapsed)
+    const elements = Array.from(this._collapsed.keys())
+    for (const el of elements) {
       this._restore(el)
-    })
+    }
   }
 
   /**
